@@ -1,0 +1,319 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  height: 100vh;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 헤더 */
+header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+
+  width: 100%;
+  height: 20px;
+
+  padding: 10px 20px;
+}
+
+header h1 {
+  text-align: center;
+  position: absolute;
+
+  padding-top: 30px;
+  font-size: 25px;
+  font-weight: 250;
+  color: #333;
+}
+
+.header-line {
+  width: 100%;
+  border: none;
+  left: 0%;
+  border-bottom: 1px solid black;
+  /* color: #ddd; */
+  margin: 30px 0;
+}
+
+.back-button, .header-profile-img {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.back-button {
+  display: flex;
+
+  font-size: 18px;
+  font-weight: 250;
+
+  max-width: 30px;
+  max-height: 30px;
+
+  position: absolute;
+  left: 50%;
+  transform: translateX(-240px);
+  top: 15px;
+}
+
+.header-profile-img {
+  position: absolute;
+
+  max-width: 30px;
+  max-height: 30px;
+  border-radius: 50%;
+  /* background-color: #ccc; */
+
+  position: absolute;
+  left: 50%; /* 부모 요소의 가로축 중간 */
+  transform: translateX(220px); /* 중간 지점에서 오른쪽으로 250px 이동 */
+
+  margin-top: 30px;
+  overflow: hidden;
+}
+
+.profile-button {
+  background: none;
+  border: none;
+  padding: 0;
+  position: absolute;
+  right: 25px;
+  cursor: pointer;
+  width: 50px; /* 원하는 크기로 조정 */
+  height: 50px; /* 원하는 크기로 조정 */
+  border-radius: 50%; /* 원형 */
+  overflow: hidden;
+  cursor: pointer;
+}
+
+
+/* .header-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  list-style: none;
+
+  margin: 0;
+  padding: 20px 40px;
+  border-bottom: 1px solid #ddd;
+} */
+
+
+/* .header-menu .icon-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+
+/* .user-menu {
+  position: absolute;
+  right: 30%;
+} */
+
+
+/* 드롭다운 메뉴 */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 50px;
+  width: 100px;
+  right: 0;
+  background-color: #ddd;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  color: #333;
+  border: none;
+  background: none;
+}
+
+.dropdown button:hover {
+  background-color: #e9e9e9;
+}
+
+/* 버튼 */
+button {
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600
+}
+
+.login-button, .submit-button {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  /* background-color: #8888ff; */
+  background-color: #ACA0EB;
+  border: none;
+}
+
+.login-button:hover, .signup-button:hover {
+  background-color: #6666ff;
+}
+
+.complete-button {
+  display: block;
+  margin: 0 auto;
+
+  margin-top: 10%;
+  padding: 10px;
+  color: white;
+  background-color: #8888ff;
+  border: none;
+  border-radius: 2em;
+}
+
+a {
+  text-decoration: none; /* 밑줄 제거 */
+  color: inherit; /* 부모 요소의 텍스트 색상 상속 */
+}
+
+.link, #registerBtn {
+  display: inline-block;
+  background: none;
+  border: none;
+
+  padding: 10px;
+  font-size: 10px;
+
+  cursor: pointer;
+  color: #333;
+}
+
+/* 인풋 + 폼 */
+.form-container {
+  text-align: center;
+  width: 300px;
+  font-size: 12px;
+}
+
+.form-title {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 12px;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.helper-text {
+  font-size: 10px;
+  color: red;
+  margin-top: 5px;
+  display: block;
+  text-align: left;
+}
+
+
+/* 모달창 */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
+}
+
+.dialog p {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.dialog-note {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.dialog-buttons {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  justify-content: center;
+}
+
+.dialog-cancel-button, .dialog-confirm-button {
+  padding: 10px 20px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.dialog-cancel-button {
+  background-color: #333;
+  color: #fff;
+}
+
+.dialog-confirm-button {
+  background-color: #8888ff;
+  color: #fff;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 350;
+}
