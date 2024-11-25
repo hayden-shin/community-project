@@ -24,6 +24,7 @@
                     <span class="helper-text" id="profile-picture-helper"></span>
                     <div class="profile-img-placeholder">
                         <label for="profile-upload" class="profile-img-add-button" style="font-weight: 50;">+</label>
+                        <!-- <img src="../assets/headerpic.png" alt="Img Placeholder"> -->
                         <input type="file" id="profile-upload" name="profile-picture" accept="image/*" style="display: none;">
                     </div>
                 </div>
@@ -37,13 +38,13 @@
                 <div class="form-group">
                     <label for="password">비밀번호 *</label>
                     <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
-                    <span class="helper-text" id="pwd-helper"></span>
+                    <span class="helper-text" id="password-helper"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="confirm-password">비밀번호 확인 *</label>
-                    <input type="password" id="password-confirm" placeholder="비밀번호를 한번 더 입력하세요" required>
-                    <span class="helper-text" id="pwd-confirm-helper"></span>
+                    <input type="password" id="confirm-password" placeholder="비밀번호를 한번 더 입력하세요" required>
+                    <span class="helper-text" id="confirm-password-helper"></span>
                 </div>
 
                 <div class="form-group">
@@ -52,11 +53,15 @@
                     <span class="helper-text" id="nickname-helper"></span>
                 </div>
 
-                <button type="submit" class="submit-button" id="signup-submit-btn">회원가입</button>
+                <button type="submit" class="submit-button" id="signup-button">회원가입</button>
             </form>
-            <a href="login.html" class="link">로그인하러 가기</a>
+            <a href="./login" class="link">로그인하러 가기</a>
         </section>
     </div>
-    <script src="script.js"></script>
+    <!-- <script src="../scripts/common/api.js"></script> -->
+    <script src="../scripts/common/utils.js"></script>
+    <!-- <script src="../scripts/common/auth.js"></script> -->
+    <!-- <script src="../scripts/common/constants.js"></script> -->
+    <script src="../scripts/signup.js"></script>
 </body>
 </html>

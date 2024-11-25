@@ -79,7 +79,6 @@ header h1 {
   max-width: 30px;
   max-height: 30px;
   border-radius: 50%;
-  /* background-color: #ccc; */
 
   position: absolute;
   left: 50%; /* 부모 요소의 가로축 중간 */
@@ -102,33 +101,6 @@ header h1 {
   overflow: hidden;
   cursor: pointer;
 }
-
-
-/* .header-menu {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  list-style: none;
-
-  margin: 0;
-  padding: 20px 40px;
-  border-bottom: 1px solid #ddd;
-} */
-
-
-/* .header-menu .icon-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-} */
-
-
-/* .user-menu {
-  position: absolute;
-  right: 30%;
-} */
-
 
 /* 드롭다운 메뉴 */
 .dropdown {
@@ -168,7 +140,7 @@ button {
   width: 100%;
   padding: 10px;
   color: white;
-  /* background-color: #8888ff; */
+  /* background-color: ##7F6AEE; */
   background-color: #ACA0EB;
   border: none;
 }
@@ -248,53 +220,73 @@ textarea {
   font-size: 10px;
   color: red;
   margin-top: 5px;
-  display: block;
   text-align: left;
+  display: none; /* 기본적으로 숨김 */
 }
 
+input:focus + .helper-text,
+textarea:focus + .helper-text {
+  display: block; /* 입력 중일 때 표시 */
+  color: red;
+}
 
 /* 모달창 */
-.dialog-overlay {
+/* #modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 101;
+  display: none;
+} */
+
+/* 모달창 */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5); /* 50% 불투명 */
+  z-index: 100;
   display: none;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
 }
 
-.dialog {
+.modal {
   background-color: #fff;
   padding: 30px;
   border-radius: 8px;
   text-align: center;
   width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 모달 그림자 */
 }
 
-.dialog p {
+#modal-message {
   font-size: 14px;
   color: #333;
   margin-bottom: 10px;
   font-weight: 600;
 }
 
-.dialog-note {
+.modal-note {
   font-size: 10px;
   color: #888;
   margin-bottom: 20px;
 }
 
-.dialog-buttons {
+.modal-buttons {
   display: flex;
   width: 100%;
   gap: 10px;
   justify-content: center;
 }
 
-.dialog-cancel-button, .dialog-confirm-button {
+.modal-cancel-button, .modal-confirm-button {
   padding: 10px 20px;
   font-size: 12px;
   border: none;
@@ -303,12 +295,12 @@ textarea {
   font-weight: 500;
 }
 
-.dialog-cancel-button {
+.modal-cancel-button {
   background-color: #333;
   color: #fff;
 }
 
-.dialog-confirm-button {
+.modal-confirm-button {
   background-color: #8888ff;
   color: #fff;
 }
@@ -316,4 +308,37 @@ textarea {
 label {
   font-size: 12px;
   font-weight: 350;
+}
+
+
+/* 토스트 메세지 */
+.toast-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #323232;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 수정</title>
     <link rel="stylesheet" href="../styles/global.css">
-    <link rel="stylesheet" href="../styles/edit-post.css">
+    <link rel="stylesheet" href="../styles/post-edit.css">
 </head>
 
 <body>
@@ -24,30 +24,35 @@
 
             <form action="#" method="PATCH" class="post-edit-form">
                 <div class="form-group">
-                    <label for="post-title">제목 *</label>
-                    <input type="text" id="post-edit-title" value="제목 1" maxlength="26" required />
+                    <label for="title">제목 *</label>
+                    <input type="text" id="post-title" name="title" value="제목 1" maxlength="26" required />
                 </div>
     
                 <!-- 게시글 내용 작성 -->
                 <div class="form-group">
-                    <label for="post-content">내용 *</label>
-                    <textarea id="edit-post-content" rows="10" required>무엇을 이야기할까요? ...</textarea>
+                    <label for="content">내용 *</label>
+                    <textarea id="post-content" name="content" rows="10" required>무엇을 이야기할까요? ...</textarea>
                     <span class="helper-text" id="post-edit-helper"></span>
                 </div>
     
                 <!-- 이미지 첨부 -->
                 <div class="form-group">
-                    <label for="post-image">이미지</label>
-                    <input type="file" id="post-edit-img" />
+                    <label for="image">이미지</label>
+                    <input type="file" id="image-upload" name="image"/>
+                    <img id="image-preview" style="display: none; max-width: 100%; max-height: 300px; margin-top: 10px;" alt="미리보기" />
                 </div>
     
                 <!-- 수정하기 버튼 -->
-                <button type="submit" class="submit-button" id="post-edit-submit-btn">수정하기</button>
+                <button type="submit" class="submit-button" id="update-post-button">수정하기</button>
             </form>
 
         </section>
     </div>
-    <script src="script.js"></script>
+    <script src="../scripts/common/api.js"></script>
+    <script src="../scripts/common/utils.js"></script>
+    <script src="../scripts/common/auth.js"></script>
+    <script src="../scripts/common/constants.js"></script>
+    <script src="../scripts/post-edit.js"></script>
 </body>
 
 </html>

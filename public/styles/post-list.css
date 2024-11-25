@@ -111,9 +111,13 @@
   float: right;
   padding: 10px;
   color: white;
-  background-color: #8888ff;
+  background-color: #ACA0EB;
   border: none;
   border-radius: 2em;
+}
+
+.create-post-button:hover {
+  background-color: #7F6AEE;
 }
 
 /* 포맷 */

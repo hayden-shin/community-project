@@ -1,6 +1,4 @@
 .post-detail {
-  /* width: 40%; */
-
   display: flex;
   flex-direction: column;
   width: 500px;
@@ -102,7 +100,7 @@
 }
 
 /* 게시글/댓글 수정 삭제 버튼 */
-.post-edit-button, .post-delete-button, .comment-edit-button, .comment-delete-button {
+.edit-post-button, .delete-post-button, .edit-comment-button, .delete-comment-button {
   padding: 3px 12px;
   font-size: 15px;
   font-weight: 400;
@@ -158,6 +156,10 @@
   color: #666;
 }
 
+#like-button {
+  cursor: pointer;
+}
+
 /* 댓글 */
 .comment-form {
   display: flex;
@@ -182,13 +184,13 @@
   box-sizing: border-box;
 }
 
-.comment-submit-button {
+.comment-button {
   display: block;
   margin: 10px 10px 10px auto;
 
   width: 20%;
   padding: 10px;
-  background-color: #8888ff;
+  background-color: #ACA0EB;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -200,8 +202,6 @@
   right: 0;
   bottom: 3px;
 }
-
-
 
 .comment-buttons {
   display: flex;
@@ -248,38 +248,12 @@
   /* margin-right: auto; */
 }
 
-/* .comments-section {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 24px;
-} */
-
-/* .comment-submit {
-  width: 138px;
-  height: 39px;
-  background: #7F6AEE;
-  color: white;
-  border: none;
-  padding: 8px 24px;
-  border-radius: 16px;
-  position: absolute;
-  right: 0;
-  bottom: 3px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 25.04px;
-} */
-
 .comment-item {
   padding: 16px;
   border-bottom: 1px solid #eee;
   width: 620px;
   margin: 0 auto;
 }
-
-
 
 /* 댓글 수정 버튼 */
 /* .comment-edit-button {
@@ -295,7 +269,6 @@
   background-color: #FFFFFF;
   margin-right: 25px;
 } */
-
 
 hr {
   display: block; /* 기본적으로 block-level 요소 */

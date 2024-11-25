@@ -7,6 +7,11 @@
   text-align: left;
 }
 
+.dropdown-container {
+  display: flex;
+
+}
+
 .profile-picture-wrapper {
   display: flex;
   flex-direction: column;
