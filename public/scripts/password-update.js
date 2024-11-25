@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM 요소들
   const newPassword = document.getElementById('new-password');
   const confirmPassword = document.getElementById('confirm-password');
   const passwordUpdateButton = document.getElementById(
@@ -9,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmPasswordHelper = document.getElementById(
     'confirm-password-helper'
   );
+
+  // 사용자 데이터 저장 변수
+  let currentUser = null;
 
   // 비밀번호 유효성 검사 함수
   const isValidPassword = (password) => {
@@ -41,14 +43,44 @@ document.addEventListener('DOMContentLoaded', () => {
     toast.textContent = message;
     document.body.appendChild(toast);
 
-    // 지정된 시간 후 토스트 메시지 제거 및 페이지 이동
-    setTimeout(() => {
-      toast.remove(); // 토스트 메시지 제거
-      window.location.href = url; // 페이지 이동
-    }, duration);
+    if (url) {
+      // 지정된 시간 후 토스트 메시지 제거 및 페이지 이동
+      setTimeout(() => {
+        toast.remove(); // 토스트 메시지 제거
+        window.location.href = url; // 페이지 이동
+      }, duration);
+    }
   };
 
-  // 초기 버튼 상태 설정
+  // 사용자 데이터 가져오기
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/data/users.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const users = await response.json();
+      // 현재 사용자 가정 (예: 첫 번째 사용자)
+      currentUser = users[0]; // 실제 구현에서는 사용자 인증에 따라 결정됨
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  // 비밀번호 업데이트 시뮬레이션
+  const updatePassword = async () => {
+    try {
+      // 서버에 업데이트 요청 시뮬레이션 (실제 백엔드 없이)
+      console.log('Updating password for user:', currentUser);
+      currentUser.password = newPassword.value; // 로컬 데이터 수정 시뮬레이션
+      showToastAndRedirect('비밀번호가 성공적으로 변경되었습니다!', './login');
+    } catch (error) {
+      console.error('Error updating password:', error);
+    }
+  };
+
+  // 초기화
+  fetchUserData(); // 사용자 데이터 가져오기
   passwordUpdateButton.disabled = true;
   passwordUpdateButton.style.backgroundColor = '#ACA0EB'; // 초기 비활성 상태
 
@@ -58,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!newPasswordValue.trim()) {
       newPasswordHelper.textContent = '*비밀번호를 입력해주세요.';
-      newPasswordHelper.style.color = 'black';
+      newPasswordHelper.style.color = 'red';
     } else if (!isValidPassword(newPasswordValue)) {
       newPasswordHelper.textContent =
         '*비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.';
@@ -90,11 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 비밀번호 변경 버튼 클릭 핸들러
-  passwordUpdateButton.addEventListener('click', (event) => {
+  passwordUpdateButton.addEventListener('click', async (event) => {
     event.preventDefault();
 
     if (allFieldsValid()) {
-      showToastAndRedirect('비밀번호가 성공적으로 변경되었습니다!', './login');
+      await updatePassword(); // 비밀번호 업데이트
+      showToastAndRedirect('비밀번호가 성공적으로 변경되었습니다!');
     }
   });
 });

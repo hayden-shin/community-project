@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // 사용자 데이터
-  const usersData = [
-    { email: 'hayden@gmail.com', password: '!Hayden2024' },
-    { email: 'user@gmail.com', password: '!User2024' },
-  ];
+  // 사용자 데이터 저장 변수
+  let usersData = [];
 
   // DOM 요소 선택
   const loginForm = document.querySelector('.login-form');
@@ -40,17 +37,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 토스트 메시지 + 리다이렉트
   const showToastAndRedirect = (message, url, duration = 2000) => {
-    // 토스트 메시지 생성
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.textContent = message;
     document.body.appendChild(toast);
 
-    // 지정된 시간 후 토스트 메시지 제거 및 페이지 이동
     setTimeout(() => {
-      toast.remove(); // 토스트 메시지 제거
-      window.location.href = url; // 페이지 이동
+      toast.remove();
+      window.location.href = url;
     }, duration);
+  };
+
+  // 사용자 데이터 가져오기
+  const fetchUsersData = async () => {
+    try {
+      const response = await fetch('/data/users.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users data');
+      }
+      usersData = await response.json();
+    } catch (error) {
+      console.error('Error fetching users data:', error);
+      showToast('사용자 데이터를 불러오는 데 실패했습니다.');
+    }
   };
 
   // 이메일 유효성 검사
@@ -110,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    showToastAndRedirect('로그인 성공', './post-list'); // 로그인 성공 토스트 메세지 + 리다이렉트
+    showToastAndRedirect('로그인 성공', './post-list');
   };
 
   // 이벤트 리스너 등록
@@ -118,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   passwordInput.addEventListener('input', validatePassword);
   loginForm.addEventListener('submit', handleLogin);
 
-  // 초기 로그인 버튼 상태 확인
+  // 초기 데이터 및 버튼 상태 설정
+  fetchUsersData(); // 사용자 데이터 가져오기
   checkLoginButtonState();
 });

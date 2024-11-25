@@ -3,53 +3,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const createPostButton = document.getElementById('create-post-button');
 
   // 게시글 목록 컨테이너
-  const postList = document.querySelector('post-list');
+  const postList = document.querySelector('.post-list');
 
-  // 게시글 임시 데이터
-  const postsData = [
-    {
-      id: 1,
-      title: '게시글 제목 1',
-      content: '게시글 내용입니다.',
-      createdAt: new Date(),
-      views: 1050,
-      comments: 15,
-      likes: 12000,
-    },
-    {
-      id: 2,
-      title: '게시글 제목이 굉장히 길어서 잘려야만 보이는 예시입니다람쥐방울',
-      content: '이 게시글의 본문 내용입니다.',
-      createdAt: new Date(),
-      views: 999,
-      comments: 8,
-      likes: 500,
-    },
-  ];
+  // 게시글 데이터 저장 변수
+  let postsData = [];
 
   // 토스트 메시지 + 리다이렉트
   const showToastAndRedirect = (message, url, duration = 2000) => {
-    // 토스트 메시지 생성
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.textContent = message;
     document.body.appendChild(toast);
 
-    // 지정된 시간 후 토스트 메시지 제거 및 페이지 이동
     setTimeout(() => {
-      toast.remove(); // 토스트 메시지 제거
-      window.location.href = url; // 페이지 이동
+      toast.remove();
+      window.location.href = url;
     }, duration);
   };
 
   // 날짜 및 시간 포맷 함수
   const formatDateTime = (date) => {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
+    const dateObj = new Date(date); // 날짜 문자열을 Date 객체로 변환
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const hh = String(dateObj.getHours()).padStart(2, '0');
+    const min = String(dateObj.getMinutes()).padStart(2, '0');
+    const ss = String(dateObj.getSeconds()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
   };
 
@@ -102,11 +82,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  // 게시글 데이터 가져오기
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/data/posts.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts data');
+      }
+      postsData = await response.json();
+      renderPosts(); // 데이터를 가져온 후 게시글 렌더링
+    } catch (error) {
+      console.error('Error fetching posts data:', error);
+      showToastAndRedirect(
+        '게시글 데이터를 불러오는 데 실패했습니다.',
+        './error'
+      );
+    }
+  };
+
   // 게시글 작성 페이지로 이동 이벤트
   createPostButton.addEventListener('click', () => {
     showToastAndRedirect('게시글 작성 페이지로 이동합니다.', './post-create');
   });
 
-  // 초기 게시글 렌더링
-  renderPosts();
+  // 초기 데이터 가져오기
+  fetchPosts();
 });

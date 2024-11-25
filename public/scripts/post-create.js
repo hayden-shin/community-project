@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // HTML 요소들
   const title = document.getElementById('post-title');
   const content = document.getElementById('post-content');
   const postButton = document.getElementById('post-button');
   const postHelper = document.getElementById('post-helper');
   const image = document.getElementById('image-upload');
   const imagePreview = document.getElementById('image-preview');
+
+  // 게시글 데이터 저장 변수
+  let posts = [];
 
   // 토스트 메시지 + 리다이렉트
   const showToastAndRedirect = (message, url, duration = 2000) => {
@@ -33,6 +35,40 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       postButton.style.backgroundColor = '#ACA0EB'; // 비활성화 색상
       postButton.disabled = true;
+    }
+  };
+
+  // 게시글 데이터 가져오기
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/data/posts.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts data');
+      }
+      posts = await response.json();
+    } catch (error) {
+      console.error('Error fetching posts data:', error);
+    }
+  };
+
+  // 게시글 추가 시뮬레이션
+  const addPost = async () => {
+    try {
+      const newPost = {
+        id: posts.length + 1, // 새로운 ID 할당
+        title: title.value.trim(),
+        content: content.value.trim(),
+        image: imagePreview.src || '', // 이미지 URL
+        createdAt: new Date().toISOString(),
+      };
+
+      // 로컬 데이터에 새로운 게시글 추가
+      posts.push(newPost);
+
+      console.log('New post added:', newPost); // 서버 통신 시뮬레이션
+      showToastAndRedirect('게시글이 등록되었습니다!', './post-view');
+    } catch (error) {
+      console.error('Error adding new post:', error);
     }
   };
 
@@ -68,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', updateButtonState)
   );
 
-  // 게시 버튼 클릭 이벤트
-  postButton.addEventListener('click', (e) => {
+  // 게시글 작성 버튼 클릭 이벤트
+  postButton.addEventListener('click', async (e) => {
     e.preventDefault(); // 기본 폼 제출 동작 방지
 
     const isTitleFilled = title.value.trim() !== '';
@@ -80,7 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
       postHelper.style.color = 'red';
     } else {
       postHelper.textContent = ''; // 헬퍼 텍스트 초기화
-      showToastAndRedirect('게시글이 등록되었습니다!', './post-view');
+      await addPost(); // 게시글 추가 함수 호출
     }
   });
+
+  // 초기화
+  fetchPosts(); // 기존 게시글 데이터 가져오기
 });

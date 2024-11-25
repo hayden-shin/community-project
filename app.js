@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
 
 const app = express();
 
@@ -10,15 +9,18 @@ const __dirname = path.resolve();
 // 정적 파일 제공 설정
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Dynamic routing for HTML files in public/pages
 const pagesDir = path.join(__dirname, 'public/pages');
-fs.readdirSync(pagesDir).forEach((file) => {
-  if (file.endsWith('.html')) {
-    const route = `/${file.replace('.html', '')}`;
-    app.get(route, (req, res) => {
-      res.sendFile(path.join(pagesDir, file));
-    });
-  }
+
+app.get('/:page', (req, res) => {
+  const page = req.params.page;
+  const filePath = path.join(pagesDir, `${page}.html`);
+
+  // 파일 존재 여부 확인
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).send(`File not found: ${filePath}`);
+    }
+  });
 });
 
 // 서버 시작
