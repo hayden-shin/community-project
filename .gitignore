@@ -1,0 +1,4 @@
+.env
+data/
+views/
+server.js
