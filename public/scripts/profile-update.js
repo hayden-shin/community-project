@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteAccount(userId); // deleteAccount 함수 호출
   });
 
-  const modal = document.getElementById('confirmation-modal');
+  const modal = document.getElementById('modal');
   const modalCancelButton = document.getElementById('modal-cancel-button');
   const modalConfirmButton = document.getElementById('modal-confirm-button');
 
