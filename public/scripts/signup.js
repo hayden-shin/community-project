@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+<<<<<<< Updated upstream
   // 중복 확인을 위한 임시 데이터
   const users = [
     { email: 'hayden@gmail.com', nickname: 'hayden' },
@@ -7,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 필요한 DOM 요소 선택
   const signupForm = document.querySelector('.signup-form');
+=======
+
+>>>>>>> Stashed changes
   const email = document.getElementById('email');
   const password = document.getElementById('password');
   const confirmPassword = document.getElementById('confirm-password');
@@ -113,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         color: 'red',
       },
       {
-        condition: () => !isValidPassword(password.value),
+        condition: () => !isValidPassword(pa``ssword.value),
         message:
           '*비밀번호는 8자 이상 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.',
         color: 'red',
@@ -126,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ])
   );
 
-  confirmPassword.addEventListener('input', () =>
+  confirmPassword.addEventListener('input', ``() =>
     validateInput(confirmPassword, confirmPasswordHelper, [
       {
         condition: () => !confirmPassword.value.trim(),
@@ -195,12 +199,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+
+  async function signup(email, password, confirmPassword, nickname, profileImage) {
+    // 입력값 유효성 검사
+    if (!email || !password || !confirmPassword || !nickname) {
+      alert('이메일, 비밀번호, 닉네임은 필수 입력값입니다.');
+      return;
+    }
+  
+    if (password.length < 8 || password.length > 20) {
+      alert('비밀번호는 8자 이상 20자 이하로 입력해주세요.');
+      return;
+    }
+  
+    // 비밀번호 형식 확인 (영문자, 숫자, 특수문자를 각각 포함)
+    if (!isValidPassword) {
+      alert('비밀번호는 영문자, 숫자, 특수문자를 각각 최소 1개 이상 포함해야 합니다.');
+      return;
+    }
+  
+    // API 요청 데이터
+    const requestData = {
+      email,
+      password,
+      nickname,
+      profile_image: profileImage || null, // 선택적 필드
+    };
+  
+    try {
+      // API 호출
+      const response = await fetch('http://localhost:3000/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      // 응답 상태 코드 처리
+      if (response.status === 201) {
+        const result = await response.json();
+        alert('회원가입 성공! 사용자 ID: ' + result.data.user_id);
+        console.log('회원가입 응답:', result);
+  
+        // 성공 시 로그인 페이지로 이동
+        window.location.href = '/login.html';
+      } else if (response.status === 400) {
+        const result = await response.json();
+        alert('회원가입 실패: ' + result.message);
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('회원가입 요청 실패:', error);
+      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
+  
+  // HTML 폼 이벤트와 연결
+  const signupForm = document.querySelector('.signup-form');
+  signupForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+  
+    const email = email.value;
+    const password = password.value;
+    const confirmPassword = confirmPassword.value;
+    const nickname = nickname.value;
+    const profileUpload = profileUpload.value;
+  
+    await signup(email, password, confirmPassword, nickname, profileUpload);
+  });
+  
   signupForm.addEventListener('input', () => {
     signupButton.disabled = !checkAllValid();
     signupButton.style.backgroundColor = checkAllValid()
       ? '#7F6AEE'
       : '#ACA0EB';
   });
+<<<<<<< Updated upstream
 
   signupForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -210,4 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('모든 필드를 올바르게 입력해주세요.');
     }
   });
+=======
+>>>>>>> Stashed changes
 });
