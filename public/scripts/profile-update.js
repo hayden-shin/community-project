@@ -1,18 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const dropdownMenu = document.getElementById('dropdown-menu');
   const profileIcon = document.querySelector('.header-profile-img');
-  const logout = document.getElementById('logout');
-  const editNicknameButton = document.getElementById('edit-nickname-button');
-  const nicknameInput = document.getElementById('nickname');
-  const nicknameHelper = document.getElementById('nickname-helper');
-  const deleteAccountButton = document.getElementById('delete-account-button');
-  const modal = document.getElementById('confirmation-modal');
-  const modalCancelButton = document.getElementById('modal-cancel-button');
-  const modalConfirmButton = document.getElementById('modal-confirm-button');
 
-  // 사용자 데이터 저장 변수
-  let users = [];
-  let currentUser = null;
+  const newNickname = document.getElementById('nickname');
+  const nicknameHelper = document.getElementById('nickname-helper');
 
   // 토스트 메시지 표시
   const showToast = (message) => {
@@ -36,34 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, duration);
   };
 
-  // 사용자 데이터 가져오기
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/data/users.json');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users data');
-      }
-      users = await response.json();
-
-      // 현재 사용자 설정 (예: 첫 번째 사용자, 실제로는 인증을 통해 결정)
-      currentUser = users[0];
-      populateUserProfile(currentUser);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      showToast('사용자 데이터를 불러오는 데 실패했습니다.');
-    }
-  };
-
   // 사용자 프로필 데이터 폼에 채우기
   const populateUserProfile = (user) => {
     if (user.nickname) {
-      nicknameInput.value = user.nickname;
+      newNickname.value = user.nickname;
     }
   };
 
   // 닉네임 유효성 검사
   const validateNickname = () => {
-    const nickname = nicknameInput.value.trim();
+    const nickname = newNickname.value.trim();
 
     if (!nickname) {
       nicknameHelper.textContent = '*닉네임을 입력해주세요.';
@@ -82,48 +55,181 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 닉네임 업데이트
-  const updateNickname = async (newNickname) => {
+  // 로그아웃 요청
+  async function logout() {
     try {
-      currentUser.nickname = newNickname; // 로컬 데이터 업데이트
-      console.log('Nickname updated:', currentUser); // 서버 통신 시뮬레이션
-      showToast('닉네임이 성공적으로 수정되었습니다.');
-    } catch (error) {
-      console.error('Error updating nickname:', error);
-      showToast('닉네임 수정에 실패했습니다.');
-    }
-  };
+      // API 호출: 로그아웃 요청을 보냄
+      const response = await fetch('http://localhost:3000/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-  // 회원 탈퇴 처리
-  const deleteAccount = async () => {
+      // 응답 상태 코드에 따른 처리
+      if (response.status === 204) {
+        // 로그아웃 성공: 로컬 스토리지 삭제 및 로그인 페이지로 리다이렉트
+        alert('로그아웃 성공! 로그인 페이지로 이동합니다.');
+        localStorage.removeItem('user_nickname'); // 사용자 정보 삭제
+        window.location.href = '/pages/login.html';
+      } else if (response.status === 400) {
+        const result = await response.json();
+        alert('로그아웃 실패: ' + result.message);
+      } else if (response.status === 500) {
+        alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      // 네트워크 또는 기타 오류 처리
+      console.error('로그아웃 요청 실패:', error);
+      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
+
+  // 로그아웃 버튼과 이벤트 연결
+  const logoutButton = document.getElementById('logout');
+  logoutButton.addEventListener('click', logout); // 클릭 시 logout() 함수 호출
+
+  // 회원 탈퇴 이벤트
+  modalConfirmButton.addEventListener('click', async () => {
+    const password = prompt('비밀번호를 입력하세요:');
+    if (password) {
+      await deleteAccount(password);
+    }
+  });
+
+  // 프로필 업데이트 요청
+  async function updateProfile(userId) {
+    // 입력값 가져오기
+    const newNickname = document.getElementById('nickname').value; // 닉네임 필드 값
+    const newProfileImage = document.getElementById('profile-image').value; // 프로필 이미지 필드 값
+
+    // 입력값 유효성 검사
+    if (!newNickname && !newProfileImage) {
+      alert('변경할 닉네임 또는 프로필 이미지를 입력해주세요.');
+      return;
+    }
+
+    // 닉네임이 입력된 경우, 최대 10자를 초과하지 않도록 검증
+    if (newNickname && newNickname.length > 10) {
+      alert('닉네임은 최대 10자까지 입력 가능합니다.');
+      nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
+      return;
+    }
+
+    // 프로필 이미지 URL이 입력된 경우, 유효한 URL인지 검증
+    if (newProfileImage && !isValidURL(newProfileImage)) {
+      alert('올바른 프로필 이미지 URL을 입력해주세요.');
+      return;
+    }
+
+    // 요청 데이터 생성 (닉네임 또는 프로필 이미지만 포함)
+    const requestData = {};
+    if (newNickname) requestData.new_nickname = newNickname;
+    if (newProfileImage) requestData.new_profile_image = newProfileImage;
+
     try {
-      // 사용자 데이터 삭제 시뮬레이션
-      users = users.filter((user) => user !== currentUser);
-      console.log('User deleted:', currentUser); // 서버 삭제 시뮬레이션
-      showToastAndRedirect('회원 탈퇴가 완료되었습니다.', './login');
+      // API 호출: 닉네임 및/또는 프로필 이미지 업데이트 요청
+      const response = await fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      // 서버 응답 처리
+      if (response.status === 204) {
+        alert('프로필이 성공적으로 업데이트되었습니다!');
+        console.log('프로필 업데이트 성공');
+      } else if (response.status === 400) {
+        alert('요청이 잘못되었습니다. 입력값을 확인해주세요.');
+      } else if (response.status === 401) {
+        alert('인증되지 않은 사용자입니다. 다시 로그인해주세요.');
+      } else if (response.status === 500) {
+        alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
     } catch (error) {
-      console.error('Error deleting account:', error);
-      showToast('회원 탈퇴에 실패했습니다.');
+      // 네트워크 또는 기타 오류 처리
+      console.error('프로필 업데이트 요청 실패:', error);
+      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
-  };
+  }
 
-  // 프로필 아이콘 드롭다운
-  const toggleDropdownMenu = (event) => {
-    event.stopPropagation();
-    dropdownMenu.style.display =
-      dropdownMenu.style.display === 'block' ? 'none' : 'block';
-  };
-
-  const closeDropdownMenu = () => {
-    dropdownMenu.style.display = 'none';
-  };
-
-  const handleDropdownHover = (event) => {
-    if (event.target.tagName === 'LI') {
-      event.target.style.backgroundColor =
-        event.type === 'mouseover' ? '#E9E9E9' : 'transparent';
+  // URL 유효성 검사 함수
+  function isValidURL(string) {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
     }
-  };
+  }
+
+  // 프로필 수정 버튼과 이벤트 연결
+  const updateProfileButton = document.getElementById('update-profile-button'); // 프로필 수정 버튼 선택
+  updateProfileButton.addEventListener('click', () => {
+    const userId = localStorage.getItem('user_id'); // 사용자 ID를 로컬 스토리지에서 가져온다고 가정
+    if (!userId) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    updateProfile(userId); // 프로필 업데이트 함수 호출
+  });
+
+  // 회원탈퇴 요청
+  async function deleteAccount(userId) {
+    try {
+      // DELETE 요청을 통해 계정 삭제
+      const response = await fetch(`http://localhost:3000/users/{user_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id }), // 비밀번호를 요청 본문으로 전송
+      });
+
+      // 서버 응답 상태 코드 처리
+      if (response.status === 204) {
+        alert('계정이 성공적으로 삭제되었습니다.');
+        localStorage.clear(); // 로컬 스토리지 초기화
+        window.location.href = '/signup.html'; // 회원가입 페이지로 이동
+      } else if (response.status === 400) {
+        alert('요청이 잘못되었습니다. 입력값을 확인해주세요.');
+      } else if (response.status === 401) {
+        alert('인증되지 않은 사용자이거나 비밀번호가 틀렸습니다.');
+      } else if (response.status === 500) {
+        alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      // 네트워크 또는 기타 오류 처리
+      console.error('계정 삭제 요청 실패:', error);
+      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
+
+  // 이벤트 리스너를 통해 삭제 요청 처리
+  const deleteAccountButton = document.getElementById('delete-account-button'); // 계정 삭제 버튼 선택
+  deleteAccountButton.addEventListener('click', () => {
+    const userId = localStorage.getItem('user_id'); // 사용자 ID 가져오기 (가정)
+
+    if (!userId) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    deleteAccount(userId); // deleteAccount 함수 호출
+  });
+
+  const modal = document.getElementById('confirmation-modal');
+  const modalCancelButton = document.getElementById('modal-cancel-button');
+  const modalConfirmButton = document.getElementById('modal-confirm-button');
 
   profileIcon.addEventListener('click', toggleDropdownMenu);
   window.addEventListener('click', closeDropdownMenu);
@@ -133,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const handleDropdownClick = (event) => {
     const { id } = event.target;
     const navigationMap = {
-      'profile-update': './profile-update',
-      'password-update': './password-update',
-      logout: './login',
+      'profile-update': '/pages/profile-update',
+      'password-update': '/pages/password-update',
+      logout: '/pages/login',
     };
 
     if (navigationMap[id]) {
@@ -161,7 +267,5 @@ document.addEventListener('DOMContentLoaded', () => {
   deleteAccountButton.addEventListener('click', openModal);
   modalCancelButton.addEventListener('click', closeModal);
   modalConfirmButton.addEventListener('click', confirmDeleteAccount);
-
-  // 초기화
-  fetchUsers();
+  updateProfileButton.addEventListener('click', updateProfile);
 });
