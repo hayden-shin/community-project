@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const password = document.getElementById('password');
   const confirmPassword = document.getElementById('confirm-password');
   const nickname = document.getElementById('nickname');
-  const profileUpload = document.getElementById('profile-upload');
+  const profileImage = document.getElementById('profile-image');
   const signupButton = document.getElementById('signup-button');
 
   // 헬퍼 텍스트 요소
@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     passwordHelper,
     confirmPasswordHelper,
     nicknameHelper,
-    profilePictureHelper,
+    profileImageHelper,
   ] = [
     'email-helper',
     'password-helper',
     'confirm-password-helper',
     'nickname-helper',
-    'profile-picture-helper',
+    'profile-image-helper',
   ].map((id) => document.getElementById(id));
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -29,20 +29,20 @@ document.addEventListener('DOMContentLoaded', () => {
       password
     );
 
-  const checkEmailDuplication = (email) =>
+  const isEmailTaken = (email) =>
     users.some((user) => user.email === email);
 
-  const checkNicknameDuplication = (nickname) =>
+  const isNicknameTaken = (nickname) =>
     users.some((user) => user.nickname === nickname);
 
   const checkAllValid = () =>
     isValidEmail(email.value) &&
-    !checkEmailDuplication(email.value) &&
+    !isEmailTaken(email.value) &&
     isValidPassword(password.value) &&
     password.value === confirmPassword.value &&
     nickname.value.trim().length > 0 &&
     nickname.value.trim().length <= 10 &&
-    !checkNicknameDuplication(nickname.value.trim());
+    !isNicknameTaken(nickname.value.trim());
 
   // 토스트 메시지 + 리다이렉트
   const showToastAndRedirect = (message, url, duration = 2000) => {
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         color: 'red',
       },
       {
-        condition: () => checkEmailDuplication(email.value),
+        condition: () => isEmailTaken(email.value),
         message: '*중복된 이메일입니다.',
         color: 'red',
       },
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         color: 'red',
       },
       {
-        condition: () => checkNicknameDuplication(nickname.value.trim()),
+        condition: () => isNicknameTaken(nickname.value.trim()),
         message: '*중복된 닉네임입니다.',
         color: 'red',
       },
@@ -164,11 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
   profileUpload.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (!file) {
-      profilePictureHelper.textContent = '*프로필 사진을 추가해주세요.';
-      profilePictureHelper.style.color = 'red';
+      profileImageHelper.textContent = '*프로필 사진을 추가해주세요.';
+      profileImageHelper.style.color = 'red';
     } else {
-      profilePictureHelper.textContent = '프로필 사진이 업로드되었습니다.';
-      profilePictureHelper.style.color = 'green';
+      profileImageHelper.textContent = '프로필 사진이 업로드되었습니다.';
+      profileImageHelper.style.color = 'green';
 
       const reader = new FileReader();
       reader.onload = () => {
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  async function signup(ema``il, password, confirmPassword, nickname, profileImage) {
+  async function signup(email, password, confirmPassword, nickname, profileImage) {
     // 입력값 유효성 검사
     if (!email || !password || !confirmPassword || !nickname) {
       alert('이메일, 비밀번호, 닉네임은 필수 입력값입니다.');
@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const password = password.value;
     const confirmPassword = confirmPassword.value;
     const nickname = nickname.value;
-    const profileUpload = profileUpload.value;
+    const profileImage = profileImage.value;
   
-    await signup(email, password, confirmPassword, nickname, profileUpload);
+    await signup(email, password, confirmPassword, nickname, profileImage);
   });
   
   signupForm.addEventListener('input', () => {
