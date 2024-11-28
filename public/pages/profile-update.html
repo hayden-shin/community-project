@@ -28,16 +28,16 @@
             <h2 class="form-title">회원정보수정</h2>
 
             <!-- 회원정보수정폼 -->
-            <form action="/" method="PUT" class="profile-edit-form">
+            <form action="/" method="PUT" class="profile-update-form">
 
                 <!-- 프로필 사진 -->
                 <div class="form-group">
-                    <label for="profile-picture" class="profile-label">프로필 사진*</label>
-                    <div class="profile-picture-wrapper">
+                    <label for="profile-image" class="profile-label">프로필 사진*</label>
+                    <div class="profile-image-wrapper">
                         <div class="profile-image-container">
                             <img src="../assets/headerpic.png" alt="프로필 사진" class="profile-image" />
                             <label for="image-upload" class="change-photo-label">변경</label>
-                            <input type="file" id="image-upload" accept="image/*" style="display: none;" />
+                            <input type="file" id="profile-image" accept="image/*" style="display: none;" />
                         </div>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                     <span class="helper-text" id="nickname-helper"></span>
                 </div>
 
-                <button type="submit" class="submit-button" id="edit-nickname-button">수정하기</button>
+                <button type="submit" class="submit-button" id="update-profile-button">수정하기</button>
                 <button type="button" class="link" id="delete-account-button">회원탈퇴</button>
             </form>
 

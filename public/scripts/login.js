@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // 사용자 데이터 저장 변수
-  let usersData = [];
-
   // DOM 요소 선택
-  const loginForm = document.querySelector('.login-form');
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
   const loginButton = document.getElementById('login-button');
@@ -48,20 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, duration);
   };
 
-  // 사용자 데이터 가져오기
-  const fetchUsersData = async () => {
-    try {
-      const response = await fetch('/data/users.json');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users data');
-      }
-      usersData = await response.json();
-    } catch (error) {
-      console.error('Error fetching users data:', error);
-      showToast('사용자 데이터를 불러오는 데 실패했습니다.');
-    }
-  };
-
   // 이메일 유효성 검사
   const validateEmail = () => {
     const email = emailInput.value.trim();
@@ -101,33 +83,80 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 로그인 처리
-  const handleLogin = (event) => {
-    event.preventDefault();
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    const user = usersData.find((user) => user.email === email);
-
-    if (!user) {
-      updateHelperText(emailHelper, '*등록되지 않은 이메일입니다.', 'red');
+  async function login(email, password) {
+    // 입력값 유효성 검사
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
 
-    if (user.password !== password) {
-      updateHelperText(passwordHelper, '*비밀번호가 다릅니다.', 'red');
+    if (!isValidPassword) {
+      alert(
+        '비밀번호는 8자 이상 20자 이하이며, 영문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.'
+      );
       return;
     }
 
-    showToastAndRedirect('로그인 성공', './post-list');
-  };
+    if (!isValidEmail) {
+      alert('올바르지 않은 이메일 입니다.');
+    }
+
+    // API 요청 데이터
+    const requestData = {
+      email,
+      password,
+    };
+
+    try {
+      // API 호출
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      // 응답 상태 코드 처리
+      if (response.status === 200) {
+        const result = await response.json();
+        alert(`로그인 성공! 환영합니다, ${result.data.user_nickname}님!`);
+        console.log('로그인 응답:', result);
+
+        // 세션에 사용자 정보 저장
+        localStorage.setItem('user_nickname', result.data.user_nickname);
+
+        // 성공 시 대시보드로 이동
+        window.location.href = '/dashboard.html';
+      } else if (response.status === 400) {
+        const result = await response.json();
+        alert('로그인 실패: ' + result.message);
+      } else if (response.status === 429) {
+        alert('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('로그인 요청 실패:', error);
+      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   // 이벤트 리스너 등록
   emailInput.addEventListener('input', validateEmail);
   passwordInput.addEventListener('input', validatePassword);
-  loginForm.addEventListener('submit', handleLogin);
 
-  // 초기 데이터 및 버튼 상태 설정
-  fetchUsersData(); // 사용자 데이터 가져오기
+  // HTML 폼 이벤트와 연결
+  const loginForm = document.getElementById('login-form');
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    await login(email, password);
+  });
+
+  // 버튼 상태 설정
   checkLoginButtonState();
 });
