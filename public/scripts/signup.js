@@ -1,16 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-<<<<<<< Updated upstream
-  // 중복 확인을 위한 임시 데이터
-  const users = [
-    { email: 'hayden@gmail.com', nickname: 'hayden' },
-    { email: 'user@example.com', nickname: 'user' },
-  ];
 
-  // 필요한 DOM 요소 선택
-  const signupForm = document.querySelector('.signup-form');
-=======
-
->>>>>>> Stashed changes
   const email = document.getElementById('email');
   const password = document.getElementById('password');
   const confirmPassword = document.getElementById('confirm-password');
@@ -54,20 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
     nickname.value.trim().length > 0 &&
     nickname.value.trim().length <= 10 &&
     !checkNicknameDuplication(nickname.value.trim());
-  // profileUpload.files.length > 0; //보류
 
   // 토스트 메시지 + 리다이렉트
   const showToastAndRedirect = (message, url, duration = 2000) => {
-    // 토스트 메시지 생성
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.textContent = message;
     document.body.appendChild(toast);
 
-    // 리다이렉트
     setTimeout(() => {
-      toast.remove(); // 토스트 메시지 제거
-      window.location.href = url; // 페이지 이동
+      toast.remove();
+      window.location.href = url;
     }, duration);
   };
 
@@ -117,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         color: 'red',
       },
       {
-        condition: () => !isValidPassword(pa``ssword.value),
+        condition: () => !isValidPassword(password.value),
         message:
           '*비밀번호는 8자 이상 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.',
         color: 'red',
@@ -200,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  async function signup(email, password, confirmPassword, nickname, profileImage) {
+  async function signup(ema``il, password, confirmPassword, nickname, profileImage) {
     // 입력값 유효성 검사
     if (!email || !password || !confirmPassword || !nickname) {
       alert('이메일, 비밀번호, 닉네임은 필수 입력값입니다.');
@@ -243,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('회원가입 응답:', result);
   
         // 성공 시 로그인 페이지로 이동
-        window.location.href = '/login.html';
+        window.location.href = '/pages/login.html';
       } else if (response.status === 400) {
         const result = await response.json();
         alert('회원가입 실패: ' + result.message);
@@ -276,16 +262,4 @@ document.addEventListener('DOMContentLoaded', () => {
       ? '#7F6AEE'
       : '#ACA0EB';
   });
-<<<<<<< Updated upstream
-
-  signupForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (checkAllValid()) {
-      showToastAndRedirect('회원가입이 완료되었습니다.', './login', 2000);
-    } else {
-      showToast('모든 필드를 올바르게 입력해주세요.');
-    }
-  });
-=======
->>>>>>> Stashed changes
 });
