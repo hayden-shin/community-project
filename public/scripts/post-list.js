@@ -1,110 +1,131 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // 게시글 작성 버튼
-  const createPostButton = document.getElementById('create-post-button');
+// 게시글 작성 버튼
+const createPostButton = document.getElementById('create-post-button');
 
-  // 게시글 목록 컨테이너
-  const postList = document.querySelector('.post-list');
+// 게시글 목록 컨테이너
+const postList = document.querySelector('.post-list');
 
-  // 게시글 데이터 저장 변수
-  let postsData = [];
+// 토스트 메시지 + 리다이렉트
+const showToastAndRedirect = (message, url, duration = 2000) => {
+  const toast = document.createElement('div');
+  toast.className = 'toast-message';
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
-  // 토스트 메시지 + 리다이렉트
-  const showToastAndRedirect = (message, url, duration = 2000) => {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.textContent = message;
-    document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.remove();
+    window.location.href = url;
+  }, duration);
+};
 
-    setTimeout(() => {
-      toast.remove();
-      window.location.href = url;
-    }, duration);
-  };
+// 날짜 및 시간 포맷 함수
+const formatDateTime = (date) => {
+  const dateObj = new Date(date); // 날짜 문자열을 Date 객체로 변환
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+  const hh = String(dateObj.getHours()).padStart(2, '0');
+  const min = String(dateObj.getMinutes()).padStart(2, '0');
+  const ss = String(dateObj.getSeconds()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+};
 
-  // 날짜 및 시간 포맷 함수
-  const formatDateTime = (date) => {
-    const dateObj = new Date(date); // 날짜 문자열을 Date 객체로 변환
-    const yyyy = dateObj.getFullYear();
-    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const dd = String(dateObj.getDate()).padStart(2, '0');
-    const hh = String(dateObj.getHours()).padStart(2, '0');
-    const min = String(dateObj.getMinutes()).padStart(2, '0');
-    const ss = String(dateObj.getSeconds()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-  };
+// 숫자 축약 함수 (1k, 10k, 100k)
+const formatNumber = (number) => {
+  if (number >= 100000) return `${Math.floor(number / 1000)}k`;
+  if (number >= 10000) return `${Math.floor(number / 1000)}k`;
+  if (number >= 1000) return `${Math.floor(number / 1000)}k`;
+  return number;
+};
 
-  // 숫자 축약 함수 (1k, 10k, 100k)
-  const formatNumber = (number) => {
-    if (number >= 100000) return `${Math.floor(number / 1000)}k`;
-    if (number >= 10000) return `${Math.floor(number / 1000)}k`;
-    if (number >= 1000) return `${Math.floor(number / 1000)}k`;
-    return number;
-  };
+// 게시글 작성 페이지로 이동 이벤트
+createPostButton.addEventListener('click', () => {
+  showToastAndRedirect(
+    '게시글 작성 페이지로 이동합니다.',
+    '/pages/post-create.html'
+  );
+});
 
-  // 게시글 렌더링 함수
-  const renderPosts = () => {
-    // 게시글 목록 초기화
-    postList.innerHTML = '';
-
-    postsData.forEach(({ id, title, createdAt, views, comments, likes }) => {
-      // 게시글 요소 생성
-      const postItem = document.createElement('div');
-      postItem.classList.add('post-item');
-      postItem.dataset.id = id; // 게시글 ID 저장
-
-      // 제목이 26자로 제한
-      const truncatedTitle =
-        title.length > 26 ? `${title.substring(0, 26)}...` : title;
-
-      // 게시글 아이템 생성
-      postItem.innerHTML = `
-        <h3 class="post-title">${truncatedTitle}</h3>
-        <div class="post-stats">
-          <span>조회수: ${formatNumber(views)}</span>
-          <span>댓글: ${formatNumber(comments)}</span>
-          <span>좋아요: ${formatNumber(likes)}</span>
-          <p class="post-date">${formatDateTime(createdAt)}</p>
-        </div>
-        <hr />
-        <div class="post-author">
-          <img src="../assets/headerpic.png" alt="프로필 이미지" class="post-author-img">
-          <span>더미 작성자 1</span>
-        </div>
-      `;
-
-      // 게시글 클릭 시 게시글 상세 페이지로 이동
-      postItem.addEventListener('click', () => {
-        window.location.href = `./post-view?id=${id}`;
-      });
-
-      // 게시글 목록 컨테이너에 추가
-      postList.appendChild(postItem);
-    });
-  };
-
-  // 게시글 데이터 가져오기
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/data/posts.json');
-      if (!response.ok) {
-        throw new Error('Failed to fetch posts data');
+// 게시글 리스트
+async function postList(page = 1, limit = 10) {
+  try {
+    // API 호출: 게시글 목록 요청
+    const response = await fetch(
+      `http://localhost:3000/posts?page=${page}&limit=${limit}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
-      postsData = await response.json();
-      renderPosts(); // 데이터를 가져온 후 게시글 렌더링
-    } catch (error) {
-      console.error('Error fetching posts data:', error);
-      showToastAndRedirect(
-        '게시글 데이터를 불러오는 데 실패했습니다.',
-        './error'
-      );
+    );
+
+    // 서버 응답 상태 코드 처리
+    if (response.status === 200) {
+      const result = await response.json();
+      renderPosts(result.data); // 게시글 데이터를 화면에 렌더링
+    } else if (response.status === 401) {
+      alert('인증되지 않은 사용자입니다. 다시 로그인해주세요.');
+      window.location.href = '/login.html'; // 로그인 페이지로 리다이렉트
+    } else if (response.status === 500) {
+      alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } else {
+      alert('알 수 없는 오류가 발생했습니다.');
     }
-  };
+  } catch (error) {
+    // 네트워크 또는 기타 오류 처리
+    console.error('게시글 목록 요청 실패:', error);
+    alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+  }
+}
 
-  // 게시글 작성 페이지로 이동 이벤트
-  createPostButton.addEventListener('click', () => {
-    showToastAndRedirect('게시글 작성 페이지로 이동합니다.', './post-create');
+// 게시글 렌더링 함수
+const renderPosts = (postsData) => {
+  // 게시글 목록 초기화
+  const postListContainer = document.getElementById('post-list-container'); // 게시글 목록 컨테이너
+  postListContainer.innerHTML = ''; // 기존 내용을 초기화
+
+  // 게시글 데이터가 없을 경우 메시지 출력
+  if (!postsData || postsData.length === 0) {
+    postListContainer.innerHTML = '<p>게시글이 없습니다.</p>';
+    return;
+  }
+
+  // 게시글 데이터 순회 및 렌더링
+  postsData.forEach(({ id, title, createdAt, views, comments, likes }) => {
+    // 게시글 요소 생성
+    const postItem = document.createElement('div');
+    postItem.classList.add('post-item');
+    postItem.dataset.id = id; // 게시글 ID 저장
+
+    // 게시글 아이템 HTML 구조 생성
+    postItem.innerHTML = `
+      <h3 class="post-title">${post.title}</h3>
+      <div class="post-stats">
+        <span>조회수: ${formatNumber(views)}</span>
+        <span>댓글: ${formatNumber(comments)}</span>
+        <span>좋아요: ${formatNumber(likes)}</span>
+        <p class="post-date">${formatDateTime(createdAt)}</p>
+      </div>
+      <hr />
+      <div class="post-author">
+        <img src="../assets/headerpic.png" alt="프로필 이미지" class="post-author-img">
+        <span>더미 작성자 1</span>
+      </div>
+    `;
+
+    // 게시글 클릭 시 게시글 상세 페이지로 이동
+    postItem.addEventListener('click', () => {
+      window.location.href = `./post-view.html?id=${id}`;
+    });
+
+    // 게시글 목록 컨테이너에 추가
+    postListContainer.appendChild(postItem);
   });
+};
 
-  // 초기 데이터 가져오기
-  fetchPosts();
+// 페이지 로딩 시 게시글 목록 로드
+document.addEventListener('DOMContentLoaded', () => {
+  const page = 1; // 초기 페이지
+  const limit = 10; // 한 페이지당 게시글 수
+  postList(page, limit);
 });
