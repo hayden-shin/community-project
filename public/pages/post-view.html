@@ -13,8 +13,13 @@
     <div class="container">
         <header>
             <button class="back-button" id="back-button" onclick="window.history.back()">&lt;</button>
-            <h1>아무 말 대잔치</h1>
+            <h1 id="header">아무 말 대잔치</h1>
             <img src="../assets/headerpic.png" alt="User Icon" class="header-profile-img">
+            <div class="dropdown" id="dropdown-menu">
+                <li id="profile-update">회원정보수정</li>
+                <li id="password-update">비밀번호수정</li>
+                <li id="logout">로그아웃</li>
+            </div>
         </header>
         <hr class="header-line" />
 
@@ -35,9 +40,10 @@
             </header>
             <hr />
 
-            <section class="post-content" id="post-content">
-                <div class="img-placeholder"></div>
-                <p></p>
+            <section class="post-content">
+                <!-- <div class="img-placeholder"></div> -->
+                <img id="post-image" alt="Post Image" class="post-image" />
+                <p id="post-text" class="post-text"></p>
             </section>
 
             <footer class="post-footer">
@@ -71,9 +77,11 @@
             </div>
         </div>
     </div>
-    <script src="../scripts/post-view.js"></script>
-    <script src="../scripts/likes.js"></script>
-    <script src="../scripts/comment.js"></script>
+    <script type="module" src="../scripts/post-view.js"></script>
+    <script type="module" src="../scripts/dropdown.js"></script>
+    <script type="module" src="../scripts/likes.js"></script>
+    <script type="module" src="../scripts/comment.js"></script>
+    <script type="module" src="../scripts/common.js"></script>
 </body>
 
 </html>

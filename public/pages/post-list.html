@@ -13,8 +13,13 @@
     <div class="container">
         <header class="header-wrapper">
             <button class="back-button" onclick="window.history.back()">&lt;</button>
-            <h1>아무 말 대잔치</h1>
+            <h1 id="header">아무 말 대잔치</h1>
             <img src="../assets/headerpic.png" alt="User Icon" class="header-profile-img">
+            <div class="dropdown" id="dropdown-menu">
+                <li id="profile-update">회원정보수정</li>
+                <li id="password-update">비밀번호수정</li>
+                <li id="logout">로그아웃</li>
+            </div>
         </header>
         <hr class="header-line"/>
 
@@ -68,7 +73,11 @@
             </section>
         </main>
     </div>
-    <script src="../scripts/post-list.js"></script>
+    <script type="module" src="../scripts/post-list.js"></script>
+    <script type="module" src="../scripts/dropdown.js"></script>
+    <!-- <script type="module" src="../scripts/post-view.js"></script> -->
+    <!-- <script type="module" src="../scripts/comment.js"></script> -->
+    <script type="module" src="../scripts/common.js"></script>
 </body>
 
 </html>
