@@ -1,23 +1,21 @@
-const express = require('express');
-const {
-  signupUser,
-  updateNickname,
+import express from 'express';
+import {
+  getUserProfile,
+  updateProfile,
   updatePassword,
-  deleteUser,
-} = require('../controllers/userController');
+} from '../controllers/userController.js';
 
-const router = express.Router();
+import { upload } from '../middlewares/upload.js';
 
-// 회원가입
-router.post('/signup', signupUser);
+const router = express.Router({ mergeParams: true });
 
-// 닉네임 변경
-router.patch('/:user_id', updateNickname);
+// 사용자 프로필 가져오기
+router.get('/profile', getUserProfile);
+
+// 프로필 수정
+router.patch('/profile', upload, updateProfile);
 
 // 비밀번호 변경
-router.patch('/:user_id', updatePassword);
+router.patch('/password', updatePassword);
 
-// 계정 탈퇴
-router.delete('/:user_id', deleteUser);
-
-module.exports = router;
+export default router;

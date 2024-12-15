@@ -1,27 +1,41 @@
-const express = require('express');
-const {
-  getAllPosts,
-  getPostById,
+import express from 'express';
+// import { requireAuth } from '../middlewares/auth.js';
+import {
   createPost,
-  updatePost,
+  getPostById,
+  getAllPosts,
+  editPost,
   deletePost,
-} = require('../controllers/postController');
+  getLikeStatus,
+  toggleLikePost,
+} from '../controllers/postController.js';
 
-const router = express.Router();
+// import { addLike, removeLike } from '../controllers/likeController.js';
+import { upload } from '../middlewares/upload.js';
 
-// 게시글 목록 조회
-router.get('/', getAllPosts);
+const router = express.Router({ mergeParams: true });
 
-// 게시글 상세 조회
+// 새 게시글 생성
+router.post('/', upload, createPost);
+
+// 특정 게시글 가져오기
 router.get('/:post_id', getPostById);
 
-// 게시글 작성
-router.post('/', createPost);
+// 모든 게시글 가져오기
+router.get('/', getAllPosts);
 
 // 게시글 수정
-router.patch('/:post_id', updatePost);
+router.patch('/:post_id', upload, editPost);
 
 // 게시글 삭제
 router.delete('/:post_id', deletePost);
 
-module.exports = router;
+router.get('/:post_id/likes', getLikeStatus);
+
+// 좋아요 추가
+router.post('/:post_id/likes', toggleLikePost);
+
+// 좋아요 취소
+router.delete('/:post_id/likes', toggleLikePost);
+
+export default router;

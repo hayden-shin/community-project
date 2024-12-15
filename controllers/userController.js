@@ -1,134 +1,240 @@
-const path = require('path');
-const { readJSONFile, writeJSONFile } = require('../utils/fileUtils');
+import { readUsersFromFile, writeUsersToFile } from '../models/userModel.js';
+import { createRequire } from 'module';
 
-const USERS_FILE = path.join(__dirname, '../data/users.json');
+const require = createRequire(import.meta.url);
+const bcrypt = require('bcrypt');
+
+const SERVER_URL = 'http://localhost:3000';
 
 // 회원가입
-const signupUser = (req, res) => {
-  const { nickname, email, password } = req.body;
+export const signup = async (req, res) => {
+  const { email, password, nickname } = req.body;
 
-  if (!nickname || !email || !password) {
-    return res.status(400).json({ message: '모든 필드를 입력해야 합니다.' });
+  if (!email || !password || !nickname) {
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  const users = readJSONFile(USERS_FILE);
-  const isEmailTaken = users.some((user) => user.email === email);
+  // 프로필 이미지 처리
+  let profileUrl = req.file
+    ? `${SERVER_URL}/assets/${req.file.filename}`
+    : `${SERVER_URL}/assets/default-profile.jpg`;
 
-  if (isEmailTaken) {
-    return res.status(400).json({ message: '이미 사용 중인 이메일입니다.' });
+  try {
+    const users = await readUsersFromFile();
+
+    if (users.some((user) => user.email === email)) {
+      return res
+        .status(400)
+        .json({ message: 'email already exists', data: null });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10); // 비밀번호 암호화
+    const newUser = {
+      id: users.length + 1,
+      profile_url: profileUrl,
+      email,
+      password: hashedPassword,
+      nickname,
+      created_at: new Date().toISOString(),
+    };
+
+    users.push(newUser);
+
+    await writeUsersToFile(users);
+
+    res.status(201).json({
+      message: 'register success',
+      data: newUser,
+    });
+  } catch (error) {
+    console.error('회원가입 실패:', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
-
-  const newUser = {
-    id: users.length > 0 ? users[users.length - 1].id + 1 : 1,
-    nickname,
-    email,
-    password,
-    createdAt: new Date().toISOString(),
-  };
-
-  users.push(newUser);
-  writeJSONFile(USERS_FILE, users);
-  res.status(201).json(newUser);
 };
 
-// 닉네임 변경
-const updateNickname = (req, res) => {
-  const { user_id } = req.params;
-  const { nickname } = req.body;
+// 로그인
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-  if (!nickname) {
-    return res.status(400).json({ message: '닉네임을 입력해주세요.' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  if (nickname.length > 10) {
-    return res
-      .status(400)
-      .json({ message: '닉네임은 최대 10자 까지 작성 가능합니다.' });
+  try {
+    const users = await readUsersFromFile();
+    const user = users.find((user) => user.email === email);
+    if (!user) {
+      return res.status(400).json({ message: 'login fail', data: null });
+    }
+
+    const isPasswordMatch = bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: 'login fail', data: null });
+    }
+
+    // 세션에 사용자 정보 저장
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      profile_url: user.profile_url,
+    };
+
+    // HttpOnly 쿠키 발급
+    console.log('세션 저장된 사용자: ', req.session.user);
+
+    res.cookie('sessionId', req.sessionID, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24, // 24시간 유지
+    });
+
+    res.status(200).json({
+      message: 'login_success',
+      data: {
+        id: user.id,
+        email: user.email,
+        nickname: user.nickname,
+        profile_url: user.profile_url,
+      },
+    });
+  } catch (error) {
+    console.error('로그인 실패:', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
+};
 
-  const users = readJSONFile(USERS_FILE);
-
-  // 닉네임 중복 검사
-  const isNicknameTaken = users.some((user) => user.nickname === nickname);
-  if (isNicknameTaken) {
-    return res.status(400).json({ message: '중복된 닉네임 입니다.' });
-  }
-
-  const userIndex = users.findIndex((user) => user.id === Number(user_id));
-  if (userIndex === -1) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
-  }
-
-  // 닉네임 변경
-  users[userIndex].nickname = nickname;
-  users[userIndex].updatedAt = new Date().toISOString();
-
-  writeJSONFile(USERS_FILE, users);
-
-  res.status(200).json({
-    message: '닉네임이 성공적으로 변경되었습니다.',
-    user: { id: users[userIndex].id, nickname: users[userIndex].nickname },
+// 로그아웃
+export const logout = async (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: 'internal_server_error', data: null });
+    }
+    res.clearCookie('sessionId');
+    res.status(204).send({ message: 'Logged out successfully' });
   });
 };
 
+// 사용자 프로필 가져오기
+export const getUserProfile = async (req, res) => {
+  const userId = req.session?.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'unauthorized', data: null });
+  }
+
+  try {
+    const users = await readUsersFromFile();
+    const user = users.find((u) => u.id === userId);
+    // 유저 정보 반환
+    res.status(200).json({
+      message: 'user_profile_retrieved',
+      data: {
+        email: user.email,
+        nickname: user.nickname,
+        profileImage:
+          user.profile_url || `${SERVER_URL}/assets/default-profile.jpg`, // 기본 프로필 이미지 제공
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// 사용자 정보 수정
+export const updateProfile = async (req, res) => {
+  const userId = req.session?.user?.id;
+  const { newEmail, newNickname } = req.body;
+  const newProfileImage = req.file
+    ? `${SERVER_URL}/assets/${req.file.filename}`
+    : null;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'unauthorized', data: null });
+  }
+
+  try {
+    const users = await readUsersFromFile();
+    const user = users.find((user) => user.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'not found', data: null });
+    }
+
+    if (newEmail) user.email = newEmail;
+    if (newNickname) user.nickname = newNickname;
+    if (newProfileImage) user.profile_url = newProfileImage;
+
+    await writeUsersToFile(users);
+    res.status(200).json({ message: 'profile updated', data: null });
+  } catch (error) {
+    console.error('사용자 정보 수정 실패:', error);
+    res.status(500).json({ message: 'internal server error', data: null });
+  }
+};
+
 // 비밀번호 변경
-const updatePassword = (req, res) => {
-  const { user_id } = req.params;
-  const { newPassword, confirmPassword } = req.body;
+export const updatePassword = async (req, res) => {
+  const userId = req.session?.user?.id;
+  const { newPassword } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'unauthorized', data: null });
+  }
 
   if (!newPassword) {
-    return res.status(400).json({ message: '비밀번호를 입력해주세요.' });
-  }
-
-  if (!confirmPassword) {
     return res
       .status(400)
-      .json({ message: '비밀번호를 한번 더 입력해주세요.' });
+      .json({ message: 'new_password_required', data: null });
   }
 
-  // 비밀번호 확인
-  if (newPassword !== confirmPassword) {
-    return res.status(400).json({ message: '비밀번호 확인과 다릅니다.' });
+  try {
+    const users = await readUsersFromFile();
+    const user = users.find((user) => user.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'user not found', data: null });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await writeUsersToFile(users);
+
+    res.status(200).json({ message: 'profile updated', data: null });
+  } catch (error) {
+    console.error('비밀번호 변경 실패:', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
-
-  // 비밀번호 유효성 검사
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
-  if (!passwordRegex.test(newPassword)) {
-    return res.status(400).json({
-      message:
-        '비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.',
-    });
-  }
-
-  const users = readJSONFile(USERS_FILE);
-
-  const userIndex = users.findIndex((user) => user.id === Number(user_id));
-  if (userIndex === -1) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
-  }
-
-  // 비밀번호 변경
-  users[userIndex].password = newPassword;
-  users[userIndex].updatedAt = new Date().toISOString();
-
-  writeJSONFile(USERS_FILE, users);
-
-  res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
 };
 
 // 회원 탈퇴
-const deleteUser = (req, res) => {
-  const { user_id } = req.params;
-  const users = readJSONFile(USERS_FILE);
+export const deleteAccount = async (req, res) => {
+  const userId = req.session.user?.id;
 
-  const newUsers = users.filter((u) => u.id !== Number(user_id));
-  if (users.length === newUsers.length) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+  if (!userId) {
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  writeJSONFile(USERS_FILE, newUsers);
-  res.status(204).send();
-};
+  try {
+    const users = await readUsersFromFile();
+    const userIndex = users.findIndex((user) => user.id === userId);
 
-module.exports = { signupUser, updateNickname, updatePassword, deleteUser };
+    if (
+      userIndex === -1 ||
+      !bcrypt.compareSync(password, users[userIndex].password)
+    ) {
+      return res.status(401).json({ message: 'unauthorized', data: null });
+    }
+
+    users.splice(userIndex, 1);
+    await writeUsersToFile(users);
+
+    req.session.destroy();
+    res.clearCookie('user_session');
+    res.status(204).send();
+  } catch (error) {
+    console.error('회원 탈퇴 실패:', error);
+    res.status(500).json({ message: 'internal server error', data: null });
+  }
+};

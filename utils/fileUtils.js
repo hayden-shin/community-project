@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 데이터 읽기 함수
-const readJSONFile = (filePath) => {
+exports.readJSONFile = (filePath) => {
   try {
     const data = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(data);
@@ -13,7 +13,7 @@ const readJSONFile = (filePath) => {
 };
 
 // 데이터 쓰기 함수
-const writeJSONFile = (filePath, data) => {
+exports.writeJSONFile = (filePath, data) => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     console.log(`Successfully wrote data to: ${filePath}`);
@@ -22,5 +22,3 @@ const writeJSONFile = (filePath, data) => {
     throw new Error('파일 저장 중 오류가 발생했습니다.');
   }
 };
-
-module.exports = { readJSONFile, writeJSONFile };
