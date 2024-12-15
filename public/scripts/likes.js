@@ -1,114 +1,105 @@
-// 좋아요 증가 요청
-async function increaseLike(postId) {
-  try {
-    // API 호출: 좋아요 증가 요청
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ like: true }), // 좋아요 증가 플래그
-      }
-    );
+// import { showToast } from './common.js';
 
-    // 서버 응답 상태 코드 처리
-    if (response.status === 200) {
-      const result = await response.json();
-      console.log('좋아요 증가 성공:', result.data);
+// const likeButton = document.getElementById('like-button');
 
-      // 좋아요 UI 업데이트
-      const likeCountElement = document.getElementById('like-button');
-      likeCountElement.innerHTML = `${result.data.like_cnt}<span>좋아요</span>`;
-    } else if (response.status === 401) {
-      alert('인증되지 않은 사용자입니다. 다시 로그인해주세요.');
-      window.location.href = '/login.html'; // 로그인 페이지로 이동
-    } else if (response.status === 404) {
-      alert('게시글을 찾을 수 없습니다.');
-      window.location.href = '/post-list.html'; // 게시글 목록 페이지로 이동
-    } else if (response.status === 500) {
-      alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-    } else {
-      alert('알 수 없는 오류가 발생했습니다.');
-    }
-  } catch (error) {
-    // 네트워크 또는 기타 오류 처리
-    console.error('좋아요 증가 요청 실패:', error);
-    alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
-  }
-}
+// export async function fetchLikeStatus(postId) {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:3000/posts/${postId}/likes`,
+//       {
+//         method: 'GET',
+//         credentials: 'include',
+//       }
+//     );
 
-// 좋아요 증가 이벤트
-document.getElementById('like-button').addEventListener('click', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const postId = urlParams.get('id'); // URL에서 게시글 ID 가져오기
+//     if (response.ok) {
+//       const result = await response.json();
+//       const { isLiked } = result.data;
 
-  if (!postId) {
-    alert('게시글 ID를 확인할 수 없습니다.');
-    return;
-  }
+//       // 서버 상태에 맞게 초기 UI 설정
+//       if (isLiked) {
+//         likeButton.classList.add('liked');
+//       } else {
+//         likeButton.classList.remove('liked');
+//       }
 
-  increaseLike(postId); // 좋아요 증가 함수 호출
-});
+//       return isLiked;
+//     } else if (response.status === 401) {
+//       alert('로그인이 필요합니다.');
+//       window.location.href = '/login';
+//     } else {
+//       console.error('좋아요 상태를 가져올 수 없습니다.');
+//     }
+//   } catch (error) {
+//     console.error('좋아요 상태 가져오기 실패:', error);
+//   }
+//   return false; // 기본값
+// }
 
-// 좋아요 취소 요청
-async function cancelLike(postId) {
-  try {
-    // API 호출: 좋아요 취소 요청
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ like: false }), // 좋아요 취소 플래그
-      }
-    );
+// async function addLikes(postId) {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:3000/posts/${postId}/likes`,
+//       {
+//         method: 'POST',
+//         credentials: 'include',
+//       }
+//     );
 
-    // 서버 응답 상태 코드 처리
-    if (response.status === 200) {
-      const result = await response.json();
-      console.log('좋아요 취소 성공:', result.data);
+//     if (response.ok) {
+//       const result = await response.json();
+//       const { likes } = result.data;
 
-      // 좋아요 UI 업데이트
-      const likeCountElement = document.getElementById('like-button');
-      likeCountElement.innerHTML = `${result.data.like_cnt}<span>좋아요</span>`;
-    } else if (response.status === 401) {
-      alert('인증되지 않은 사용자입니다. 다시 로그인해주세요.');
-      window.location.href = '/login.html'; // 로그인 페이지로 이동
-    } else if (response.status === 404) {
-      alert('게시글을 찾을 수 없습니다.');
-      window.location.href = '/post-list.html'; // 게시글 목록 페이지로 이동
-    } else if (response.status === 500) {
-      alert('서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-    } else {
-      alert('알 수 없는 오류가 발생했습니다.');
-    }
-  } catch (error) {
-    // 네트워크 또는 기타 오류 처리
-    console.error('좋아요 취소 요청 실패:', error);
-    alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
-  }
-}
+//       likeButton.classList.add('liked');
+//       likeButton.innerHTML = `${likes}<span>좋아요</span>`;
+//       showToast('좋아요');
+//     } else if (response.status == 401) {
+//       alert('로그인이 필요합니다.');
+//       window.location.href = '/login';
+//     } else {
+//       alert('좋아요 요청 실패');
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-document.getElementById('like-button').addEventListener('click', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const postId = urlParams.get('id'); // URL에서 게시글 ID 가져오기
+// async function removeLikes(postId) {
+//   const response = await fetch(`http://localhost:3000/posts/${postId}/likes`, {
+//     method: 'DELETE',
+//     credentials: 'include',
+//   });
 
-  if (!postId) {
-    alert('게시글 ID를 확인할 수 없습니다.');
-    return;
-  }
+//   if (response.ok) {
+//     const result = await response.json();
+//     const { likes } = result.data;
 
-  // 좋아요 상태에 따라 증가 또는 취소 함수 호출
-  const likeButton = document.getElementById('like-button');
-  if (likeButton.classList.contains('liked')) {
-    cancelLike(postId); // 좋아요 취소 함수 호출
-    likeButton.classList.remove('liked'); // 버튼 상태 변경
-  } else {
-    increaseLike(postId); // 좋아요 증가 함수 호출 (별도 구현됨)
-    likeButton.classList.add('liked'); // 버튼 상태 변경
-  }
-});
+//     likeButton.classList.remove('liked');
+//     likeButton.innerHTML = `${likes}<span>좋아요</span>`;
+//     showToast('좋아요 취소');
+//   } else if (response.status == 401) {
+//     alert('로그인이 필요합니다.');
+//     window.location.href = '/login';
+//   } else {
+//     alert('좋아요 요청 실패');
+//   }
+
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+// likeButton.addEventListener('click', async () => {
+//   const postId = new URLSearchParams(window.location.search).get('id');
+//   console.log(`post ID: ${postId}`);
+
+//   // 현재 상태 확인
+//   const isLiked = likeButton.classList.contains('liked');
+
+//   if (isLiked) {
+//     await removeLikes(postId);
+//   } else {
+//     await addLikes(postId);
+//   }
+// });

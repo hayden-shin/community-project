@@ -7,10 +7,7 @@
   text-align: left;
 }
 
-.dropdown-container {
-  display: flex;
 
-}
 
 .profile-image-wrapper {
   display: flex;
@@ -39,7 +36,7 @@
   transform: translate(-50%, -50%); /* 중앙 정렬 */
 
   background-color: rgba(0, 0, 0, 0.6); /* 반투명 배경 */
-  color: white;
+  color: white !important;
   padding: 5px 10px;
   border-radius: 2em;
   border: 1px solid white;

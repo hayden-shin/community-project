@@ -13,8 +13,13 @@
     <div class="container">
         <header>
             <button class="back-button" onclick="window.history.back()">&lt;</button>
-            <h1>아무 말 대잔치</h1>
+            <h1 id="header">아무 말 대잔치</h1>
             <img src="../assets/headerpic.png" alt="User Icon" class="header-profile-img">
+            <div class="dropdown" id="dropdown-menu">
+                <li id="profile-update">회원정보수정</li>
+                <li id="password-update">비밀번호수정</li>
+                <li id="logout">로그아웃</li>
+            </div>
         </header>
         <hr class="header-line" />
 
@@ -22,23 +27,23 @@
             <!-- 게시글 제목 작성-->
             <h2 class="form-title">게시글 수정</h2>
 
-            <form action="/" method="PUT" class="post-edit-form">
+            <form class="post-edit-form">
                 <div class="form-group">
                     <label for="title">제목 *</label>
-                    <input type="text" id="post-title" name="title" value="제목 1" maxlength="26" required />
+                    <input type="text" id="post-title" name="title" value="" maxlength="26" required />
                 </div>
     
                 <!-- 게시글 내용 작성 -->
                 <div class="form-group">
                     <label for="content">내용 *</label>
-                    <textarea id="post-content" name="content" rows="10" required>무엇을 이야기할까요? ...</textarea>
+                    <textarea id="post-text" name="text" rows="10" value="" required></textarea>
                     <span class="helper-text" id="post-edit-helper"></span>
                 </div>
     
                 <!-- 이미지 첨부 -->
                 <div class="form-group">
                     <label for="image">이미지</label>
-                    <input type="file" id="image-upload" name="image"/>
+                    <input type="file" id="image-url" name="image"/>
                     <img id="image-preview" style="display: none; max-width: 100%; max-height: 300px; margin-top: 10px;" alt="미리보기" />
                 </div>
     
@@ -48,8 +53,9 @@
 
         </section>
     </div>
-    <script src="../scripts/common.js"></script>
-    <script src="../scripts/post-edit.js"></script>
+    <script type="module" src="../scripts/common.js"></script>
+    <script type="module" src="../scripts/dropdown.js"></script>
+    <script type="module" src="../scripts/post-edit.js"></script>
 </body>
 
 </html>

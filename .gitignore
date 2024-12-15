@@ -1,3 +1,7 @@
+.gitignore
 data/
 public/scripts/common
 public/scripts/script.js
+api/
+components/
+public/scripts/likes.js

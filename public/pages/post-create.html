@@ -13,8 +13,13 @@
     <div class="container">
         <header>
             <button class="back-button" onclick="window.history.back()">&lt;</button>
-            <h1 class="title">아무 말 대잔치</h1>
+            <h1 id="header" class="title">아무 말 대잔치</h1>
             <img src="../assets/headerpic.png" alt="User Icon" class="header-profile-img">
+            <div class="dropdown" id="dropdown-menu">
+                <li id="profile-update">회원정보수정</li>
+                <li id="password-update">비밀번호수정</li>
+                <li id="logout">로그아웃</li>
+            </div>
         </header>
         <hr class="header-line"/>
 
@@ -33,18 +38,16 @@
 
             <div class="form-group">
                 <label for="post-image">이미지</label>
-                <input type="file" id="image-image-url">
-                <img id="image-preview" alt="이미지 미리보기" style="max-width: 100px; display: block; margin-top: 10px;">
+                <input type="file" id="image-url">
+                <img id="image-preview" alt="이미지 미리보기" style="max-width: 100px; display: none; margin-top: 10px;">
             </div>
 
             <button type="submit" class="submit-button" id="post-button">완료</button>
         </form>
     </div>
-    <script src="../scripts/common/api.js"></script>
-    <script src="../scripts/common/utils.js"></script>
-    <script src="../scripts/common/auth.js"></script>
-    <script src="../scripts/common/constants.js"></script>
-    <script src="../scripts/post-create.js"></script>
+    <script type="module" src="../scripts/post-create.js"></script>
+    <script type="module" src="../scripts/dropdown.js"></script>
+    <script type="module" src="../scripts/common.js"></script>
 </body>
 
 </html>
