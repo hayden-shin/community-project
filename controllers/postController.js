@@ -1,39 +1,46 @@
-const postModel = require('../models/postModel');
+import {
+  readPostsFromFile,
+  readCommentsFromFile,
+  writePostsToFile,
+} from '../models/postModel.js';
 
 // 새 게시글 생성
-exports.createPost = (req, res) => {
-  const { title, content, image_url } = req.body;
+export const createPost = async (req, res) => {
+  const { title, text } = req.body;
   const user = req.session?.user;
 
-  // 인증되지 않은 사용자인 경우
   if (!user) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  if (!title || !content) {
+  if (!title || !text) {
     return res.status(400).json({ message: 'invalid_request', data: null });
   }
 
   try {
-    const posts = postModel.readPostsFromFile();
+    let imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+
+    const posts = await readPostsFromFile();
 
     // 새 게시글 생성
     const newPost = {
       post_id: posts.length + 1,
       title,
-      content,
-      image_url: image_url || null,
+      text,
+      image_url: imageUrl,
       author_id: user.id,
       author_profile_url: user.profile_image,
       author_nickname: user.nickname,
       created_at: new Date().toISOString(),
       likes: 0,
       views: 0,
+      comments: 0,
       comment_ids: [],
+      liked_users: [],
     };
 
     posts.push(newPost);
-    postModel.writePostsToFile(posts);
+    writePostsToFile(posts);
 
     return res
       .status(201)
@@ -47,15 +54,15 @@ exports.createPost = (req, res) => {
 };
 
 // 특정 게시글 가져오기
-exports.getPostById = (req, res) => {
+export const getPostById = async (req, res) => {
   const postId = parseInt(req.params.post_id);
   console.log('Requested postId:', postId); // 요청된 post_id 로그
 
   try {
-    const posts = postModel.readPostsFromFile();
+    const posts = await readPostsFromFile();
     console.log('All posts:', posts); // 로그용 - 전체 포스트
 
-    const comments = postModel.readCommentsFromFile();
+    const comments = await readCommentsFromFile();
 
     const post = posts.find((p) => p.post_id === postId);
     console.log('Found post:', post); // 로그용 - 특정 포스트
@@ -71,11 +78,12 @@ exports.getPostById = (req, res) => {
 
     // 조회수 증가
     post.views += 1;
-    postModel.writePostsToFile(posts);
+    await writePostsToFile(posts);
 
+    console.log('Returning data:', { ...post, comments: postComments });
     res.status(200).json({
       message: 'post_retrieved',
-      data: { ...post, comments: postComments || [] },
+      data: { ...post, comments: postComments },
     });
   } catch (error) {
     console.error('게시글 가져오기 실패:', error);
@@ -83,51 +91,58 @@ exports.getPostById = (req, res) => {
   }
 };
 
-exports.editPost = (req, res) => {
-  const postId = parseInt(req.params.post_id);
+// 게시글 수정
+export const editPost = async (req, res) => {
+  const postId = parseInt(req.params.post_id, 10);
   console.log('수정 요청 게시글 ID: ', postId);
 
-  const { newTitle, newContent, newImageUrl } = req.body;
-  console.log('수정 요청 데이터: ', newTitle, newContent, newImageUrl);
+  const { title, text } = req.body;
+  const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+  console.log('수정 요청 데이터: ', title, text, imageUrl);
 
   try {
-    // 게시글 수정
-
     // posts.json 파일에서 게시글 불러오기
-    const posts = postModel.readPostsFromFile;
+    const posts = await readPostsFromFile();
 
     // 수정할 게시글 찾기
     const post = posts.find((p) => p.post_id === postId);
+    console.log(post);
 
     if (!post) {
       return res.status(404).json({ message: 'post_not_found', data: null });
     }
 
     const user = req.session?.user; // 현재 로그인한 사용자 정보
+    console.log('현재 로그인한 사용자: ', user);
+
     if (!user || post.author_id !== user.id) {
       return res.status(401).json({ message: 'no_permission', data: null });
     }
 
-    if (newTitle) post.title = newTitle;
-    if (newContent) post.content = newContent;
-    if (newImageUrl) post.image_url = newImageUrl;
-    post.updated_at = new Date().toISOString();
+    post.title = title;
+    post.text = text;
+    if (imageUrl) post.image_url = imageUrl;
 
-    postModel.writePostsToFile(posts);
+    if (title || text || imageUrl) {
+      post.updated_at = new Date().toISOString();
+    }
+
+    console.log(`Post ID: ${postId}, Image: ${imageUrl}, Title: ${title}`);
+
+    await writePostsToFile(posts);
 
     res.status(200).json({ message: 'post_updated', data: post });
-  } catch {
+  } catch (error) {
     console.log('댓글 수정 실패', error);
     res.status(500).json({ message: 'internal_server_error', data: null });
   }
 };
 
 // 모든 게시글 가져오기
-exports.getAllPosts = (req, res) => {
+export const getAllPosts = async (req, res) => {
   try {
-    const posts = postModel.readPostsFromFile();
+    const posts = await readPostsFromFile();
 
-    // Ensure all posts have consistent structure
     const sanitizedPosts = posts.map((post) => ({
       ...post,
       commentIds: post.commentIds || [],
@@ -142,19 +157,23 @@ exports.getAllPosts = (req, res) => {
 };
 
 // 게시글 삭제
-exports.deletePost = (req, res) => {
+export const deletePost = async (req, res) => {
   const postId = parseInt(req.params.post_id);
   const user = req.session?.user;
 
-  // 인증되지 않은 사용자인 경우
-  if (!user) {
+  console.log('삭제할 게시글 ID: ', postId);
+  console.log('게시글 삭제를 요청한 사용자: ', req.session?.user?.id);
+
+  if (!req.session.user) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const posts = postModel.readPostsFromFile();
+    const posts = await readPostsFromFile();
 
-    const postIndex = posts.findIndex((p) => p.post_id === postId);
+    const postIndex = posts.findIndex((p) => p.post_id == postId);
+    console.log('post INDEX: ', postIndex);
+
     if (postIndex === -1) {
       return res.status(404).json({ message: 'post_not_found', data: null });
     }
@@ -165,7 +184,7 @@ exports.deletePost = (req, res) => {
     }
 
     posts.splice(postIndex, 1);
-    postModel.writePostsToFile(posts);
+    await writePostsToFile(posts);
 
     res.status(204).send();
   } catch (error) {
@@ -174,101 +193,71 @@ exports.deletePost = (req, res) => {
   }
 };
 
-// 댓글 추가
-exports.addComment = (req, res) => {
-  const { post_id, content } = req.body;
-  const user = req.session?.user;
-
-  if (!user) {
-    return res.status(401).json({ message: 'unauthorized', data: null });
-  }
-
-  if (!post_id || !content) {
-    return res.status(400).json({ message: 'invalid_request', data: null });
-  }
-
+export const getLikeStatus = async (req, res) => {
+  const postId = parseInt(req.params.post_id, 10);
+  const userId = req.session?.user?.id;
   try {
-    const posts = postModel.readPostsFromFile();
-    const comments = postModel.readCommentsFromFile();
-
-    const post = posts.find((p) => p.post_id === post_id);
-    if (!post) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
-    }
-
-    const newComment = {
-      comment_id: comments.length + 1,
-      post_id,
-      content,
-      created_at: new Date().toISOString(),
-      author_id: user.id,
-      author_profile_url: user.profile_image,
-      author_nickname: user.nickname,
-    };
-
-    comments.push(newComment);
-    post.comment_ids.push(newComment.comment_id);
-
-    postModel.writeCommentsToFile(comments);
-    postModel.writePostsToFile(posts);
-
-    res.status(201).json({ message: 'comment_created', data: newComment });
-  } catch (error) {
-    console.error('댓글 추가 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
-  }
-};
-
-// 좋아요 증감
-exports.likePost = (req, res) => {
-  const postId = parseInt(req.params.post_id);
-
-  try {
-    const posts = postModel.readPostsFromFile();
+    const posts = await readPostsFromFile();
     const post = posts.find((p) => p.post_id === postId);
-    if (!post) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
-    }
 
-    if (liked) {
-      // 좋아요 취소 = 좋아요 -1
-      post.likes -= 1;
-      postModel.writePostsToFile(posts);
-      res
-        .status(200)
-        .json({ message: 'like_updated', data: { likes: post.likes } });
-    } else {
-      // 좋아요 +1
-      post.likes += 1;
-      postModel.writePostsToFile(posts);
-      res
-        .status(200)
-        .json({ message: 'like_updated', data: { likes: post.likes } });
-    }
-  } catch (error) {
-    console.error('Like update failed:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
-  }
-};
-
-exports.unlikePost = (req, res) => {
-  const postId = parseInt(req.params.post_id);
-
-  try {
-    const posts = postModel.readPostsFromFile();
-    const post = posts.find((p) => p.post_id === postId);
-    if (!post) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
-    }
-
-    post.likes -= 1;
-    postModel.writePostsToFile(posts);
+    const isLiked = post.liked_users?.includes(userId) || false;
 
     res
       .status(200)
-      .json({ message: 'like_updated', data: { likes: post.likes } });
+      .json({ message: 'Like status retrieved', data: { isLiked } });
   } catch (error) {
-    console.error('Like update failed:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.log(`좋아요 상태 확인 실패: ${error}`);
+    res.status(500).json({ message: 'Internal server error', data: null });
+  }
+};
+
+export const toggleLikePost = async (req, res) => {
+  const postId = parseInt(req.params.post_id, 10);
+  const userId = req.session?.user?.id;
+
+  if (!postId) {
+    return res.status(400).json({ message: 'Invalid post ID', data: null });
+  }
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized', data: null });
+  }
+
+  try {
+    const posts = await readPostsFromFile();
+    const post = posts.find((p) => p.post_id === postId);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found', data: null });
+    }
+
+    // 좋아요 상태 토글
+    if (!Array.isArray(post.liked_users)) {
+      post.liked_users = [];
+    }
+
+    const isLiked = post.liked_users.includes(userId);
+
+    if (isLiked) {
+      // 좋아요 취소
+      post.liked_users = post.liked_users.filter((id) => id !== userId);
+      post.likes -= 1;
+    } else {
+      // 좋아요 추가
+      post.liked_users.push(userId);
+      post.likes += 1;
+    }
+
+    await writePostsToFile(posts);
+
+    res.status(200).json({
+      message: 'like toggled',
+      data: {
+        likes: post.likes,
+        isLiked: !isLiked, // 현재 좋아요 상태 반환
+      },
+    });
+  } catch (error) {
+    console.error('좋아요 토글 실패:', error);
+    res.status(500).json({ message: 'Internal server error', data: null });
   }
 };

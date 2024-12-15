@@ -1,17 +1,23 @@
-const express = require('express');
-const router = express.Router();
-const commentController = require('../controllers/commentController');
+import express from 'express';
+import {
+  createComment,
+  getCommentsByPostId,
+  updateComment,
+  deleteComment,
+} from '../controllers/commentController.js';
+
+const router = express.Router({ mergeParams: true });
 
 // 댓글 생성
-router.post('/', commentController.createComment);
+router.post('/', createComment);
 
 // 특정 게시글의 댓글 가져오기
-router.get('/', commentController.getCommentsByPostId);
+router.get('/', getCommentsByPostId);
 
 // 댓글 수정
-router.patch('/:comment_id', commentController.updateComment);
+router.patch('/:comment_id', updateComment);
 
 // 댓글 삭제
-router.delete('/:comment_id', commentController.deleteComment);
+router.delete('/:comment_id', deleteComment);
 
-module.exports = router;
+export default router;

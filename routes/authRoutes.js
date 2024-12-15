@@ -1,15 +1,16 @@
-const express = require('express');
-const {
+import express from 'express';
+import {
   signup,
   login,
   logout,
   deleteAccount,
-} = require('../controllers/userController');
+} from '../controllers/userController.js';
+import { upload } from '../middlewares/upload.js';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 // 회원가입
-router.post('/signup', signup);
+router.post('/signup', upload, signup);
 
 // 로그인
 router.post('/login', login);
@@ -18,6 +19,6 @@ router.post('/login', login);
 router.post('/logout', logout);
 
 // 회원 탈퇴
-router.delete('/:user_id', deleteAccount);
+router.delete('/account', deleteAccount);
 
-module.exports = router;
+export default router;
