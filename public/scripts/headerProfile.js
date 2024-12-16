@@ -19,24 +19,28 @@ async function fetchUserProfile() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 현재 페이지의 URL 확인
-  const currentPage = window.location.pathname;
+  // const currentPage = window.location.pathname;
 
-  // 로그인 및 회원가입 페이지는 제외
-  if (currentPage.includes('login') || currentPage.includes('signup')) {
-    return; // 아무 작업도 하지 않음
-  }
+  // // 로그인 및 회원가입 페이지는 제외
+  // if (currentPage.includes('login') || currentPage.includes('signup')) {
+  //   return; // 아무 작업도 하지 않음
+  // }
 
   try {
     const userProfile = await fetchUserProfile();
+    console.log('userProfile.profileImage:', userProfile.profileImage);
 
     if (userProfile) {
       const headerProfileImage = document.getElementById(
         'header-profile-image'
       );
       if (headerProfileImage) {
-        headerProfileImage.src =
-          `${SERVER_URL}${userProfile.profileImage}` ||
-          `${SERVER_URL}/assets/default-profile.jpg`;
+        if (userProfile.profileImage) {
+          headerProfileImage.src = `${SERVER_URL}${userProfile.profileImage}`;
+        } else {
+          // 기본 프로필 이미지 경로 사용
+          headerProfileImage.src = `${SERVER_URL}/assets/default-profile.jpg`;
+        }
       }
     }
   } catch (error) {
