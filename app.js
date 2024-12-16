@@ -9,6 +9,13 @@ const __dirname = path.resolve();
 // 정적 파일 제공을 위한 미들웨어 설정
 app.use(express.static(path.join(__dirname, 'public')));
 
+// utils 폴더를 정적 파일로 제공
+app.use('/utils', express.static(path.join(__dirname, 'utils')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pages/login.html'));
+});
+
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pages/login.html'));
 });
