@@ -3,6 +3,7 @@ import {
   getUserProfile,
   updateProfile,
   updatePassword,
+  getAuthorProfile,
 } from '../controllers/userController.js';
 
 import { upload } from '../middlewares/upload.js';
@@ -17,5 +18,8 @@ router.patch('/profile', upload, updateProfile);
 
 // 비밀번호 변경
 router.patch('/password', updatePassword);
+
+// 작성자 정보 가져오기
+router.get('/:author_id', getAuthorProfile);
 
 export default router;

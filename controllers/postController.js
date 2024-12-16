@@ -29,7 +29,7 @@ export const createPost = async (req, res) => {
       text,
       image_url: imageUrl,
       author_id: user.id,
-      author_profile_url: user.profile_image,
+      author_profile_url: user.profile_image || '/assets/default-profile.jpg',
       author_nickname: user.nickname,
       created_at: new Date().toISOString(),
       likes: 0,
@@ -189,6 +189,36 @@ export const deletePost = async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error('게시글 삭제 실패:', error);
+    res.status(500).json({ message: 'internal_server_error', data: null });
+  }
+};
+
+// 작성자 프로필 정보 가져오기
+export const getAuthorProfile = async (req, res) => {
+  const authorId = parseInt(req.params.author_id, 10);
+
+  if (!authorId) {
+    return res.status(400).json({ message: 'invalid_author_id', data: null });
+  }
+
+  try {
+    const users = await readUsersFromFile();
+    const author = users.find((user) => user.id === authorId);
+
+    if (!author) {
+      return res.status(404).json({ message: 'author_not_found', data: null });
+    }
+
+    // 작성자 프로필 정보 반환
+    res.status(200).json({
+      message: 'author_profile_retrieved',
+      data: {
+        nickname: author.nickname,
+        profile_url: author.profile_url || '/assets/default-profile.jpg',
+      },
+    });
+  } catch (error) {
+    console.error('작성자 프로필 정보 가져오기 실패:', error);
     res.status(500).json({ message: 'internal_server_error', data: null });
   }
 };
