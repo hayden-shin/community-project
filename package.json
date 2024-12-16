@@ -13,6 +13,6 @@
   "description": "",
   "dependencies": {
     "express": "^4.21.1",
-    "lottie-web": "^5.12.2",
+    "lottie-web": "^5.12.2"
   }
 }
