@@ -16,8 +16,8 @@ export const signup = async (req, res) => {
 
   // 프로필 이미지 처리
   let profileUrl = req.file
-    ? `${SERVER_URL}/assets/${req.file.filename}`
-    : `${SERVER_URL}/assets/default-profile.jpg`;
+    ? `/assets/${req.file.filename}`
+    : `/assets/default-profile.jpg`;
 
   try {
     const users = await readUsersFromFile();
@@ -129,14 +129,13 @@ export const getUserProfile = async (req, res) => {
   try {
     const users = await readUsersFromFile();
     const user = users.find((u) => u.id === userId);
-    // 유저 정보 반환
+
     res.status(200).json({
       message: 'user_profile_retrieved',
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileImage:
-          user.profile_url || `${SERVER_URL}/assets/default-profile.jpg`, // 기본 프로필 이미지 제공
+        profileUrl: `${SERVER_URL}${user.profile_url || '/assets/default-profile.jpg'}`,
       },
     });
   } catch (error) {
@@ -148,9 +147,9 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
   const { newEmail, newNickname } = req.body;
-  const newProfileImage = req.file
-    ? `${SERVER_URL}/assets/${req.file.filename}`
-    : null;
+  const newProfileUrl = req.file
+    ? `/assets/${req.file.filename}`
+    : `/assets/default-profile.jpg`;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
@@ -165,7 +164,7 @@ export const updateProfile = async (req, res) => {
 
     if (newEmail) user.email = newEmail;
     if (newNickname) user.nickname = newNickname;
-    if (newProfileImage) user.profile_url = newProfileImage;
+    if (newProfileUrl) user.profile_url = newProfileUrl;
 
     await writeUsersToFile(users);
     res.status(200).json({ message: 'profile updated', data: null });
@@ -236,35 +235,5 @@ export const deleteAccount = async (req, res) => {
   } catch (error) {
     console.error('회원 탈퇴 실패:', error);
     res.status(500).json({ message: 'internal server error', data: null });
-  }
-};
-
-// 작성자 프로필 정보 가져오기
-export const getAuthorProfile = async (req, res) => {
-  const authorId = parseInt(req.params.author_id, 10);
-
-  if (!authorId) {
-    return res.status(400).json({ message: 'invalid_author_id', data: null });
-  }
-
-  try {
-    const users = await readUsersFromFile();
-    const author = users.find((user) => user.id === authorId);
-
-    if (!author) {
-      return res.status(404).json({ message: 'author_not_found', data: null });
-    }
-
-    // 작성자 프로필 정보 반환
-    res.status(200).json({
-      message: 'author_profile_retrieved',
-      data: {
-        nickname: author.nickname,
-        profile_url: author.profile_url || '/assets/default-profile.jpg',
-      },
-    });
-  } catch (error) {
-    console.error('작성자 프로필 정보 가져오기 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
   }
 };
