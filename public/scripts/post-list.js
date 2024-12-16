@@ -1,4 +1,4 @@
-import { formatDateTime, formatNumber } from './format.js';
+import { formatDateTime, formatNumber } from '../../utils/format.js';
 
 // 게시글 리스트 새로고침
 export const refreshPostList = async () => {
@@ -36,7 +36,7 @@ const renderPosts = (postsData) => {
       title,
       content,
       author_id,
-      author_profile_url = 'assets/default-profile.jpg',
+      author_profile_url = '/assets/default-profile.jpg',
       author_nickname,
       created_at,
       likes,

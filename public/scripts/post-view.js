@@ -1,6 +1,7 @@
 import { updateCommentCount } from './comment.js';
 import { showToast, showModal } from './common.js';
-import { formatDateTime, formatNumber } from './format.js';
+import { formatDateTime, formatNumber } from '../../utils/format.js';
+import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
 const backButton = document.getElementById('back-button');
 const editPostButton = document.getElementById('edit-post-button');
@@ -13,6 +14,8 @@ const toggleButtonState = (button, enabled) => {
   button.disabled = !enabled;
   button.style.backgroundColor = enabled ? '#7F6AEE' : '#ACA0EB';
 };
+
+const SERVER_URL = 'http://localhost:3000';
 
 // 게시글 조회
 async function viewPost(postId) {
@@ -51,7 +54,7 @@ async function viewPost(postId) {
   }
 }
 
-function renderPost(postData) {
+async function renderPost(postData) {
   document.getElementById('post-title').textContent = postData.title;
   document.getElementById('post-author').textContent = postData.author_nickname;
   document.getElementById('post-date').textContent = formatDateTime(
@@ -59,11 +62,27 @@ function renderPost(postData) {
   );
   document.getElementById('post-text').innerHTML = postData.text;
 
-  console.log('Post Data:', postData); // postData가 올바른지 확인
+  console.log('Post Data:', postData); // postData 확인
 
+  // 작성자 프로필 정보 가져오기
+  const authorImage = document.getElementById('author-image');
+  const postAuthor = document.getElementById('post-author');
+
+  const authorProfile = await fetchUserProfile(postData.author_id);
+  authorImage.src = `${SERVER_URL}${postData.imageUrl}`;
+  postAuthor.textContent = authorProfile.nickname;
+
+  if (postData.authorProfileUrl) {
+    authorImage.src = postData.authorProfileUrl;
+    authorImage.style.display = 'block';
+  } else {
+    authorImage.src = `${SERVER_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
+  }
+
+  // 게시글 이미지 렌더링
   const postImage = document.getElementById('post-image');
   if (postData.image_url) {
-    postImage.src = `http://localhost:3000${postData.image_url}`;
+    postImage.src = `${SERVER_URL}${postData.image_url}`;
     postImage.style.display = 'block';
   } else {
     postImage.style.display = 'none';
@@ -78,41 +97,35 @@ function renderPost(postData) {
     `${formatNumber(postData.comment_ids.length)}<span>댓글</span>`;
 }
 
-function renderComments(comments) {
+async function renderComments(comments) {
   const commentList = document.getElementById('comment-list');
   commentList.innerHTML = ''; // 기존 내용을 초기화
 
-  // 댓글 데이터 렌더링
-  comments.forEach(
-    ({
-      author_profile_url = '/assets/default-profile.jpg',
-      author_nickname = '익명',
-      created_at = new Date().toISOString(),
-      text = '',
-      comment_id,
-    }) => {
-      const commentElement = document.createElement('div');
-      commentElement.classList.add('comment');
-      commentElement.setAttribute('data-comment-id', comment_id);
+  for (const comment of comments) {
+    const commentElement = document.createElement('div');
+    commentElement.classList.add('comment');
+    commentElement.setAttribute('data-comment-id', comment.comment_id);
 
-      commentElement.innerHTML = `
+    // 댓글 작성자 프로필 정보 가져오기
+    const author = await fetchUserProfile(comment.author_id);
+
+    commentElement.innerHTML = `
         <div class="comment-header">
           <div class="comment-author">
-            <img src="${author_profile_url}" alt="User Icon" class="author-img">
-            <span class="comment-author">${author_nickname}</span>
-            <span class="comment-date">${formatDateTime(created_at)}</span>
+            <img src="${SERVER_URL}${author.profileUrl}" alt="User Icon" class="author-img">
+            <span class="comment-author">${author.nickname}</span>
+            <span class="comment-date">${formatDateTime(comment.created_at)}</span>
           </div>
           <div class="comment-buttons">
             <button class="edit-comment-button">수정</button>
             <button class="delete-comment-button">삭제</button>
           </div>
         </div>
-        <p class="comment-text">${text}</p>
+        <p class="comment-text">${comment.text}</p>
       `;
 
-      commentList.appendChild(commentElement);
-    }
-  );
+    commentList.appendChild(commentElement);
+  }
   updateCommentCount();
 }
 

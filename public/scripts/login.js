@@ -1,5 +1,25 @@
 import { isValidEmail, isValidPassword } from './common.js';
 
+// 로티 애니메이션 표시
+function showSuccessAnimation() {
+  const successContainer = document.getElementById('success-container');
+  successContainer.style.display = 'flex';
+
+  // Lottie 애니메이션 로드
+  lottie.loadAnimation({
+    container: document.getElementById('lottie-success'), // 애니메이션 컨테이너
+    renderer: 'svg', // 렌더링 방식
+    loop: false, // 반복 여부
+    autoplay: true, // 자동 재생
+    path: '/assets/Lottie.json',
+  });
+
+  // 3초 후 메인 페이지로 이동
+  setTimeout(() => {
+    window.location.href = '/post-list';
+  }, 3000);
+}
+
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginButton = document.getElementById('login-button');
@@ -49,12 +69,13 @@ async function login(email, password) {
         credentials: 'include',
       });
 
-      if (response.status === 200) {
+      if (response.ok) {
         const result = await response.json();
 
         console.log('로그인 응답:', result.data);
-        alert(`로그인 성공! 환영합니다, ${result.data.nickname}님.`);
-        window.location.href = '/post-list';
+        // alert(`로그인 성공! 환영합니다, ${result.data.nickname}님.`);
+        showSuccessAnimation(); // 로그인 성공 시 애니메이션 표시
+        // window.location.href = '/post-list';
       } else if (response.status === 400) {
         const result = await response.json();
         alert('로그인 실패: ' + result.message);

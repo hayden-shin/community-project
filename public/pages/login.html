@@ -6,6 +6,36 @@
     <title>로그인</title>
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/login.css">
+    <!-- Lottie CDN 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    <style>
+        /* 성공 화면 스타일 */
+        #success-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        #lottie-success {
+            width: 50%;
+            height: 50%;
+            transform: scale(0.5); /* Lottie 애니메이션의 크기 비율 조정 */
+        }
+
+        #success-text {
+            font-size: 2rem;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -33,6 +63,12 @@
             </form>
             <a href="/signup" class="link">회원가입</a>
         </section>
+    </div>
+
+    <!-- 로그인 성공 애니메이션 -->
+    <div id="success-container" style="display: none;">
+        <div id="lottie-success"></div>
+        <div id="success-text">로그인 성공!</div>
     </div>
 
     <script type="module" src="../scripts/common.js"></script>
