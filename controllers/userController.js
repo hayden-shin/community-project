@@ -16,8 +16,8 @@ export const signup = async (req, res) => {
 
   // 프로필 이미지 처리
   let profileUrl = req.file
-    ? `${SERVER_URL}/assets/${req.file.filename}`
-    : `${SERVER_URL}/assets/default-profile.jpg`;
+    ? `/assets/${req.file.filename}`
+    : `/assets/default-profile.jpg`;
 
   try {
     const users = await readUsersFromFile();
@@ -129,14 +129,13 @@ export const getUserProfile = async (req, res) => {
   try {
     const users = await readUsersFromFile();
     const user = users.find((u) => u.id === userId);
-    // 유저 정보 반환
+
     res.status(200).json({
       message: 'user_profile_retrieved',
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileImage:
-          user.profile_url || `${SERVER_URL}/assets/default-profile.jpg`, // 기본 프로필 이미지 제공
+        profileUrl: `${SERVER_URL}${user.profile_url || '/assets/default-profile.jpg'}`,
       },
     });
   } catch (error) {
@@ -148,9 +147,9 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
   const { newEmail, newNickname } = req.body;
-  const newProfileImage = req.file
-    ? `${SERVER_URL}/assets/${req.file.filename}`
-    : null;
+  const newProfileUrl = req.file
+    ? `/assets/${req.file.filename}`
+    : `/assets/default-profile.jpg`;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
@@ -165,7 +164,7 @@ export const updateProfile = async (req, res) => {
 
     if (newEmail) user.email = newEmail;
     if (newNickname) user.nickname = newNickname;
-    if (newProfileImage) user.profile_url = newProfileImage;
+    if (newProfileUrl) user.profile_url = newProfileUrl;
 
     await writeUsersToFile(users);
     res.status(200).json({ message: 'profile updated', data: null });
