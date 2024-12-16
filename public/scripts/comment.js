@@ -1,6 +1,8 @@
 import { showModal, showToast } from './common.js';
 import { formatDateTime } from './format.js';
 
+const SERVER_URL = 'http://localhost:3000';
+
 export const updateCommentCount = (postId) => {
   const commentList = document.getElementById(`comment-list`);
   const commentCountElement = document.getElementById(`comment-count`);
@@ -69,11 +71,17 @@ const renderComment = (commentData) => {
 
   const commentElement = document.createElement('div');
   commentElement.classList.add('comment');
-  commentElement.setAttribute('data-comment-id', commentData.comment_id); // 댓글 ID 추가
+  commentElement.setAttribute('data-comment-id', commentData.comment_id);
+
+  // 절대경로로 프로필 이미지 설정
+  const profileImageUrl = commentData.author_profile_url
+    ? `${SERVER_URL}${commentData.author_profile_url}`
+    : `${SERVER_URL}/assets/default-profile.jpg`;
+
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-author">
-        <img src="${commentData.author_profile_url || '/assets/default-profile.jpg'}" alt="User Icon" class="author-img">
+        <img src="${profileImageUrl}" alt="User Icon" class="author-img">
         <span class="comment-author">${commentData.author_nickname}</span>
         <span class="comment-date">${formatDateTime(commentData.created_at)}</span>
       </div>
