@@ -1,5 +1,5 @@
 import { showModal, showToast } from './common.js';
-import { formatDateTime } from './format.js';
+import { formatDateTime } from '../../utils/format.js';
 
 const SERVER_URL = 'http://localhost:3000';
 

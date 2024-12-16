@@ -1,4 +1,5 @@
 import { showModal, closeModal } from './common.js';
+import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('email').value = userProfile.email;
       document.getElementById('nickname').value = userProfile.nickname;
       document.getElementById('profile-image-preview').src =
-        userProfile.profileImage;
+        userProfile.profileUrl;
     } else {
       console.log('userProfile이 없습니다.');
     }
@@ -38,24 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
     }
   };
-
-  async function fetchUserProfile() {
-    try {
-      const response = await fetch(`http://localhost:3000/users/profile`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        return result.data;
-      } else {
-        alert('오류 발생');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   // 로그아웃 요청
   async function logout() {
@@ -94,12 +77,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 프로필 업데이트
-  async function updateProfile(newEmail, newNickname, newProfileImage) {
+  async function updateProfile(newEmail, newNickname, newProfileUrl) {
     try {
       const formData = new FormData();
       if (newEmail) formData.append('newEmail', newEmail);
       if (newNickname) formData.append('newNickname', newNickname);
-      if (newProfileImage) formData.append('image', newProfileImage);
+      if (newProfileUrl) formData.append('image', newProfileUrl);
 
       const response = await fetch(`http://localhost:3000/users/profile`, {
         method: 'PATCH',
@@ -126,18 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error(error);
     }
   }
-
-  // 프로필 수정 버튼과 이벤트 연결
-  const updateProfileButton = document.getElementById('update-profile-button');
-  updateProfileButton.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    const newNickname = document.getElementById('nickname').value.trim();
-    const newEmail = document.getElementById('email').value.trim();
-    const newProfileImage = document.getElementById('profile-image-upload')
-      .files[0];
-    updateProfile(newEmail, newNickname, newProfileImage);
-  });
 
   // 회원 탈퇴
   async function deleteAccount() {
@@ -167,43 +138,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   }
-
-  // 프로필 이미지 미리보기
-  const profileImageUpload = document.getElementById('profile-image-upload');
-  const profileImagePreview = document.getElementById('profile-image-preview');
-
-  profileImageUpload.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        profileImagePreview.src = e.target.result; // 미리보기 이미지 업데이트
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // 수정 완료 버튼 클릭시 post-list로 이동
-  const editConfirmButton = document.getElementById('edit-confirm-button');
-  editConfirmButton.addEventListener('click', () => {
-    window.location.href = '/post-list';
-  });
-
-  const deleteAccountButton = document.getElementById('delete-account-button');
-  deleteAccountButton.addEventListener('click', () => {
-    showModal('정말 계정을 삭제하시겠습니까?', () => {
-      deleteAccount();
-    });
-  });
-
-  modalCancelButton.addEventListener('click', closeModal);
-  // modalConfirmButton.addEventListener('click', confirmDeleteAccount);
-  modalConfirmButton.addEventListener('click', () => {
-    confirmDeleteAccount();
-    closeModal();
-  });
-
-  const confirmDeleteAccount = () => {
-    deleteAccount();
-  };
 });
+
+// 프로필 수정 버튼과 이벤트 연결
+const updateProfileButton = document.getElementById('update-profile-button');
+updateProfileButton.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const newNickname = document.getElementById('nickname').value.trim();
+  const newEmail = document.getElementById('email').value.trim();
+  const newProfileUrl = document.getElementById('profile-image-upload')
+    .files[0];
+  updateProfile(newEmail, newNickname, newProfileUrl);
+});
+
+// 프로필 이미지 미리보기
+const profileImageUpload = document.getElementById('profile-image-upload');
+const profileImagePreview = document.getElementById('profile-image-preview');
+
+profileImageUpload.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImagePreview.src = e.target.result; // 미리보기 이미지 업데이트
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// 수정 완료 버튼 클릭시 post-list로 이동
+const editConfirmButton = document.getElementById('edit-confirm-button');
+editConfirmButton.addEventListener('click', () => {
+  window.location.href = '/post-list';
+});
+
+const deleteAccountButton = document.getElementById('delete-account-button');
+deleteAccountButton.addEventListener('click', () => {
+  showModal('정말 계정을 삭제하시겠습니까?', () => {
+    deleteAccount();
+  });
+});
+
+modalCancelButton.addEventListener('click', closeModal);
+// modalConfirmButton.addEventListener('click', confirmDeleteAccount);
+modalConfirmButton.addEventListener('click', () => {
+  confirmDeleteAccount();
+  closeModal();
+});
+
+const confirmDeleteAccount = () => {
+  deleteAccount();
+};

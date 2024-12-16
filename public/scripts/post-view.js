@@ -1,6 +1,7 @@
 import { updateCommentCount } from './comment.js';
 import { showToast, showModal } from './common.js';
-import { formatDateTime, formatNumber } from './format.js';
+import { formatDateTime, formatNumber } from '../../utils/format.js';
+import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
 const backButton = document.getElementById('back-button');
 const editPostButton = document.getElementById('edit-post-button');
@@ -67,11 +68,12 @@ async function renderPost(postData) {
   const authorImage = document.getElementById('author-image');
   const postAuthor = document.getElementById('post-author');
 
-  const authorProfile = await fetchAuthorProfile(postData.author_id);
-  authorImage.src = `${SERVER_URL}${postData.image_url}`;
+  const authorProfile = await fetchUserProfile(postData.author_id);
+  authorImage.src = `${SERVER_URL}${postData.imageUrl}`;
   postAuthor.textContent = authorProfile.nickname;
-  if (postData.author_profile_url) {
-    authorImage.src = `${SERVER_URL}${postData.author_profile_url}`;
+
+  if (postData.authorProfileUrl) {
+    authorImage.src = postData.authorProfileUrl;
     authorImage.style.display = 'block';
   } else {
     authorImage.src = `${SERVER_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
@@ -105,13 +107,13 @@ async function renderComments(comments) {
     commentElement.setAttribute('data-comment-id', comment.comment_id);
 
     // 댓글 작성자 프로필 정보 가져오기
-    const authorProfile = await fetchAuthorProfile(comment.author_id);
+    const author = await fetchUserProfile(comment.author_id);
 
     commentElement.innerHTML = `
         <div class="comment-header">
           <div class="comment-author">
-            <img src="${SERVER_URL}${authorProfile.profile_url}" alt="User Icon" class="author-img">
-            <span class="comment-author">${authorProfile.nickname}</span>
+            <img src="${SERVER_URL}${author.profileUrl}" alt="User Icon" class="author-img">
+            <span class="comment-author">${author.nickname}</span>
             <span class="comment-date">${formatDateTime(comment.created_at)}</span>
           </div>
           <div class="comment-buttons">
@@ -159,33 +161,6 @@ async function deletePost(postId) {
     console.error('게시글 삭제 요청 실패:', error);
     alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
-}
-
-// 작성자 프로필 정보 가져오기
-async function fetchAuthorProfile(authorId) {
-  try {
-    const response = await fetch(`${SERVER_URL}/users/${authorId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return result.data;
-    } else if (response.status === 404) {
-      console.error('작성자 정보를 찾을 수 없습니다.');
-    } else {
-      console.error('작성자 프로필 정보를 가져올 수 없습니다.');
-    }
-  } catch (error) {
-    console.error('작성자 프로필 가져오기 실패:', error);
-  }
-
-  return {
-    nickname: '익명',
-    profile_url: `${SERVER_URL}/assets/default-profile.jpg`,
-  };
 }
 
 const likeButton = document.getElementById('like-button');
