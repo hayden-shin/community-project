@@ -62,7 +62,7 @@ async function login(email, password) {
 
   if (isValidEmail(email) && isValidPassword(password)) {
     try {
-      const response = await fetch('${SERVER_URL}/auth/login', {
+      const response = await fetch(`${SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
