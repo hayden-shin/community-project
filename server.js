@@ -14,7 +14,7 @@ const app = express();
 const PORT = 3000;
 
 // DB
-import conn from './database/connect/maria.js';
+//import conn from './database/connect/maria.js';
 
 // CORS 설정
 const corsOptions = {
