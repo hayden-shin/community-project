@@ -4,7 +4,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
-const SERVER_URL = 'http://localhost:3000';
+const SERVER_URL = 'http://3.38.209.206:3000';
 
 // 회원가입
 export const signup = async (req, res) => {
