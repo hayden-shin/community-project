@@ -45,7 +45,7 @@ async function createPost(title, text, imageFile = null) {
     formData.append('text', text);
     if (imageFile) formData.append('image', imageFile);
 
-    const response = await fetch('${SERVER_URL}/posts', {
+    const response = await fetch(`${SERVER_URL}/posts`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
