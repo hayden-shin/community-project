@@ -1,7 +1,7 @@
 import { showModal, showToast } from './common.js';
 import { formatDateTime } from '../../utils/format.js';
 
-const SERVER_URL = 'http://localhost:3000';
+const SERVER_URL = 'http://3.38.209.206:3000';
 
 export const updateCommentCount = (postId) => {
   const commentList = document.getElementById(`comment-list`);
@@ -27,7 +27,7 @@ const createComment = async (postId) => {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments`,
+      `${SERVER_URL}/posts/${postId}/comments`,
       {
         method: 'POST',
         headers: {
@@ -107,7 +107,7 @@ const editComment = async (postId, commentId, newText) => {
   try {
     // 댓글 수정 요청
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments/${commentId}`,
+      `${SERVER_URL}/posts/${postId}/comments/${commentId}`,
       {
         method: 'PATCH',
         headers: {
@@ -157,7 +157,7 @@ const editComment = async (postId, commentId, newText) => {
 const deleteComment = async (postId, commentId) => {
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments/${commentId}`,
+      `${SERVER_URL}/posts/${postId}/comments/${commentId}`,
       {
         method: 'DELETE',
         credentials: 'include',
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments`
+      `${SERVER_URL}/posts/${postId}/comments`
     );
     if (!response.ok) {
       throw new Error('댓글 데이터를 가져올 수 없습니다.');
