@@ -16,9 +16,11 @@ const PORT = 3000;
 // DB
 //import conn from './database/connect/maria.js';
 
+const SERVER_URL = 3.38.209.206;
+
 // CORS 설정
 const corsOptions = {
-  origin: 'http://localhost:2000',
+  origin: `http://${SERVER_URL}:2000`,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-USER-ID'],
   credentials: true,
@@ -51,7 +53,7 @@ app.use(cookieParser());
 
 // OPTIONS 요청 예외처리
 app.use('*', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:2000');
+  res.header('Access-Control-Allow-Origin', `http://${SERVER_URL}:2000`);
   res.header(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, PATCH, OPTIONS'
