@@ -113,7 +113,7 @@ async function signup(profileImage, email, password, nickname) {
   }
 
   try {
-    const response = await fetch('${SERVER_URL}/auth/signup', {
+    const response = await fetch(`${SERVER_URL}/auth/signup`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
