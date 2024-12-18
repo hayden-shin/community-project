@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 const titleInput = document.getElementById('post-title');
 const textInput = document.getElementById('post-content');
 const postButton = document.getElementById('post-button');
@@ -43,7 +45,7 @@ async function createPost(title, text, imageFile = null) {
     formData.append('text', text);
     if (imageFile) formData.append('image', imageFile);
 
-    const response = await fetch('http://localhost:3000/posts', {
+    const response = await fetch('${SERVER_URL}/posts', {
       method: 'POST',
       credentials: 'include',
       body: formData,
