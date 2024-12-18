@@ -17,8 +17,6 @@ const toggleButtonState = (button, enabled) => {
   button.style.backgroundColor = enabled ? '#7F6AEE' : '#ACA0EB';
 };
 
-const SERVER_URL = '${SERVER_URL}';
-
 // 게시글 조회
 async function viewPost(postId) {
   try {
