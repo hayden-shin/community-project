@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { isValidPassword } from './common.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -73,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/users/password`, {
+      const response = await fetch(`${SERVER_URL}/users/password`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
