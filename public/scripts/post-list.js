@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { formatDateTime, formatNumber } from '../../utils/format.js';
 
 // 게시글 리스트 새로고침
@@ -78,7 +80,7 @@ const renderPosts = (postsData) => {
 async function postList() {
   try {
     // API 호출: 게시글 목록 요청
-    const response = await fetch(`http://localhost:3000/posts`, {
+    const response = await fetch(`${SERVER_URL}/posts`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
