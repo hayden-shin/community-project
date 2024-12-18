@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { isValidEmail, isValidPassword } from './common.js';
 
 const checkAllValid = () => {
@@ -111,7 +113,7 @@ async function signup(profileImage, email, password, nickname) {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/auth/signup', {
+    const response = await fetch('${SERVER_URL}/auth/signup', {
       method: 'POST',
       credentials: 'include',
       body: formData,
