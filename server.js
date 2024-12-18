@@ -16,7 +16,7 @@ const PORT = 3000;
 // DB
 //import conn from './database/connect/maria.js';
 
-const SERVER_URL = 3.38.209.206;
+const SERVER_URL = '3.38.209.206';
 
 // CORS 설정
 const corsOptions = {
