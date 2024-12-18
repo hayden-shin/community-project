@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { isValidEmail, isValidPassword } from './common.js';
 
 // 로티 애니메이션 표시
@@ -60,7 +62,7 @@ async function login(email, password) {
 
   if (isValidEmail(email) && isValidPassword(password)) {
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch('${SERVER_URL}/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
