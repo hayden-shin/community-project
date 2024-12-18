@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { updateCommentCount } from './comment.js';
 import { showToast, showModal } from './common.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
@@ -15,12 +17,12 @@ const toggleButtonState = (button, enabled) => {
   button.style.backgroundColor = enabled ? '#7F6AEE' : '#ACA0EB';
 };
 
-const SERVER_URL = 'http://localhost:3000';
+const SERVER_URL = '${SERVER_URL}';
 
 // 게시글 조회
 async function viewPost(postId) {
   try {
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${SERVER_URL}/posts/${postId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -133,7 +135,7 @@ async function renderComments(comments) {
 async function deletePost(postId) {
   console.log('삭제할 게시글 ID: ', postId);
   try {
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${SERVER_URL}/posts/${postId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -168,7 +170,7 @@ const likeButton = document.getElementById('like-button');
 export async function fetchLikeStatus(postId, likeButton) {
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
+      `${SERVER_URL}/posts/${postId}/likes`,
       {
         method: 'GET',
         credentials: 'include',
@@ -202,7 +204,7 @@ export async function fetchLikeStatus(postId, likeButton) {
 async function addLikes(postId) {
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
+      `${SERVER_URL}/posts/${postId}/likes`,
       {
         method: 'POST',
         credentials: 'include',
@@ -230,7 +232,7 @@ async function addLikes(postId) {
 async function removeLikes(postId) {
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
+      `${SERVER_URL}/posts/${postId}/likes`,
       {
         method: 'DELETE',
         credentials: 'include',
