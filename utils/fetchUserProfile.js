@@ -1,4 +1,4 @@
-const SERVER_URL = 3.38.209.206;
+const SERVER_URL = '3.38.209.206';
 
 export async function fetchUserProfile() {
   try {
