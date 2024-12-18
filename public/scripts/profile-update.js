@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 로그아웃 요청
   async function logout() {
     try {
-      const response = await fetch('${SERVER_URL}/auth/logout', {
+      const response = await fetch(`${SERVER_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
