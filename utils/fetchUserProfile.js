@@ -1,6 +1,8 @@
+const SERVER_URL = 3.38.209.206;
+
 export async function fetchUserProfile() {
   try {
-    const response = await fetch(`http://localhost:3000/users/profile`, {
+    const response = await fetch(`http://${SERVER_URL}:3000/users/profile`, {
       method: 'GET',
       credentials: 'include',
     });
