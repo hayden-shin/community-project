@@ -1,3 +1,5 @@
+const SERVER_URL = 'http://3.38.209.206:3000';
+
 import { showModal, closeModal } from './common.js';
 import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
@@ -43,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 로그아웃 요청
   async function logout() {
     try {
-      const response = await fetch('http://localhost:3000/auth/logout', {
+      const response = await fetch('${SERVER_URL}/auth/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (newNickname) formData.append('newNickname', newNickname);
       if (newProfileUrl) formData.append('image', newProfileUrl);
 
-      const response = await fetch(`http://localhost:3000/users/profile`, {
+      const response = await fetch(`${SERVER_URL}/users/profile`, {
         method: 'PATCH',
         credentials: 'include',
         body: formData,
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 회원 탈퇴
   async function deleteAccount() {
     try {
-      const response = await fetch(`http://localhost:3000/auth/account`, {
+      const response = await fetch(`${SERVER_URL}/auth/account`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
