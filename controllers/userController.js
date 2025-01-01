@@ -1,10 +1,9 @@
-import { pool } from '../database/connect/maria.js';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
-const SERVER_URL = 'http://3.38.209.206:3000';
+const BASE_URL = 'http://localhost:3000';
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -135,7 +134,7 @@ export const getUserProfile = async (req, res) => {
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileUrl: `${SERVER_URL}${user.profile_url}`,
+        profileUrl: `${BASE_URL}${user.profile_url}`,
       },
     });
   } catch (error) {
