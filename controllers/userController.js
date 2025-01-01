@@ -1,4 +1,4 @@
-import { readUsersFromFile, writeUsersToFile } from '../models/userModel.js';
+import { pool } from '../database/connect/maria.js';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -14,41 +14,38 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  // 프로필 이미지 처리
+  // 프로필 이미지
   let profileUrl = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile.jpg`;
 
   try {
-    const users = await readUsersFromFile();
+    // 이메일, 닉네임 중복검사
+    const [users] = await pool.query(`SELECT * FROM user WHERE email = ?`, [
+      email,
+    ]);
 
-    if (users.some((user) => user.email === email)) {
+    if (users.length > 0) {
       return res
         .status(400)
-        .json({ message: 'email already exists', data: null });
+        .json({ message: 'Email already exist', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10); // 비밀번호 암호화
-    const newUser = {
-      id: users.length + 1,
-      profile_url: profileUrl,
-      email,
-      password: hashedPassword,
-      nickname,
-      created_at: new Date().toISOString(),
-    };
+    // 비밀번호 암호화
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    users.push(newUser);
-
-    await writeUsersToFile(users);
+    const [result] = await pool.query(
+      `INSERT INTO user (email, password, nickname, profile_url) VALUES (?, ?, ?, ?)`,
+      [email, hashedPassword, nickname, profileUrl]
+    );
 
     res.status(201).json({
-      message: 'register success',
-      data: newUser,
+      message: 'Register success',
+      data: result.insertId,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
-    res.status(500).json({ message: 'internal server error', data: null });
+    res.status(500).json({ message: 'Internal server error', data: null });
   }
 };
 
@@ -57,19 +54,25 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'invalid request', data: null });
+    return res.status(400).json({ message: 'Invalid request', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.email === email);
-    if (!user) {
-      return res.status(400).json({ message: 'login fail', data: null });
+    const [users] = await pool.query(`SELECT * FROM user WHERE email = ?`, [
+      email,
+    ]);
+
+    if (users.length == 0) {
+      return res.status(400).json({ message: 'Invalid user', data: null });
     }
 
-    const isPasswordMatch = bcrypt.compare(password, user.password);
+    const user = users[0];
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ message: 'login fail', data: null });
+      return res
+        .status(400)
+        .json({ message: 'Incorrect password', data: null });
     }
 
     // 세션에 사용자 정보 저장
@@ -77,12 +80,12 @@ export const login = async (req, res) => {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
-      profile_url: user.profile_url,
+      profileUrl: user.profile_url,
     };
 
-    // HttpOnly 쿠키 발급
-    console.log('세션 저장된 사용자: ', req.session.user);
+    console.log('세션 저장된 사용자: ', req.session?.user);
 
+    // HttpOnly 쿠키 발급
     res.cookie('sessionId', req.sessionID, {
       httpOnly: true,
       secure: false,
@@ -91,17 +94,12 @@ export const login = async (req, res) => {
     });
 
     res.status(200).json({
-      message: 'login_success',
-      data: {
-        id: user.id,
-        email: user.email,
-        nickname: user.nickname,
-        profile_url: user.profile_url,
-      },
+      message: 'Login success',
+      data: { user },
     });
   } catch (error) {
-    console.error('로그인 실패:', error);
-    res.status(500).json({ message: 'internal server error', data: null });
+    console.error('로그인 실패: ', error);
+    res.status(500).json({ message: 'Internal server error', data: null });
   }
 };
 
@@ -111,7 +109,7 @@ export const logout = async (req, res) => {
     if (err) {
       return res
         .status(500)
-        .json({ message: 'internal_server_error', data: null });
+        .json({ message: 'Internal server error', data: null });
     }
     res.clearCookie('sessionId');
     res.status(204).send({ message: 'Logged out successfully' });
@@ -123,19 +121,21 @@ export const getUserProfile = async (req, res) => {
   const userId = req.session?.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'unauthorized', data: null });
+    return res.status(401).json({ message: 'Unauthorized', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((u) => u.id === userId);
+    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
+      userId,
+    ]);
+    const user = users[0];
 
     res.status(200).json({
-      message: 'user_profile_retrieved',
+      message: 'User profile retrieved',
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileUrl: `${SERVER_URL}${user.profile_url || '/assets/default-profile.jpg'}`,
+        profileUrl: `${SERVER_URL}${user.profile_url}`,
       },
     });
   } catch (error) {
@@ -146,64 +146,82 @@ export const getUserProfile = async (req, res) => {
 // 사용자 정보 수정
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { newEmail, newNickname } = req.body;
-  const newProfileUrl = req.file
+  const { email, nickname } = req.body;
+  const profileUrl = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile.jpg`;
 
   if (!userId) {
-    return res.status(401).json({ message: 'unauthorized', data: null });
+    return res.status(401).json({ message: 'Unauthorized', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.id === userId);
-    if (!user) {
-      return res.status(404).json({ message: 'not found', data: null });
+    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
+      userId,
+    ]);
+    const user = users[0];
+
+    if (users.length == 0) {
+      return res.status(404).json({ message: 'User not found', data: null });
     }
 
-    if (newEmail) user.email = newEmail;
-    if (newNickname) user.nickname = newNickname;
-    if (newProfileUrl) user.profile_url = newProfileUrl;
+    if (email) user.email = email;
+    if (nickname) user.nickname = nickname;
+    if (profileUrl) user.profile_url = profileUrl;
 
-    await writeUsersToFile(users);
-    res.status(200).json({ message: 'profile updated', data: null });
+    const updatedEmail = email || user.email;
+    const updatedNickname = nickname || user.nickname;
+    const updatedProfileUrl = profileUrl || user.profile_url;
+
+    await pool.query(
+      `UPDATE user SET email = ?, nickname =?, profile_url =? WHERE id = ?`,
+      [updatedEmail, updatedNickname, updatedProfileUrl, userId]
+    );
+
+    res
+      .status(200)
+      .json({ message: 'Profile updated successfully', data: null });
   } catch (error) {
-    console.error('사용자 정보 수정 실패:', error);
-    res.status(500).json({ message: 'internal server error', data: null });
+    console.error('사용자 정보 수정 실패: ', error);
+    res.status(500).json({ message: 'Internal server error', data: null });
   }
 };
 
 // 비밀번호 변경
 export const updatePassword = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { newPassword } = req.body;
+  const { password } = req.body;
 
   if (!userId) {
-    return res.status(401).json({ message: 'unauthorized', data: null });
+    return res.status(401).json({ message: 'Unauthorized', data: null });
   }
 
-  if (!newPassword) {
+  if (!password) {
     return res
       .status(400)
-      .json({ message: 'new_password_required', data: null });
+      .json({ message: 'New password required', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.id === userId);
-    if (!user) {
-      return res.status(404).json({ message: 'user not found', data: null });
+    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
+      userId,
+    ]);
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'User not found', data: null });
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await writeUsersToFile(users);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    res.status(200).json({ message: 'profile updated', data: null });
+    await pool.query(`UPDATE user SET password = ? WHERE id = ?`, [
+      hashedPassword,
+      userId,
+    ]);
+
+    res.status(200).json({ message: 'Profile updated', data: null });
   } catch (error) {
     console.error('비밀번호 변경 실패:', error);
-    res.status(500).json({ message: 'internal server error', data: null });
+    res.status(500).json({ message: 'Internal server error', data: null });
   }
 };
 
@@ -212,25 +230,23 @@ export const deleteAccount = async (req, res) => {
   const userId = req.session.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'unauthorized', data: null });
+    return res.status(401).json({ message: 'Unauthorized', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const userIndex = users.findIndex((user) => user.id === userId);
+    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
+      userId,
+    ]);
 
-    if (
-      userIndex === -1 ||
-      !bcrypt.compareSync(password, users[userIndex].password)
-    ) {
-      return res.status(401).json({ message: 'unauthorized', data: null });
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'User not found', data: null });
     }
 
-    users.splice(userIndex, 1);
-    await writeUsersToFile(users);
+    await pool.query(`DELETE FROM user WHERE id = ?`, [userId]);
 
+    // 세션 및 쿠키 삭제
     req.session.destroy();
-    res.clearCookie('user_session');
+    res.clearCookie('sessionId');
     res.status(204).send();
   } catch (error) {
     console.error('회원 탈퇴 실패:', error);
