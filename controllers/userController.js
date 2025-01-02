@@ -241,24 +241,23 @@ export const updatePassword = async (req, res) => {
 
 // 회원 탈퇴
 export const deleteAccount = async (req, res) => {
-  const userId = req.session.user?.id;
+  const userId = req.session?.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
-      userId,
-    ]);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const index = users.findIndex((u) => u.id == userId);
 
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'User not found', data: null });
+    if (index == -1) {
+      return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    await pool.query(`DELETE FROM user WHERE id = ?`, [userId]);
+    users.splice(index, 1);
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
-    // 세션 및 쿠키 삭제
     req.session.destroy();
     res.clearCookie('sessionId');
     res.status(204).send();
