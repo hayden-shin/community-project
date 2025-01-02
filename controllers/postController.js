@@ -114,27 +114,12 @@ export const editPost = async (req, res) => {
 // 모든 게시글 가져오기
 export const getAllPosts = async (req, res) => {
   try {
-    // const [posts] = await pool.query(`SELECT * FROM post`);
-    const [posts] = await pool.query(`
-      SELECT 
-        post.id,
-        post.title, 
-        post.content, 
-        post.created_at, 
-        post.likes, 
-        post.views, 
-        post.comments, 
-        user.nickname AS author_nickname,
-        user.profile_url AS author_profile_url
-      FROM post
-      JOIN user ON post.author_id = user.id
-      ORDER BY post.created_at DESC
-      `);
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
 
-    res.status(200).json({ message: 'Posts retrieved', data: posts });
+    res.status(200).json({ message: 'posts retrieve success', data: posts });
   } catch (error) {
     console.error('게시글 목록 가져오기 실패: ', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
