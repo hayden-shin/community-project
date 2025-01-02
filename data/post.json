@@ -1,0 +1,17 @@
+[
+  {
+    "post_id": 1,
+    "title": "First Post",
+    "text": "This is the first post.",
+    "author_id": 1,
+    "author_profile_url": "/assets/default-profile-image.jpg",
+    "author_nickname": "test",
+    "created_at": "2024-12-02T10:00:00Z",
+    "likes": 1001,
+    "views": 101,
+    "comment_ids": [],
+    "liked_users": [
+      1
+    ]
+  }
+]

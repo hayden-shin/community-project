@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "profile_url": "/assets/default-profile-image.jpg",
+    "email": "hayden@gmail.com",
+    "password": "$2b$10$SOdgXfoY1h4pzFQpVeNG4u6oApke1/JBoMzLOzCEs.3OFNSO8dfrC",
+    "nickname": "헤이든2",
+    "created_at": "2024-12-15T15:54:10.154Z"
+  },
+  {
+    "id": 2,
+    "profile_url": "/assets/image-1734326109808-203145080.png",
+    "email": "hayhyo@gmail.com",
+    "password": "$2b$10$t3Ho9Jrl2WXU/UH10S7n.eE9Dv7myfrgw.tPi7M2ed3mjXbaKXqoC",
+    "nickname": "헤이효",
+    "created_at": "2024-12-16T05:15:09.915Z"
+  }
+]
