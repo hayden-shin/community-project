@@ -125,15 +125,15 @@ export const login = async (req, res) => {
 };
 
 // 로그아웃
-export const logout = async (req, res) => {
+export const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res
         .status(500)
-        .json({ message: 'Internal server error', data: null });
+        .json({ message: 'internal server error', data: null });
     }
     res.clearCookie('sessionId');
-    res.status(204).send({ message: 'Logged out successfully' });
+    res.status(204);
   });
 };
 
@@ -142,21 +142,19 @@ export const getUserProfile = async (req, res) => {
   const userId = req.session?.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
-      userId,
-    ]);
-    const user = users[0];
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
 
     res.status(200).json({
-      message: 'User profile retrieved',
+      message: 'user profile retrieved',
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileImage: `${BASE_URL}${user.profile_url}`,
+        profileImage: `${BASE_URL}${user.profileImage}`,
       },
     });
   } catch (error) {
