@@ -6,7 +6,7 @@ const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
 
 // 댓글 생성
 export const createComment = async (req, res) => {
-  const { text } = req.body;
+  const { content } = req.body;
   const userId = req.session?.user?.id;
 
   const postId = parseInt(req.params.post_id, 10);
@@ -19,15 +19,15 @@ export const createComment = async (req, res) => {
     res.status(400).json({ message: 'Invalid post ID', data: null });
   }
 
-  if (!text) {
+  if (!content) {
     return res.status(400).json({ message: 'Invalid request', data: null });
   }
 
   try {
     // 댓글 작성
     await pool.query(
-      `INSERT INTO comment (text, post_id, author_id) VALUES (?, ?, ?)`,
-      [text, postId, userId]
+      `INSERT INTO comment (content, post_id, author_id) VALUES (?, ?, ?)`,
+      [content, postId, userId]
     );
 
     // 댓글수 +1
@@ -58,7 +58,7 @@ export const getCommentsByPostId = async (req, res) => {
       `
       SELECT 
         comment.id AS comment_id, 
-        comment.text, 
+        comment.content, 
         comment.created_at, 
         user.nickname AS author_nickname, 
         user.profile_url AS author_profile_url
@@ -80,14 +80,14 @@ export const getCommentsByPostId = async (req, res) => {
 // 댓글 수정
 export const updateComment = async (req, res) => {
   const commentId = parseInt(req.params.comment_id, 10);
-  const { text } = req.body;
+  const { content } = req.body;
   const userId = req.session?.user?.id;
 
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized', data: null });
   }
 
-  if (!commentId || !text) {
+  if (!commentId || !content) {
     return res.status(400).json({ message: 'Invalid request', data: null });
   }
 
@@ -106,8 +106,8 @@ export const updateComment = async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE comment SET text = ?, updated_at = ? WHERE id = ?`,
-      [text, new Date().toISOString(), commentId]
+      `UPDATE comment SET content = ?, updated_at = ? WHERE id = ?`,
+      [content, new Date().toISOString(), commentId]
     );
 
     res
