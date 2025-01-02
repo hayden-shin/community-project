@@ -214,35 +214,28 @@ export const updatePassword = async (req, res) => {
   const { password } = req.body;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
-  }
-
-  if (!password) {
-    return res
-      .status(400)
-      .json({ message: 'New password required', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
-      userId,
-    ]);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
 
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'User not found', data: null });
+    if (!user) {
+      return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
 
-    await pool.query(`UPDATE user SET password = ? WHERE id = ?`, [
-      hashedPassword,
-      userId,
-    ]);
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
-    res.status(200).json({ message: 'Profile updated', data: null });
+    res.status(200).json({ message: 'password update success', data: null });
   } catch (error) {
     console.error('비밀번호 변경 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
