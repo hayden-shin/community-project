@@ -37,38 +37,39 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  // 프로필 이미지
   let profileImage = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile.jpg`;
 
   try {
-    // 이메일, 닉네임 중복검사
-    const [users] = await pool.query(`SELECT * FROM user WHERE email = ?`, [
-      email,
-    ]);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
 
-    if (users.length > 0) {
+    if (users.find((u) => u.email == email)) {
       return res
         .status(400)
-        .json({ message: 'Email already exist', data: null });
+        .json({ message: 'email already exist', data: null });
     }
 
-    // 비밀번호 암호화
     const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = {
+      userId: users.length + 1,
+      profileImage,
+      email,
+      password: hashedPassword,
+      nickname,
+      createdAt: Date.now(),
+    };
+    users.push(newUser);
 
-    const [result] = await pool.query(
-      `INSERT INTO user (email, password, nickname, profile_url) VALUES (?, ?, ?, ?)`,
-      [email, hashedPassword, nickname, profileImage]
-    );
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
     res.status(201).json({
-      message: 'Register success',
-      data: result.insertId,
+      message: 'register success',
+      data: newUser.userId,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
