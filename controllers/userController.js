@@ -39,7 +39,7 @@ export const signup = async (req, res) => {
 
   let profileImage = req.file
     ? `/assets/${req.file.filename}`
-    : `/assets/default-profile.jpg`;
+    : `/assets/default-profile-image.jpg`;
 
   try {
     const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
@@ -173,7 +173,7 @@ export const updateProfile = async (req, res) => {
   const { email, nickname } = req.body;
   const profileImage = req.file
     ? `/assets/${req.file.filename}`
-    : `/assets/default-profile.jpg`;
+    : `/assets/default-profile-image.jpg`;
 
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized', data: null });
