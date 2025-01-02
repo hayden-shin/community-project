@@ -52,7 +52,7 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
-      userId: users.length + 1,
+      id: users.length + 1,
       profileImage,
       email,
       password: hashedPassword,
@@ -98,7 +98,7 @@ export const login = async (req, res) => {
 
     // 세션에 사용자 정보 저장
     req.session.user = {
-      id: user.userId,
+      id: user.id,
       email: user.email,
       nickname: user.nickname,
       profileImage: user.profileImage,
