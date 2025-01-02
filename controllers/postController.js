@@ -86,35 +86,28 @@ export const editPost = async (req, res) => {
   const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
-    // 수정할 게시글 찾기
-    const [posts] = await pool.query(`SELECT * FROM post WHERE id = ?`, [
-      postId,
-    ]);
-    const post = posts[0];
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-9'));
+    const post = posts.find((p) => p.id == postId);
 
-    if (posts.length === 0) {
-      return res.status(404).json({ message: 'Post not found', data: null });
+    if (!post) {
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    if (!userId || post.author_id !== userId) {
-      return res.status(401).json({ message: 'No permission', data: null });
+    if (!userId || post.authorId !== userId) {
+      return res.status(401).json({ message: 'no permission', data: null });
     }
 
-    await pool.query(
-      `UPDATE post SET title = ?, content =?, image_url = ?, updated_at = ? WHERE id = ?`,
-      [
-        title || post.title,
-        content || post.content,
-        postImage || null,
-        new Date().toISOString(),
-        postId,
-      ]
-    );
+    if (title) post.title = title;
+    if (content) post.content = content;
+    if (postImage) post.postImage = postImage;
+    post.updatedAt = new Date().toISOString();
 
-    res.status(200).json({ message: 'post updated', data: null });
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
+
+    res.status(200).json({ message: 'post update success', data: null });
   } catch (error) {
-    console.log('댓글 수정 실패', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.log('게시글 수정 실패', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
