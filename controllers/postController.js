@@ -3,6 +3,7 @@ import fs from 'fs';
 
 const POST_FILE = path.join(process.cwd(), '../data/post.json');
 const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
+const LIKE_FILE = path.joing(process.cwd(), '../data/like.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
@@ -182,51 +183,58 @@ export const toggleLikePost = async (req, res) => {
   const userId = req.session?.user?.id;
 
   if (!postId) {
-    return res.status(400).json({ message: 'Invalid post ID', data: null });
+    return res.status(400).json({ message: 'invalid post', data: null });
   }
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [posts] = await pool.query(`SELECT * FROM post WHERE id = ?`, [
-      postId,
-    ]);
-    if (posts.length === 0) {
-      return res.status(404).json({ message: 'Post not found', data: null });
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
+
+    if (!post) {
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    const [likes] = await pool.query(
-      `SELECT * FROM likes WHERE post_id = ? AND user_id = ?`,
-      [postId, userId]
+    const likes = JSON.parse(fs.readFileSync(LIKE_FILE, 'utf-8'));
+    const index = likes.findIndex(
+      (l) => l.postId == postId && l.userId == userId
     );
 
-    if (likes.length > 0) {
+    if (index !== -1) {
       // 좋아요 취소
-      await pool.query(`DELETE FROM likes WHERE id = ?`, [likes[0].id]);
-      await pool.query(`UPDATE post SET likes = likes - 1 WHERE id = ?`, [
-        postId,
-      ]);
+      likes.splice(index, 1);
+      fs.writeFileSync(LIKE_FILE, JSON.stringify(likes, null, 2));
+
+      post.likeCount -= 1;
+      fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
+
       return res.status(200).json({
-        message: 'Like removed',
+        message: 'like remove success',
         data: { isLiked: false },
       });
     } else {
       // 좋아요 추가
-      await pool.query(`INSERT INTO likes (post_id, user_id) VALUES (?, ?)`, [
-        postId,
+      const newLike = {
+        id: likes.length + 1,
         userId,
-      ]);
-      await pool.query(`UPDATE post SET likes = likes + 1 WHERE id = ?`, [
         postId,
-      ]);
+        createdAt: new Date().toISOString(),
+      };
+
+      likes.push(newLike);
+      fs.writeFileSync(LIKE_FILE, JSON.stringify(likes, null, 2));
+
+      post.likeCount += 1;
+      fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
       return res.status(200).json({
-        message: 'Like added',
+        message: 'like add success',
         data: { isLiked: true },
       });
     }
   } catch (error) {
     console.error('좋아요 토글 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
