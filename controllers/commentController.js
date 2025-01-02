@@ -62,30 +62,16 @@ export const getCommentsByPostId = async (req, res) => {
   const postId = parseInt(req.params.post_id);
 
   try {
-    // const [comments] = await pool.query(
-    //   `SELECT * FROM comment WHERE post_id = ?`,
-    //   [postId]
-    // );
-    const [comments] = await pool.query(
-      `
-      SELECT 
-        comment.id AS comment_id, 
-        comment.content, 
-        comment.created_at, 
-        user.nickname AS author_nickname, 
-        user.profile_url AS author_profile_url
-      FROM comment
-      JOIN user ON comment.author_id = user.id
-      WHERE comment.post_id = ?
-      ORDER BY comment.created_at ASC
-      `,
-      [postId]
-    );
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const postComments = comments.filter((c) => c.postId == postId);
 
-    res.status(200).json({ message: 'Comments retrieved', data: comments });
+    res.status(200).json({
+      message: 'comments retrieve success',
+      data: { comments: postComments },
+    });
   } catch (error) {
     console.error('댓글 가져오기 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
