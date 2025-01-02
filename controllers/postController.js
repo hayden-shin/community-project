@@ -17,22 +17,33 @@ export const createPost = async (req, res) => {
   }
 
   try {
-    let postImage = req.file ? `/assets/${req.file.filename}` : null;
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
-    const [post] = await pool.query(
-      `INSERT INTO post (title, content, image_url, author_id) VALUES (?, ?, ?, ?)`,
-      [title, content, postImage, userId]
-    );
+    const newPost = {
+      id: posts.length + 1,
+      title,
+      content,
+      postImage,
+      authorId: userId,
+      createdAt: new Date().toISOString(),
+      viewCount: 0,
+      likeCount: 0,
+      commentCount: 0,
+    };
+    posts.push(newPost);
+
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
     return res.status(201).json({
-      message: 'Post create success',
-      data: { postId: post.insertId },
+      message: 'post create success',
+      data: newPost,
     });
-  } catch (error) {
-    console.error('게시글 생성 실패:', error);
+  } catch (err) {
+    console.error('게시글 생성 실패:', err);
     return res
       .status(500)
-      .json({ message: 'Internal server error', data: null });
+      .json({ message: 'internal server error', data: null });
   }
 };
 
