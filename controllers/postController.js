@@ -17,11 +17,11 @@ export const createPost = async (req, res) => {
   }
 
   try {
-    let imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+    let postImage = req.file ? `/assets/${req.file.filename}` : null;
 
     const [post] = await pool.query(
       `INSERT INTO post (title, content, image_url, author_id) VALUES (?, ?, ?, ?)`,
-      [title, content, imageUrl, userId]
+      [title, content, postImage, userId]
     );
 
     return res.status(201).json({
@@ -76,7 +76,7 @@ export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
   const { title, content } = req.body;
-  const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+  const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
     // 수정할 게시글 찾기
@@ -98,7 +98,7 @@ export const editPost = async (req, res) => {
       [
         title || post.title,
         content || post.content,
-        imageUrl || null,
+        postImage || null,
         new Date().toISOString(),
         postId,
       ]
