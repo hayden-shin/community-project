@@ -1,17 +1,18 @@
 [
   {
-    "post_id": 1,
-    "title": "First Post",
-    "text": "This is the first post.",
-    "author_id": 1,
-    "author_profile_url": "/assets/default-profile-image.jpg",
-    "author_nickname": "test",
-    "created_at": "2024-12-02T10:00:00Z",
-    "likes": 1001,
-    "views": 101,
-    "comment_ids": [],
-    "liked_users": [
-      1
-    ]
+    "id": 1,
+    "title": "The First Post",
+    "content": "This is the first post.",
+    "postImage": null,
+    "author": {
+      "id": 1,
+      "profileImage": "/assets/default-profile-image.jpg",
+      "nickname": "test"
+    },
+    "createdAt": "2024-12-02T10:00:00Z",
+    "updatedAt": "2024-12-02T12:00:00Z",
+    "viewCount": 101,
+    "likeCount": 1001,
+    "commentCount": 0
   }
 ]
