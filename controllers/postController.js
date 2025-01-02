@@ -154,25 +154,25 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/*
+  -------- 좋아요  --------
+*/
+
 // 좋아요 상태 확인
 export const getLikeStatus = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
 
   try {
-    const [likes] = await pool.query(
-      `SELECT * FROM likes WHERE post_id = ? AND user_id = ?`,
-      [postId, userId]
-    );
-
-    const isLiked = likes.length > 0;
+    const likes = JSON.parse(fs.readFileSync(LIKE_FILE, 'utf-8'));
+    const isLiked = likes.some((l) => l.postId == postId && l.userId == userId);
 
     res
       .status(200)
-      .json({ message: 'Like status retrieved', data: { isLiked } });
+      .json({ message: 'like status retrieve success', data: { isLiked } });
   } catch (error) {
     console.error(`좋아요 상태 확인 실패: ${error}`);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
