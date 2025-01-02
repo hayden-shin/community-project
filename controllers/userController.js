@@ -168,41 +168,43 @@ export const updateProfile = async (req, res) => {
   const { email, nickname } = req.body;
   const profileImage = req.file
     ? `/assets/${req.file.filename}`
-    : `/assets/default-profile-image.jpg`;
+    : user.profileImage || `/assets/default-profile-image.jpg`;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [users] = await pool.query(`SELECT * FROM user WHERE id = ?`, [
-      userId,
-    ]);
-    const user = users[0];
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
 
-    if (users.length == 0) {
-      return res.status(404).json({ message: 'User not found', data: null });
+    if (!user) {
+      return res.status(404).json({ message: 'user not found', data: null });
     }
 
+    // validate new email if provided
+    if (users.some((u) => u.email == email && u.id !== userId)) {
+      return res
+        .status(400)
+        .json({ message: 'email already exists', data: null });
+    }
     if (email) user.email = email;
+
+    // validate new nickname if provided
+    if (users.some((u) => u.nickname == nickname && u.id !== userId)) {
+      return res
+        .status(400)
+        .json({ message: 'nickname already exists', data: null });
+    }
     if (nickname) user.nickname = nickname;
-    if (profileImage) user.profile_url = profileImage;
+    if (profileImage) user.profileImage = profileImage;
 
-    const updatedEmail = email || user.email;
-    const updatedNickname = nickname || user.nickname;
-    const updatedprofileImage = profileImage || user.profile_url;
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
-    await pool.query(
-      `UPDATE user SET email = ?, nickname =?, profile_url =? WHERE id = ?`,
-      [updatedEmail, updatedNickname, updatedprofileImage, userId]
-    );
-
-    res
-      .status(200)
-      .json({ message: 'Profile updated successfully', data: null });
+    res.status(200).json({ message: 'profile update success', data: null });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
