@@ -1,4 +1,7 @@
-import { pool } from '../database/connect/maria.js';
+import path from 'path';
+import fs from 'fs';
+
+const POST_FILE = path.join(process.cwd(), '../data/post.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
@@ -6,11 +9,11 @@ export const createPost = async (req, res) => {
   const userId = req.session?.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   if (!title || !text) {
-    return res.status(400).json({ message: 'Invalid request', data: null });
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
 
   try {
