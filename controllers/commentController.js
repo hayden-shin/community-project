@@ -8,40 +8,52 @@ const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
 export const createComment = async (req, res) => {
   const { content } = req.body;
   const userId = req.session?.user?.id;
-
   const postId = parseInt(req.params.post_id, 10);
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   if (!postId || isNaN(postId)) {
-    res.status(400).json({ message: 'Invalid post ID', data: null });
+    return res.status(400).json({ message: 'invalid post', data: null });
   }
 
   if (!content) {
-    return res.status(400).json({ message: 'Invalid request', data: null });
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
+
+  const { nickname, profileImage } = req.session?.user;
 
   try {
     // 댓글 작성
-    await pool.query(
-      `INSERT INTO comment (content, post_id, author_id) VALUES (?, ?, ?)`,
-      [content, postId, userId]
-    );
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const newComment = {
+      id: comments.length + 1,
+      postId,
+      content,
+      createdAt: new Date().toISOString(),
+      author: {
+        id: userId,
+        nickname,
+        profileImage,
+      },
+    };
+    comments.push(newComment);
+    fs.writeFileSync(COMMENT_FILE, JSON.stringify(comments, null, 2));
 
     // 댓글수 +1
-    const [result] = await pool.query(
-      `UPDATE post SET comments = comments + 1 WHERE id = ?`,
-      [postId]
-    );
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
+    post.commentCount += 1;
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
-    res
-      .status(201)
-      .json({ message: 'Comment created successful', data: result.insertId });
+    res.status(201).json({
+      message: 'comment create success',
+      data: { comment: newComment },
+    });
   } catch (error) {
     console.error('댓글 생성 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
