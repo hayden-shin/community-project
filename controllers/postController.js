@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 
 const POST_FILE = path.join(process.cwd(), '../data/post.json');
+const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
@@ -52,33 +53,28 @@ export const getPostById = async (req, res) => {
   const postId = parseInt(req.params.post_id);
 
   try {
-    const [posts] = await pool.query(`SELECT * FROM post WHERE id = ?`, [
-      postId,
-    ]);
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
 
-    const post = posts[0];
-
-    if (posts.length === 0) {
-      return res.status(404).json({ message: 'Post not found', data: null });
+    if (!post) {
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    // 게시글의 댓글 로드
-    const [comments] = await pool.query(
-      `SELECT * FROM comment WHERE post_id = ?`,
-      [postId]
-    );
+    // 댓글 가져오기
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const postComments = comments.filter((c) => c.postId == postId);
 
     // 조회수 증가
-    await pool.query(`UPDATE post SET views = views+ 1 WHERE id = ?`, [postId]);
+    post.viewCount += 1;
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
-    console.log('Returning data:', { post, comments });
     res.status(200).json({
-      message: 'Post retrieved',
-      data: { post, comments },
+      message: 'post retrieve success',
+      data: { post, comments: postComments },
     });
   } catch (error) {
     console.error('게시글 가져오기 실패: ', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
