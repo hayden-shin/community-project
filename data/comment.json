@@ -1,29 +1,35 @@
 [
   {
-    "comment_id": 1,
-    "post_id": 1,
-    "text": "This is the first comment on post 1.",
-    "created_at": "2024-12-16T02:10:37.976Z",
-    "author_id": 1,
-    "author_profile_url": "/assets/default-profile-image.jpg",
-    "author_nickname": "헤이든2"
+    "id": 1,
+    "postId": 1,
+    "content": "This is the first comment on post 1.",
+    "createdAt": "2024-12-16T02:10:37.976Z",
+    "author": {
+      "id": 1,
+      "nickname": "헤이든",
+      "profileImage": "/assets/default-profile-image.jpg"
+    }
   },
   {
-    "comment_id": 2,
-    "post_id": 1,
-    "text": "ㅇ",
-    "created_at": "2024-12-16T05:14:30.037Z",
-    "author_id": 1,
-    "author_profile_url": "/assets/default-profile-image.jpg",
-    "author_nickname": "헤이든2"
+    "id": 2,
+    "postId": 1,
+    "content": "This is the second comment on post 2.",
+    "createdAt": "2024-12-16T05:14:30.037Z",
+    "author": {
+      "id": 2,
+      "nickname": "테스트",
+      "profileImage": "/assets/default-profile-image.jpg"
+    }
   },
   {
-    "comment_id": 3,
-    "post_id": 1,
-    "text": "good",
-    "created_at": "2024-12-16T05:44:23.917Z",
-    "author_id": 1,
-    "author_profile_url": "/assets/default-profile-image.jpg",
-    "author_nickname": "헤이든2"
+    "id": 3,
+    "postId": 1,
+    "content": "This is the third comment on post 3.",
+    "createdAt": "2024-12-16T05:44:23.917Z",
+    "author": {
+      "id": 3,
+      "nickname": "사용자",
+      "profileImage": "/assets/default-profile-image.jpg"
+    }
   }
 ]
