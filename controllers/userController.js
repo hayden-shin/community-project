@@ -78,39 +78,36 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Invalid request', data: null });
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
 
   try {
-    const [users] = await pool.query(`SELECT * FROM user WHERE email = ?`, [
-      email,
-    ]);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.find(u.email == email));
 
-    if (users.length == 0) {
-      return res.status(400).json({ message: 'Invalid user', data: null });
+    if (!user) {
+      return res.status(400).json({ message: 'invalid user', data: null });
     }
-
-    const user = users[0];
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res
         .status(400)
-        .json({ message: 'Incorrect password', data: null });
+        .json({ message: 'incorrect password', data: null });
     }
 
     // 세션에 사용자 정보 저장
     req.session.user = {
-      id: user.id,
+      id: user.userId,
       email: user.email,
       nickname: user.nickname,
-      profileImage: user.profile_url,
+      profileImage: user.profileImage,
     };
 
-    console.log('세션 저장된 사용자: ', req.session?.user);
+    console.log('세션에 저장된 사용자: ', req.session?.user);
 
     // HttpOnly 쿠키 발급
-    res.cookie('sessionId', req.sessionID, {
+    res.cookie('sessionId', req.sessionId, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
@@ -118,12 +115,12 @@ export const login = async (req, res) => {
     });
 
     res.status(200).json({
-      message: 'Login success',
+      message: 'login success',
       data: { user },
     });
   } catch (error) {
     console.error('로그인 실패: ', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
