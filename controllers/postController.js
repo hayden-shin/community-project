@@ -129,29 +129,28 @@ export const deletePost = async (req, res) => {
   const userId = req.session?.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const [posts] = await pool.query(`SELECT * FROM post WHERE id = ?`, [
-      postId,
-    ]);
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const index = posts.findIndex((p) => p.id == postId);
 
-    if (posts.length === 0) {
-      return res.status(404).json({ message: 'Post not found', data: null });
+    if (index == -1) {
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    const post = posts[0];
-    if (post.author_id !== userId) {
-      return res.status(403).json({ message: 'No permission', data: null });
+    if (posts[index].authorId !== userId) {
+      return res.status(403).json({ message: 'no permission', data: null });
     }
 
-    await pool.query(`DELETE FROM post WHERE id = ?`, [postId]);
+    posts.splice(index, 1);
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
     res.status(204).send();
   } catch (error) {
     console.error('게시글 삭제 실패: ', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
