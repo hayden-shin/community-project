@@ -1,9 +1,33 @@
+import fs from 'fs';
+import path from 'path';
 import { createRequire } from 'module';
+
+const USER_FILE = path.join(process.cwd(), '../data/user.json');
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
 const BASE_URL = 'http://localhost:3000';
+
+// JSON 파일 읽기
+const loadUser = () => {
+  try {
+    const data = fs.readFileSync(USER_FILE, 'utf8');
+    JSON.parse(data);
+    return null; // when error occurs
+  } catch (err) {
+    return console.log('err: ', err);
+  }
+};
+
+// JSON 파일 쓰기
+const saveUser = (user) => {
+  try {
+    fs.writeFileSync(USER_FILE, JSON.stringify(user, null, 2));
+  } catch (err) {
+    console.log('err: ', err);
+  }
+};
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -14,7 +38,7 @@ export const signup = async (req, res) => {
   }
 
   // 프로필 이미지
-  let profileUrl = req.file
+  let profileImage = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile.jpg`;
 
@@ -35,7 +59,7 @@ export const signup = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO user (email, password, nickname, profile_url) VALUES (?, ?, ?, ?)`,
-      [email, hashedPassword, nickname, profileUrl]
+      [email, hashedPassword, nickname, profileImage]
     );
 
     res.status(201).json({
@@ -79,7 +103,7 @@ export const login = async (req, res) => {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
-      profileUrl: user.profile_url,
+      profileImage: user.profile_url,
     };
 
     console.log('세션 저장된 사용자: ', req.session?.user);
@@ -134,7 +158,7 @@ export const getUserProfile = async (req, res) => {
       data: {
         email: user.email,
         nickname: user.nickname,
-        profileUrl: `${BASE_URL}${user.profile_url}`,
+        profileImage: `${BASE_URL}${user.profile_url}`,
       },
     });
   } catch (error) {
@@ -146,7 +170,7 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
   const { email, nickname } = req.body;
-  const profileUrl = req.file
+  const profileImage = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile.jpg`;
 
@@ -166,15 +190,15 @@ export const updateProfile = async (req, res) => {
 
     if (email) user.email = email;
     if (nickname) user.nickname = nickname;
-    if (profileUrl) user.profile_url = profileUrl;
+    if (profileImage) user.profile_url = profileImage;
 
     const updatedEmail = email || user.email;
     const updatedNickname = nickname || user.nickname;
-    const updatedProfileUrl = profileUrl || user.profile_url;
+    const updatedprofileImage = profileImage || user.profile_url;
 
     await pool.query(
       `UPDATE user SET email = ?, nickname =?, profile_url =? WHERE id = ?`,
-      [updatedEmail, updatedNickname, updatedProfileUrl, userId]
+      [updatedEmail, updatedNickname, updatedprofileImage, userId]
     );
 
     res
