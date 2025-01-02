@@ -5,14 +5,14 @@ const POST_FILE = path.join(process.cwd(), '../data/post.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
-  const { title, text } = req.body;
+  const { title, content } = req.body;
   const userId = req.session?.user?.id;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  if (!title || !text) {
+  if (!title || !content) {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
@@ -20,8 +20,8 @@ export const createPost = async (req, res) => {
     let imageUrl = req.file ? `/assets/${req.file.filename}` : null;
 
     const [post] = await pool.query(
-      `INSERT INTO post (title, text, image_url, author_id) VALUES (?, ?, ?, ?)`,
-      [title, text, imageUrl, userId]
+      `INSERT INTO post (title, content, image_url, author_id) VALUES (?, ?, ?, ?)`,
+      [title, content, imageUrl, userId]
     );
 
     return res.status(201).json({
@@ -75,7 +75,7 @@ export const getPostById = async (req, res) => {
 export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
-  const { title, text } = req.body;
+  const { title, content } = req.body;
   const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
@@ -94,10 +94,10 @@ export const editPost = async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE post SET title = ?, text =?, image_url = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE post SET title = ?, content =?, image_url = ?, updated_at = ? WHERE id = ?`,
       [
         title || post.title,
-        text || post.text,
+        content || post.content,
         imageUrl || null,
         new Date().toISOString(),
         postId,
@@ -119,7 +119,7 @@ export const getAllPosts = async (req, res) => {
       SELECT 
         post.id,
         post.title, 
-        post.text, 
+        post.content, 
         post.created_at, 
         post.likes, 
         post.views, 
