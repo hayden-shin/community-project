@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const POST_FILE = path.join(process.cwd(), '../data/post.json');
-const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
+const POST_FILE = path.join(process.cwd(), 'data', 'post.json');
+const COMMENT_FILE = path.join(process.cwd(), 'data', 'comment.json');
 
 // 댓글 생성
 export const createComment = async (req, res) => {

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
 
-const USER_FILE = path.join(process.cwd(), '../data/user.json');
+const USER_FILE = path.join(process.cwd(), 'data', 'user.json');
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
@@ -146,9 +146,6 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
   const { email, nickname } = req.body;
-  const profileImage = req.file
-    ? `/assets/${req.file.filename}`
-    : user.profileImage || `/assets/default-profile-image.jpg`;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
@@ -177,6 +174,10 @@ export const updateProfile = async (req, res) => {
         .json({ message: 'nickname already exists', data: null });
     }
     if (nickname) user.nickname = nickname;
+
+    const profileImage = req.file
+      ? `/assets/${req.file.filename}`
+      : user.profileImage || `/assets/default-profile-image.jpg`;
     if (profileImage) user.profileImage = profileImage;
 
     fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
