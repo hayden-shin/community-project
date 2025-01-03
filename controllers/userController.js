@@ -63,7 +63,7 @@ export const login = async (req, res) => {
 
   try {
     const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.find(u.email == email));
+    const user = users.find((u) => u.email === email);
 
     if (!user) {
       return res.status(400).json({ message: 'invalid user', data: null });
