@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           headerProfileImage.src = user.profileUrl;
         } else {
           // 기본 프로필 이미지 경로 사용
-          headerProfileImage.src = `${SERVER_URL}/assets/default-profile.jpg`;
+          headerProfileImage.src = `${BASE_URL}/assets/default-profile.jpg`;
         }
       }
     }

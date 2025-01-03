@@ -68,20 +68,20 @@ async function renderPost(postData) {
   const postAuthor = document.getElementById('post-author');
 
   const authorProfile = await fetchUserProfile(postData.author_id);
-  authorImage.src = `${SERVER_URL}${postData.imageUrl}`;
+  authorImage.src = `${BASE_URL}${postData.imageUrl}`;
   postAuthor.textContent = authorProfile.nickname;
 
   if (postData.authorProfileUrl) {
     authorImage.src = postData.authorProfileUrl;
     authorImage.style.display = 'block';
   } else {
-    authorImage.src = `${SERVER_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
+    authorImage.src = `${BASE_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
   }
 
   // 게시글 이미지 렌더링
   const postImage = document.getElementById('post-image');
   if (postData.image_url) {
-    postImage.src = `${SERVER_URL}${postData.image_url}`;
+    postImage.src = `${BASE_URL}${postData.image_url}`;
     postImage.style.display = 'block';
   } else {
     postImage.style.display = 'none';
