@@ -45,7 +45,7 @@ export const signup = async (req, res) => {
 
     res.status(201).json({
       message: 'register success',
-      data: newUser.userId,
+      data: newUser.id,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
