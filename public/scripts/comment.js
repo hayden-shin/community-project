@@ -1,3 +1,4 @@
+import BASE_URL from '../config.js';
 import { showModal, showToast } from './common.js';
 import { formatDateTime } from '../../utils/format.js';
 
