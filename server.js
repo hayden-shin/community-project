@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
@@ -10,11 +11,11 @@ import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = 3000;
-
-// DB
-// import conn from './database/connect/maria.js';
 
 // CORS 설정
 const corsOptions = {
@@ -39,14 +40,13 @@ app.use(
   })
 );
 
-// 정적 파일 제공 설정
-const __dirname = path.resolve();
+// 정적 파일 제공
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // 미들웨어 설정
 app.use(cors(corsOptions));
-app.use(express.json()); // JSON 요청 본문 파싱
-app.use(express.urlencoded({ extended: true })); // URL-encoded 파싱
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 
 // OPTIONS 요청 예외처리
@@ -75,10 +75,6 @@ app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/posts/:post_id/comments', commentRoutes);
-
-// JSON 요청 본문 크기 제한 늘리기
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // 404 에러 디버깅
 app.use((req, res, next) => {
