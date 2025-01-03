@@ -14,13 +14,11 @@ const app = express();
 const PORT = 3000;
 
 // DB
-//import conn from './database/connect/maria.js';
-
-const SERVER_URL = '3.38.209.206';
+// import conn from './database/connect/maria.js';
 
 // CORS 설정
 const corsOptions = {
-  origin: `http://${SERVER_URL}:2000`,
+  origin: `http://localhost:2000`,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-USER-ID'],
   credentials: true,
@@ -87,28 +85,6 @@ app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: 'Not Found' });
 });
-
-// JSON 파일 경로
-const POSTS_FILE = path.join(process.cwd(), 'data/posts.json');
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
-const COMMENTS_FILE = path.join(process.cwd(), 'data/comments.json');
-
-let posts = [];
-let users = [];
-let comments = [];
-
-// JSON 데이터 로드 함수
-const loadJSONData = () => {
-  try {
-    posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf-8'));
-    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    comments = JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8'));
-    console.log('JSON 데이터가 성공적으로 로드되었습니다.');
-  } catch (error) {
-    console.error('JSON 데이터 로드 중 에러 발생:', error);
-  }
-};
-loadJSONData();
 
 // 기본 라우트
 app.get('/', (req, res) => {
