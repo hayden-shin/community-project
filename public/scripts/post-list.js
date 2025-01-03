@@ -1,3 +1,4 @@
+import BASE_URL from '../config.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
 
 // 게시글 리스트 새로고침
@@ -32,9 +33,9 @@ const renderPosts = (postsData) => {
   // 게시글 데이터 순회 및 렌더링
   postsData.forEach(
     ({
-      post_id,
+      id,
       title,
-      content,
+      text,
       author_id,
       author_profile_url = '/assets/default-profile.jpg',
       author_nickname,
@@ -42,19 +43,18 @@ const renderPosts = (postsData) => {
       likes,
       views,
       comments,
-      comment_ids,
     }) => {
       // 게시글 요소 생성
       const postItem = document.createElement('div');
       postItem.classList.add('post-item');
-      postItem.dataset.id = post_id; // 게시글 ID 저장
+      postItem.dataset.id = id; // 게시글 ID 저장
 
       // 게시글 아이템 HTML 구조 생성
       postItem.innerHTML = `
         <h3 class="post-title">${title}</h3>
         <div class="post-stats">
           <span>조회수: ${formatNumber(views)}</span>
-          <span>댓글: ${formatNumber(comment_ids.length)}</span>
+          <span>댓글: ${formatNumber(comments)}</span>
           <span>좋아요: ${formatNumber(likes)}</span>
           <p class="post-date">${formatDateTime(created_at)}</p>
         </div>
@@ -66,7 +66,7 @@ const renderPosts = (postsData) => {
       `;
 
       postItem.addEventListener('click', () => {
-        window.location.href = `/post-view?id=${post_id}`;
+        window.location.href = `/post-view?id=${id}`;
       });
 
       postListContainer.prepend(postItem);
@@ -78,7 +78,7 @@ const renderPosts = (postsData) => {
 async function postList() {
   try {
     // API 호출: 게시글 목록 요청
-    const response = await fetch(`http://localhost:3000/posts`, {
+    const response = await fetch(`${BASE_URL}/posts`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -1,16 +1,9 @@
 import { showModal, showToast } from './common.js';
 import { formatDateTime } from '../../utils/format.js';
 
-const SERVER_URL = 'http://localhost:3000';
-
 export const updateCommentCount = (postId) => {
   const commentList = document.getElementById(`comment-list`);
   const commentCountElement = document.getElementById(`comment-count`);
-
-  if (!commentList || !commentCountElement) {
-    console.warn('아직 작성된 댓글이 없습니다.');
-    return;
-  }
 
   commentCountElement.innerHTML = `${commentList.childElementCount}<span>댓글</span>`;
 };
@@ -26,17 +19,14 @@ const createComment = async (postId) => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ text: commentText }),
-      }
-    );
+    const response = await fetch(`${BASE_URL}/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ text: commentText }),
+    });
 
     if (response.status === 201) {
       const result = await response.json();
@@ -45,7 +35,7 @@ const createComment = async (postId) => {
 
       renderComment(result.data);
       updateCommentCount(postId);
-      // refreshPostList();
+
       commentInput.value = '';
       alert('댓글이 성공적으로 등록되었습니다.');
     } else if (response.status === 401) {
@@ -73,15 +63,10 @@ const renderComment = (commentData) => {
   commentElement.classList.add('comment');
   commentElement.setAttribute('data-comment-id', commentData.comment_id);
 
-  // 절대경로로 프로필 이미지 설정
-  const profileImageUrl = commentData.author_profile_url
-    ? `${SERVER_URL}${commentData.author_profile_url}`
-    : `${SERVER_URL}/assets/default-profile.jpg`;
-
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-author">
-        <img src="${profileImageUrl}" alt="User Icon" class="author-img">
+        <img src="${commentData.author_profile_url}" alt="User Icon" class="author-img">
         <span class="comment-author">${commentData.author_nickname}</span>
         <span class="comment-date">${formatDateTime(commentData.created_at)}</span>
       </div>
@@ -107,15 +92,13 @@ const editComment = async (postId, commentId, newText) => {
   try {
     // 댓글 수정 요청
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments/${commentId}`,
+      `${BASE_URL}/posts/${postId}/comments/${commentId}`,
       {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          post_id: postId,
-          comment_id: commentId,
           text: newText,
         }),
         credentials: 'include',
@@ -157,7 +140,7 @@ const editComment = async (postId, commentId, newText) => {
 const deleteComment = async (postId, commentId) => {
   try {
     const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments/${commentId}`,
+      `${BASE_URL}/posts/${postId}/comments/${commentId}`,
       {
         method: 'DELETE',
         credentials: 'include',
@@ -201,9 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/comments`
-    );
+    const response = await fetch(`${BASE_URL}/posts/${postId}/comments`);
     if (!response.ok) {
       throw new Error('댓글 데이터를 가져올 수 없습니다.');
     }

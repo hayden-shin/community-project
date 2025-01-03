@@ -1,8 +1,8 @@
-const SERVER_URL = 'http://localhost:3000';
+import BASE_URL from '../config.js';
 
 async function fetchUserProfile() {
   try {
-    const response = await fetch(`http://localhost:3000/users/profile`, {
+    const response = await fetch(`${BASE_URL}/users/profile`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -20,15 +20,15 @@ async function fetchUserProfile() {
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const user = await fetchUserProfile();
-    console.log('user.profileImage:', user.profileImage);
+    console.log('user.profileUrl:', user.profileUrl);
 
     if (user) {
       const headerProfileImage = document.getElementById(
         'header-profile-image'
       );
       if (headerProfileImage) {
-        if (user.profileImage) {
-          headerProfileImage.src = user.profileImage;
+        if (user.profileUrl) {
+          headerProfileImage.src = user.profileUrl;
         } else {
           // 기본 프로필 이미지 경로 사용
           headerProfileImage.src = `${SERVER_URL}/assets/default-profile.jpg`;

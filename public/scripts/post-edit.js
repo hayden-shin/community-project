@@ -1,3 +1,4 @@
+import BASE_URL from '../config.js';
 import { showToast } from './common.js';
 
 const title = document.getElementById('post-title');
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // 기존 게시글 데이터 가져오기
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     text.value = post.text;
 
     if (post.image_url) {
-      imagePreview.src = `http://localhost:3000${post.image_url}`;
+      imagePreview.src = `${BASE_URL}${post.image_url}`;
       imagePreview.style.display = 'block';
     } else {
       imagePreview.style.display = 'none';
@@ -101,7 +102,7 @@ async function editPost(postId, newTitle, newText, newImageFile = null) {
   if (newImageFile) formData.append('image', newImageFile);
 
   try {
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'PATCH',
       credentials: 'include',
       body: formData,

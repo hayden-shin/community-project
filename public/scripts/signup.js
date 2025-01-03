@@ -1,4 +1,5 @@
 import { isValidEmail, isValidPassword } from './common.js';
+import { BASE_URL } from '../config.js';
 
 const checkAllValid = () => {
   return (
@@ -111,7 +112,7 @@ async function signup(profileImage, email, password, nickname) {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/auth/signup', {
+    const response = await fetch(`${BASE_URL}/auth/signup`, {
       method: 'POST',
       credentials: 'include',
       body: formData,

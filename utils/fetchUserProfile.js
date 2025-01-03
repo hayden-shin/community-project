@@ -1,6 +1,8 @@
+import BASE_URL from '../config.js';
+
 export async function fetchUserProfile() {
   try {
-    const response = await fetch(`http://localhost:3000/users/profile`, {
+    const response = await fetch(`${BASE_URL}/users/profile`, {
       method: 'GET',
       credentials: 'include',
     });

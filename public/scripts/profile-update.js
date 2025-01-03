@@ -1,15 +1,15 @@
+import BASE_URL from '../config.js';
 import { showModal, closeModal } from './common.js';
 import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const userProfile = await fetchUserProfile();
+    const user = await fetchUserProfile();
 
     if (userProfile) {
-      document.getElementById('email').value = userProfile.email;
-      document.getElementById('nickname').value = userProfile.nickname;
-      document.getElementById('profile-image-preview').src =
-        userProfile.profileUrl;
+      document.getElementById('email').value = user.email;
+      document.getElementById('nickname').value = user.nickname;
+      document.getElementById('profile-image-preview').src = user.profileUrl;
     } else {
       console.log('userProfile이 없습니다.');
     }
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`프로필 초기화 중 오류: ${error.message}`);
   }
 
-  const newNickname = document.getElementById('nickname');
+  const nickname = document.getElementById('nickname');
   const nicknameHelper = document.getElementById('nickname-helper');
 
   const showToast = (message) => {
@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 닉네임 유효성 검사
   const validateNickname = () => {
-    const nickname = newNickname.value.trim();
+    const nicknameValue = nickname.value.trim();
 
-    if (!nickname) {
+    if (!nicknameValue) {
       nicknameHelper.textContent = '*닉네임을 입력해주세요.';
     } else if (nickname.length > 10) {
       nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 로그아웃 요청
   async function logout() {
     try {
-      const response = await fetch('http://localhost:3000/auth/logout', {
+      const response = await fetch(`${BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,14 +77,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 프로필 업데이트
-  async function updateProfile(newEmail, newNickname, newProfileUrl) {
+  async function updateProfile(email, nickname, profileUrl) {
     try {
       const formData = new FormData();
-      if (newEmail) formData.append('newEmail', newEmail);
-      if (newNickname) formData.append('newNickname', newNickname);
-      if (newProfileUrl) formData.append('image', newProfileUrl);
+      if (email) formData.append('newEmail', email);
+      if (nickname) formData.append('newNickname', nickname);
+      if (profileUrl) formData.append('image', profileUrl);
 
-      const response = await fetch(`http://localhost:3000/users/profile`, {
+      const response = await fetch(`${BASE_URL}/users/profile`, {
         method: 'PATCH',
         credentials: 'include',
         body: formData,
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 회원 탈퇴
   async function deleteAccount() {
     try {
-      const response = await fetch(`http://localhost:3000/auth/account`, {
+      const response = await fetch(`${BASE_URL}/auth/account`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -140,16 +140,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// 사용자 프로필 불러오기
+const profile = () => {
+  const userProfile = document.createElement('div');
+  const userProfileContents = `
+  <div class="form-group">
+      <label for="profile-image" class="profile-label">프로필 사진*</label>
+      <div class="profile-image-wrapper">
+          <div class="profile-image-container">
+              <img src="../assets/headerpic.png" alt="프로필 사진" class="profile-image" id="profile-image-preview" />
+              <label for="profile-image-upload" class="change-photo-label">변경</label>
+              <input type="file" id="profile-image-upload" accept="image/*" style="display: none;" />
+          </div>
+      </div>
+  </div>
+
+  <div class="form-group">
+      <label for="email">이메일</label>
+      <input type="email" id="email" value="hayden@gmail.com">
+      <!-- <input type="email" id="email" value="hayden@gmail.com" readonly> -->
+  </div>
+
+  <div class="form-group">
+      <label for="nickname">닉네임</label>
+      <input type="text" id="nickname" value="헤이든">
+      <span class="helper-text" id="nickname-helper"></span>
+  </div>`;
+
+  userProfile.innerHTML = userProfileContents;
+};
+
 // 프로필 수정 버튼과 이벤트 연결
 const updateProfileButton = document.getElementById('update-profile-button');
 updateProfileButton.addEventListener('click', (e) => {
   e.preventDefault();
 
-  const newNickname = document.getElementById('nickname').value.trim();
-  const newEmail = document.getElementById('email').value.trim();
-  const newProfileUrl = document.getElementById('profile-image-upload')
-    .files[0];
-  updateProfile(newEmail, newNickname, newProfileUrl);
+  const nickname = document.getElementById('nickname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const profileUrl = document.getElementById('profile-image-upload').files[0];
+  updateProfile(email, nickname, profileUrl);
 });
 
 // 프로필 이미지 미리보기

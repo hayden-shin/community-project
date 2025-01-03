@@ -1,3 +1,4 @@
+import BASE_URL from '../config.js';
 import { updateCommentCount } from './comment.js';
 import { showToast, showModal } from './common.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
@@ -15,12 +16,10 @@ const toggleButtonState = (button, enabled) => {
   button.style.backgroundColor = enabled ? '#7F6AEE' : '#ACA0EB';
 };
 
-const SERVER_URL = 'http://localhost:3000';
-
 // 게시글 조회
 async function viewPost(postId) {
   try {
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -94,7 +93,7 @@ async function renderPost(postData) {
   document.getElementById('view-count').innerHTML =
     `${formatNumber(postData.views)}<span>조회수</span>`;
   document.getElementById('comment-count').innerHTML =
-    `${formatNumber(postData.comment_ids.length)}<span>댓글</span>`;
+    `${formatNumber(postData.comments)}<span>댓글</span>`;
 }
 
 async function renderComments(comments) {
@@ -112,7 +111,7 @@ async function renderComments(comments) {
     commentElement.innerHTML = `
         <div class="comment-header">
           <div class="comment-author">
-            <img src="${SERVER_URL}${author.profileUrl}" alt="User Icon" class="author-img">
+            <img src="${author.profileUrl}" alt="User Icon" class="author-img">
             <span class="comment-author">${author.nickname}</span>
             <span class="comment-date">${formatDateTime(comment.created_at)}</span>
           </div>
@@ -133,7 +132,7 @@ async function renderComments(comments) {
 async function deletePost(postId) {
   console.log('삭제할 게시글 ID: ', postId);
   try {
-    const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -167,13 +166,10 @@ const likeButton = document.getElementById('like-button');
 
 export async function fetchLikeStatus(postId, likeButton) {
   try {
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
-      {
-        method: 'GET',
-        credentials: 'include',
-      }
-    );
+    const response = await fetch(`${BASE_URL}/posts/${postId}/likes`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
     if (response.ok) {
       const result = await response.json();
@@ -201,13 +197,10 @@ export async function fetchLikeStatus(postId, likeButton) {
 
 async function addLikes(postId) {
   try {
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
-      {
-        method: 'POST',
-        credentials: 'include',
-      }
-    );
+    const response = await fetch(`${BASE_URL}/posts/${postId}/likes`, {
+      method: 'POST',
+      credentials: 'include',
+    });
 
     if (response.ok) {
       const result = await response.json();
@@ -229,13 +222,10 @@ async function addLikes(postId) {
 
 async function removeLikes(postId) {
   try {
-    const response = await fetch(
-      `http://localhost:3000/posts/${postId}/likes`,
-      {
-        method: 'DELETE',
-        credentials: 'include',
-      }
-    );
+    const response = await fetch(`${BASE_URL}/posts/${postId}/likes`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
 
     if (response.ok) {
       const result = await response.json();

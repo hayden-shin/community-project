@@ -1,3 +1,4 @@
+import BASE_URL from '../config.js';
 import { isValidEmail, isValidPassword } from './common.js';
 
 // 로티 애니메이션 표시
@@ -60,7 +61,7 @@ async function login(email, password) {
 
   if (isValidEmail(email) && isValidPassword(password)) {
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
