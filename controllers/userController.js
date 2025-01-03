@@ -9,26 +9,6 @@ const bcrypt = require('bcrypt');
 
 const BASE_URL = 'http://localhost:3000';
 
-// JSON 파일 읽기
-const loadUser = () => {
-  try {
-    const data = fs.readFileSync(USER_FILE, 'utf8');
-    JSON.parse(data);
-    return null; // when error occurs
-  } catch (err) {
-    return console.log('err: ', err);
-  }
-};
-
-// JSON 파일 쓰기
-const saveUser = (user) => {
-  try {
-    fs.writeFileSync(USER_FILE, JSON.stringify(user, null, 2));
-  } catch (err) {
-    console.log('err: ', err);
-  }
-};
-
 // 회원가입
 export const signup = async (req, res) => {
   const { email, password, nickname } = req.body;
