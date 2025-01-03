@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (userProfile) {
       document.getElementById('email').value = user.email;
       document.getElementById('nickname').value = user.nickname;
-      document.getElementById('profile-image-preview').src = user.profileUrl;
+      document.getElementById('profile-image-preview').src = user.profileImage;
     } else {
       console.log('userProfile이 없습니다.');
     }
@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 프로필 업데이트
-  async function updateProfile(email, nickname, profileUrl) {
+  async function updateProfile(email, nickname, profileImage) {
     try {
       const formData = new FormData();
       if (email) formData.append('newEmail', email);
       if (nickname) formData.append('newNickname', nickname);
-      if (profileUrl) formData.append('image', profileUrl);
+      if (profileImage) formData.append('image', profileImage);
 
       const response = await fetch(`${BASE_URL}/users/profile`, {
         method: 'PATCH',
@@ -177,8 +177,8 @@ updateProfileButton.addEventListener('click', (e) => {
 
   const nickname = document.getElementById('nickname').value.trim();
   const email = document.getElementById('email').value.trim();
-  const profileUrl = document.getElementById('profile-image-upload').files[0];
-  updateProfile(email, nickname, profileUrl);
+  const profileImage = document.getElementById('profile-image-upload').files[0];
+  updateProfile(email, nickname, profileImage);
 });
 
 // 프로필 이미지 미리보기

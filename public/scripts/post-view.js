@@ -71,8 +71,8 @@ async function renderPost(postData) {
   authorImage.src = `${BASE_URL}${postData.imageUrl}`;
   postAuthor.textContent = authorProfile.nickname;
 
-  if (postData.authorProfileUrl) {
-    authorImage.src = postData.authorProfileUrl;
+  if (postData.authorprofileImage) {
+    authorImage.src = postData.authorprofileImage;
     authorImage.style.display = 'block';
   } else {
     authorImage.src = `${BASE_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
@@ -111,7 +111,7 @@ async function renderComments(comments) {
     commentElement.innerHTML = `
         <div class="comment-header">
           <div class="comment-author">
-            <img src="${author.profileUrl}" alt="User Icon" class="author-img">
+            <img src="${author.profileImage}" alt="User Icon" class="author-img">
             <span class="comment-author">${author.nickname}</span>
             <span class="comment-date">${formatDateTime(comment.created_at)}</span>
           </div>
