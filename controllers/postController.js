@@ -3,7 +3,7 @@ import fs from 'fs';
 
 const POST_FILE = path.join(process.cwd(), '../data/post.json');
 const COMMENT_FILE = path.join(process.cwd(), '../data/comment.json');
-const LIKE_FILE = path.joing(process.cwd(), '../data/like.json');
+const LIKE_FILE = path.join(process.cwd(), '../data/like.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
