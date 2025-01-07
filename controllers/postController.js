@@ -27,7 +27,11 @@ export const createPost = async (req, res) => {
       title,
       content,
       postImage,
-      authorId: userId,
+      author: {
+        id: userId,
+        profileImage: req.session.user.profileImage,
+        nickname: req.session.user.nickanme,
+      },
       createdAt: new Date().toISOString(),
       viewCount: 0,
       likeCount: 0,
@@ -94,7 +98,7 @@ export const editPost = async (req, res) => {
       return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    if (!userId || post.authorId !== userId) {
+    if (!userId || post.author.id !== userId) {
       return res.status(401).json({ message: 'no permission', data: null });
     }
 
@@ -141,7 +145,7 @@ export const deletePost = async (req, res) => {
       return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    if (posts[index].authorId !== userId) {
+    if (posts[index].author.id !== userId) {
       return res.status(403).json({ message: 'no permission', data: null });
     }
 
