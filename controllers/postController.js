@@ -91,7 +91,7 @@ export const editPost = async (req, res) => {
   const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
-    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-9'));
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
     const post = posts.find((p) => p.id == postId);
 
     if (!post) {
@@ -216,7 +216,7 @@ export const toggleLikePost = async (req, res) => {
 
       return res.status(200).json({
         message: 'like remove success',
-        data: { isLiked: false },
+        data: { isLiked: false, likeCount: post.likeCount },
       });
     } else {
       // 좋아요 추가
@@ -234,7 +234,7 @@ export const toggleLikePost = async (req, res) => {
       fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
       return res.status(200).json({
         message: 'like add success',
-        data: { isLiked: true },
+        data: { isLiked: true, likeCount: post.likeCount },
       });
     }
   } catch (error) {
