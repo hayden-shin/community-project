@@ -30,7 +30,7 @@ export const createPost = async (req, res) => {
       author: {
         id: userId,
         profileImage: req.session.user.profileImage,
-        nickname: req.session.user.nickanme,
+        nickname: req.session.user.nickname,
       },
       createdAt: new Date().toISOString(),
       viewCount: 0,
