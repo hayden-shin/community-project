@@ -1,14 +1,14 @@
 import BASE_URL from '../config.js';
 
 const titleInput = document.getElementById('post-title');
-const textInput = document.getElementById('post-content');
+const contentInput = document.getElementById('post-content');
 const postButton = document.getElementById('post-button');
 const postHelper = document.getElementById('post-helper');
 const imagePreview = document.getElementById('image-preview');
 
 const checkAllValid = () => {
   return (
-    titleInput.value.trim().length > 0 && textInput.value.trim().length > 0
+    titleInput.value.trim().length > 0 && contentInput.value.trim().length > 0
   );
 };
 
@@ -38,11 +38,11 @@ imageFileInput.addEventListener('change', () => {
 });
 
 // 게시글 작성 요청
-async function createPost(title, text, imageFile = null) {
+async function createPost(title, content, imageFile = null) {
   try {
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('text', text);
+    formData.append('content', content);
     if (imageFile) formData.append('image', imageFile);
 
     const response = await fetch(`${BASE_URL}/posts`, {
@@ -54,9 +54,6 @@ async function createPost(title, text, imageFile = null) {
     // 서버 응답 상태 코드 처리
     if (response.status === 201) {
       const result = await response.json();
-      alert(
-        `게시글이 성공적으로 작성되었습니다! 게시글 ID: ${result.data.post_id}`
-      );
       console.log(`게시글 생성 응답: ${result.data}`);
 
       window.location.href = '/post-list';
@@ -77,10 +74,10 @@ postButton.addEventListener('click', (e) => {
   e.preventDefault();
 
   const title = titleInput.value.trim();
-  const text = textInput.value.trim();
+  const content = contentInput.value.trim();
   const imageFile = imageFileInput.files[0];
 
-  createPost(title, text, imageFile);
+  createPost(title, content, imageFile);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
