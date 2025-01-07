@@ -2,7 +2,7 @@ import BASE_URL from '../config.js';
 import { showToast } from './common.js';
 
 const title = document.getElementById('post-title');
-const text = document.getElementById('post-text');
+const content = document.getElementById('post-content');
 const imageFileInput = document.getElementById('image-url');
 const imagePreview = document.getElementById('image-preview');
 const updateButton = document.getElementById('update-post-button');
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const result = await response.json();
-    const post = result.data;
+    const post = result.data.post;
 
     // 기존 데이터 세팅
     title.value = post.title;
-    text.value = post.text;
+    content.value = post.content;
 
     if (post.image_url) {
       imagePreview.src = `${BASE_URL}${post.image_url}`;
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     event.preventDefault();
 
     const newTitle = title.value.trim();
-    const newContent = text.value.trim();
+    const newContent = content.value.trim();
     const newImageFile = imageFileInput.files[0]; // 선택된 파일
 
     if (!newTitle || !newContent) {
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function editPost(postId, newTitle, newText, newImageFile = null) {
   const formData = new FormData();
   formData.append('title', newTitle);
-  formData.append('text', newText);
+  formData.append('content', newText);
   if (newImageFile) formData.append('image', newImageFile);
 
   try {
@@ -127,7 +127,7 @@ function updateButtonState() {
   const isValid =
     title.value.trim().length > 0 &&
     title.value.trim().length <= MAX_TITLE_LENGTH &&
-    text.value.trim().length > 0;
+    content.value.trim().length > 0;
 
   updateButton.disabled = !isValid;
   updateButton.style.backgroundColor = isValid ? '#7F6AEE' : '#ACA0EB';
