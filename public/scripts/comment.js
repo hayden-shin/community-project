@@ -32,7 +32,7 @@ const createComment = async (postId) => {
     if (response.ok) {
       const result = await response.json();
 
-      renderComment(result.data);
+      renderComment(result.data.comment);
       updateCommentCount(postId);
       commentInput.value = '';
       showToast('댓글이 성공적으로 등록되었습니다.');
@@ -55,7 +55,7 @@ const renderComment = (commentData) => {
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-author">
-        <img src="${commentData.author.profileImage}" alt="User Icon" class="author-img">
+        <img src="${BASE_URL}${commentData.author.profileImage}" alt="User Icon" class="author-img">
         <span class="comment-author">${commentData.author.nickname}</span>
         <span class="comment-date">${formatDateTime(commentData.createdAt)}</span>
       </div>
