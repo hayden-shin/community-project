@@ -56,7 +56,7 @@ header h1 {
   margin: 30px 0;
 }
 
-.back-button, .header-profile-img {
+.back-button, .header-profile-image {
   background: none;
   border: none;
   cursor: pointer;
@@ -77,11 +77,11 @@ header h1 {
   top: 15px;
 }
 
-.header-profile-img {
+.header-profile-image {
   display: flex;
 
-  max-width: 30px;
-  max-height: 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
 
   position: absolute;
