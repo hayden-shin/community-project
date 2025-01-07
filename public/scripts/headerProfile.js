@@ -1,8 +1,8 @@
-const SERVER_URL = 'http://3.38.209.206:3000';
+import BASE_URL from '../config.js';
 
 async function fetchUserProfile() {
   try {
-    const response = await fetch(`${SERVER_URL}/users/profile`, {
+    const response = await fetch(`${BASE_URL}/users/profile`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           headerProfileImage.src = user.profileImage;
         } else {
           // 기본 프로필 이미지 경로 사용
-          headerProfileImage.src = `${SERVER_URL}/assets/default-profile.jpg`;
+          headerProfileImage.src = `${BASE_URL}/assets/default-profile.jpg`;
         }
       }
     }

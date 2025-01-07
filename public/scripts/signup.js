@@ -1,6 +1,5 @@
-const SERVER_URL = 'http://3.38.209.206:3000';
-
 import { isValidEmail, isValidPassword } from './common.js';
+import BASE_URL from '../config.js';
 
 const checkAllValid = () => {
   return (
@@ -113,7 +112,7 @@ async function signup(profileImage, email, password, nickname) {
   }
 
   try {
-    const response = await fetch(`${SERVER_URL}/auth/signup`, {
+    const response = await fetch(`${BASE_URL}/auth/signup`, {
       method: 'POST',
       credentials: 'include',
       body: formData,

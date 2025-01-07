@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const profileIcon = document.querySelector('.header-profile-img');
+  const profileIcon = document.querySelector('.header-profile-image');
   const dropdownMenu = document.getElementById('dropdown-menu');
 
   // 드롭다운 메뉴 토글 함수

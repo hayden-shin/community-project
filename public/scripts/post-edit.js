@@ -1,10 +1,9 @@
-const SERVER_URL = 'http://3.38.209.206:3000';
-
+import BASE_URL from '../config.js';
 import { showToast } from './common.js';
 
 const title = document.getElementById('post-title');
-const text = document.getElementById('post-text');
-const imageFileInput = document.getElementById('image-url');
+const content = document.getElementById('post-content');
+const imageInput = document.getElementById('image-url');
 const imagePreview = document.getElementById('image-preview');
 const updateButton = document.getElementById('update-post-button');
 const charCountDisplay = document.getElementById('char-count');
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // 기존 게시글 데이터 가져오기
-    const response = await fetch(`${SERVER_URL}/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -32,18 +31,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const result = await response.json();
-    const post = result.data;
+    const post = result.data.post;
 
     // 기존 데이터 세팅
     title.value = post.title;
-    text.value = post.text;
+    content.value = post.content;
 
-    if (post.image_url) {
-      imagePreview.src = `${SERVER_URL}${post.image_url}`;
+    if (post.postImage) {
+      imagePreview.src = `${BASE_URL}${post.postImage}`;
       imagePreview.style.display = 'block';
     } else {
       imagePreview.style.display = 'none';
     }
+
+    updateButtonState();
   } catch (error) {
     console.error('게시글 데이터 로드 실패:', error);
     alert('게시글 데이터를 불러오는 중 문제가 발생했습니다.');
@@ -59,8 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 이미지 업로드 미리보기 처리
-  imageFileInput.addEventListener('change', () => {
-    const file = imageFileInput.files[0];
+  imageInput.addEventListener('change', () => {
+    const file = imageInput.files[0];
 
     if (file) {
       const reader = new FileReader();
@@ -80,15 +81,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     event.preventDefault();
 
     const newTitle = title.value.trim();
-    const newContent = text.value.trim();
-    const newImageFile = imageFileInput.files[0]; // 선택된 파일
+    const newContent = content.value.trim();
+    const newPostImage = imageInput.files[0];
 
     if (!newTitle || !newContent) {
       alert('제목과 내용을 입력해주세요.');
       return;
     }
 
-    await editPost(postId, newTitle, newContent, newImageFile);
+    await editPost(postId, newTitle, newContent, newPostImage);
   });
 
   // 초기 버튼 상태 설정
@@ -96,14 +97,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // 게시글 수정 요청 함수
-async function editPost(postId, newTitle, newText, newImageFile = null) {
+async function editPost(postId, newTitle, newText, newPostImage = null) {
   const formData = new FormData();
   formData.append('title', newTitle);
-  formData.append('text', newText);
-  if (newImageFile) formData.append('image', newImageFile);
+  formData.append('content', newText);
+  if (newPostImage) formData.append('image', newPostImage);
 
   try {
-    const response = await fetch(`${SERVER_URL}/posts/${postId}`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}`, {
       method: 'PATCH',
       credentials: 'include',
       body: formData,
@@ -128,7 +129,7 @@ function updateButtonState() {
   const isValid =
     title.value.trim().length > 0 &&
     title.value.trim().length <= MAX_TITLE_LENGTH &&
-    text.value.trim().length > 0;
+    content.value.trim().length > 0;
 
   updateButton.disabled = !isValid;
   updateButton.style.backgroundColor = isValid ? '#7F6AEE' : '#ACA0EB';
