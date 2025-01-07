@@ -30,7 +30,7 @@ async function viewPost(postId) {
     if (response.status === 200) {
       const result = await response.json();
       // console.log('포스트:', result); // fetched 포스트 데이터 로그
-      renderPost(result.data);
+      renderPost(result.data.post);
       renderComments(result.data.comments);
       // if (result.data.comments) {
       //   renderComments(result.data.comments);
@@ -55,11 +55,10 @@ async function viewPost(postId) {
 
 async function renderPost(postData) {
   document.getElementById('post-title').textContent = postData.title;
-  document.getElementById('post-author').textContent = postData.author_nickname;
   document.getElementById('post-date').textContent = formatDateTime(
-    postData.created_at
+    postData.createdAt
   );
-  document.getElementById('post-text').innerHTML = postData.text;
+  document.getElementById('post-content').innerHTML = postData.content;
 
   console.log('Post Data:', postData); // postData 확인
 
@@ -67,21 +66,21 @@ async function renderPost(postData) {
   const authorImage = document.getElementById('author-image');
   const postAuthor = document.getElementById('post-author');
 
-  const authorProfile = await fetchUserProfile(postData.author_id);
-  authorImage.src = `${BASE_URL}${postData.imageUrl}`;
-  postAuthor.textContent = authorProfile.nickname;
+  const author = postData.author;
+  authorImage.src = `${BASE_URL}${author.profileImage}`;
+  postAuthor.textContent = author.nickname;
 
-  if (postData.authorprofileImage) {
-    authorImage.src = postData.authorprofileImage;
+  if (postData.author.profileImage) {
+    authorImage.src = author.profileImage;
     authorImage.style.display = 'block';
   } else {
-    authorImage.src = `${BASE_URL}/assets/default-profile.jpg`; // 기본 이미지 설정
+    authorImage.src = `${BASE_URL}/assets/default-profile-image.jpg`; // 기본 이미지 설정
   }
 
   // 게시글 이미지 렌더링
   const postImage = document.getElementById('post-image');
-  if (postData.image_url) {
-    postImage.src = `${BASE_URL}${postData.image_url}`;
+  if (postData.postImage) {
+    postImage.src = `${BASE_URL}${postData.postImage}`;
     postImage.style.display = 'block';
   } else {
     postImage.style.display = 'none';
@@ -89,11 +88,11 @@ async function renderPost(postData) {
 
   // 좋아요, 조회수, 댓글 수 업데이트
   document.getElementById('like-button').innerHTML =
-    `${formatNumber(postData.likes)}<span>좋아요</span>`;
+    `${formatNumber(postData.likeCount)}<span>좋아요</span>`;
   document.getElementById('view-count').innerHTML =
-    `${formatNumber(postData.views)}<span>조회수</span>`;
+    `${formatNumber(postData.viewCount)}<span>조회수</span>`;
   document.getElementById('comment-count').innerHTML =
-    `${formatNumber(postData.comments)}<span>댓글</span>`;
+    `${formatNumber(postData.commentCount)}<span>댓글</span>`;
 }
 
 async function renderComments(comments) {
@@ -103,24 +102,24 @@ async function renderComments(comments) {
   for (const comment of comments) {
     const commentElement = document.createElement('div');
     commentElement.classList.add('comment');
-    commentElement.setAttribute('data-comment-id', comment.comment_id);
+    commentElement.setAttribute('data-comment-id', comment.id);
 
     // 댓글 작성자 프로필 정보 가져오기
-    const author = await fetchUserProfile(comment.author_id);
+    const author = await fetchUserProfile(comment.author.id);
 
     commentElement.innerHTML = `
         <div class="comment-header">
           <div class="comment-author">
             <img src="${author.profileImage}" alt="User Icon" class="author-img">
             <span class="comment-author">${author.nickname}</span>
-            <span class="comment-date">${formatDateTime(comment.created_at)}</span>
+            <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
           </div>
           <div class="comment-buttons">
             <button class="edit-comment-button">수정</button>
             <button class="delete-comment-button">삭제</button>
           </div>
         </div>
-        <p class="comment-text">${comment.text}</p>
+        <p class="comment-text">${comment.content}</p>
       `;
 
     commentList.appendChild(commentElement);
@@ -204,10 +203,10 @@ async function addLikes(postId) {
 
     if (response.ok) {
       const result = await response.json();
-      const { likes } = result.data;
+      const { likeCount } = result.data;
 
       likeButton.classList.add('liked');
-      likeButton.innerHTML = `${likes}<span>좋아요</span>`;
+      likeButton.innerHTML = `${likeCount}<span>좋아요</span>`;
       showToast('좋아요');
     } else if (response.status == 401) {
       alert('로그인이 필요합니다.');
@@ -229,10 +228,10 @@ async function removeLikes(postId) {
 
     if (response.ok) {
       const result = await response.json();
-      const { likes } = result.data;
+      const { likeCount } = result.data;
 
       likeButton.classList.remove('liked');
-      likeButton.innerHTML = `${likes}<span>좋아요</span>`;
+      likeButton.innerHTML = `${likeCount}<span>좋아요</span>`;
       showToast('좋아요 취소');
     } else if (response.status === 401) {
       alert('로그인이 필요합니다.');
