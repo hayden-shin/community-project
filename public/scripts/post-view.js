@@ -228,9 +228,6 @@ async function removeLikes(postId) {
   }
 }
 
-// 초기화
-backButton.addEventListener('click', () => window.history.back());
-
 editPostButton.addEventListener('click', () => {
   const postId = new URLSearchParams(window.location.search).get('id');
   if (postId) window.location.href = `/post-edit?id=${postId}`;
