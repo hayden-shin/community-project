@@ -37,7 +37,7 @@ export const signup = async (req, res) => {
       email,
       password: hashedPassword,
       nickname,
-      createdAt: Date.now(),
+      createdAt: new Date().toISOString(),
     };
     users.push(newUser);
 
@@ -132,6 +132,7 @@ export const getUserProfile = async (req, res) => {
     res.status(200).json({
       message: 'user profile retrieved',
       data: {
+        id: userId,
         email: user.email,
         nickname: user.nickname,
         profileImage: `${BASE_URL}${user.profileImage}`,
@@ -145,7 +146,7 @@ export const getUserProfile = async (req, res) => {
 // 사용자 정보 수정
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { email, nickname } = req.body;
+  const { nickname } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
@@ -158,14 +159,6 @@ export const updateProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
-
-    // validate new email if provided
-    if (users.some((u) => u.email == email && u.id !== userId)) {
-      return res
-        .status(400)
-        .json({ message: 'email already exists', data: null });
-    }
-    if (email) user.email = email;
 
     // validate new nickname if provided
     if (users.some((u) => u.nickname == nickname && u.id !== userId)) {
@@ -182,7 +175,20 @@ export const updateProfile = async (req, res) => {
 
     fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
-    res.status(200).json({ message: 'profile update success', data: null });
+    // 세션에 저장된 사용자 정보 수정
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      profileImage: user.profileImage,
+    };
+
+    console.log('세션에 저장된 사용자: ', req.session?.user);
+
+    res.status(200).json({
+      message: 'profile update success',
+      data: { nickname, profileImage },
+    });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);
     res.status(500).json({ message: 'internal server error', data: null });
