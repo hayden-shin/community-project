@@ -12,7 +12,7 @@ const router = express.Router({ mergeParams: true });
 // 사용자 프로필 가져오기
 router.get('/profile', getUserProfile);
 
-// 프로필 수정
+// 사용자 정보 변경
 router.patch('/profile', upload, updateProfile);
 
 // 비밀번호 변경
