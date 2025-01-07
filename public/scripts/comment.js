@@ -64,7 +64,7 @@ const renderComment = (commentData) => {
         <button class="delete-comment-button">삭제</button>
       </div>
     </div>
-    <p class="comment-text">${commentData.content}</p>
+    <p class="comment-content">${commentData.content}</p>
   `;
 
   commentList.appendChild(commentElement);
