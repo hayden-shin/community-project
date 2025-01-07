@@ -1,293 +1,244 @@
-import {
-  readPostsFromFile,
-  readCommentsFromFile,
-  writePostsToFile,
-} from '../models/postModel.js';
+import path from 'path';
+import fs from 'fs';
+
+const POST_FILE = path.join(process.cwd(), 'data', 'post.json');
+const COMMENT_FILE = path.join(process.cwd(), 'data', 'comment.json');
+const LIKE_FILE = path.join(process.cwd(), 'data', 'like.json');
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
-  const { title, text } = req.body;
-  const user = req.session?.user;
+  const { title, content } = req.body;
+  const userId = req.session?.user?.id;
 
-  if (!user) {
+  if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  if (!title || !text) {
-    return res.status(400).json({ message: 'invalid_request', data: null });
+  if (!title || !content) {
+    return res.status(400).json({ message: 'invalid request', data: null });
   }
 
   try {
-    let imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
-    const posts = await readPostsFromFile();
-
-    // 새 게시글 생성
     const newPost = {
-      post_id: posts.length + 1,
+      id: posts.length + 1,
       title,
-      text,
-      image_url: imageUrl,
-      author_id: user.id,
-      author_profile_url: user.profile_image || '/assets/default-profile.jpg',
-      author_nickname: user.nickname,
-      created_at: new Date().toISOString(),
-      likes: 0,
-      views: 0,
-      comments: 0,
-      comment_ids: [],
-      liked_users: [],
+      content,
+      postImage,
+      author: {
+        id: userId,
+        profileImage: req.session.user.profileImage,
+        nickname: req.session.user.nickname,
+      },
+      createdAt: new Date().toISOString(),
+      viewCount: 0,
+      likeCount: 0,
+      commentCount: 0,
     };
-
     posts.push(newPost);
-    writePostsToFile(posts);
 
-    return res
-      .status(201)
-      .json({ message: 'post_created', data: { post_id: newPost.post_id } });
-  } catch (error) {
-    console.error('게시글 생성 실패:', error);
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
+
+    return res.status(201).json({
+      message: 'post create success',
+      data: newPost,
+    });
+  } catch (err) {
+    console.error('게시글 생성 실패:', err);
     return res
       .status(500)
-      .json({ message: 'internal_server_error', data: null });
+      .json({ message: 'internal server error', data: null });
   }
 };
 
 // 특정 게시글 가져오기
 export const getPostById = async (req, res) => {
   const postId = parseInt(req.params.post_id);
-  console.log('Requested postId:', postId); // 요청된 post_id 로그
 
   try {
-    const posts = await readPostsFromFile();
-    console.log('All posts:', posts); // 로그용 - 전체 포스트
-
-    const comments = await readCommentsFromFile();
-
-    const post = posts.find((p) => p.post_id === postId);
-    console.log('Found post:', post); // 로그용 - 특정 포스트
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
 
     if (!post) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    // 게시글의 댓글 로드
-    const postComments = comments.filter((comment) =>
-      post.comment_ids.includes(comment.comment_id)
-    );
+    // 댓글 가져오기
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const postComments = comments.filter((c) => c.postId == postId);
 
     // 조회수 증가
-    post.views += 1;
-    await writePostsToFile(posts);
+    post.viewCount += 1;
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
-    console.log('Returning data:', { ...post, comments: postComments });
     res.status(200).json({
-      message: 'post_retrieved',
-      data: { ...post, comments: postComments },
+      message: 'post retrieve success',
+      data: { post, comments: postComments },
     });
   } catch (error) {
-    console.error('게시글 가져오기 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.error('게시글 가져오기 실패: ', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
 // 게시글 수정
 export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
-  console.log('수정 요청 게시글 ID: ', postId);
-
-  const { title, text } = req.body;
-  const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
-  console.log('수정 요청 데이터: ', title, text, imageUrl);
+  const userId = req.session?.user?.id;
+  const { title, content } = req.body;
+  const postImage = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
-    // posts.json 파일에서 게시글 불러오기
-    const posts = await readPostsFromFile();
-
-    // 수정할 게시글 찾기
-    const post = posts.find((p) => p.post_id === postId);
-    console.log(post);
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
 
     if (!post) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    const user = req.session?.user; // 현재 로그인한 사용자 정보
-    console.log('현재 로그인한 사용자: ', user);
-
-    if (!user || post.author_id !== user.id) {
-      return res.status(401).json({ message: 'no_permission', data: null });
+    if (!userId || post.author.id !== userId) {
+      return res.status(401).json({ message: 'no permission', data: null });
     }
 
-    post.title = title;
-    post.text = text;
-    if (imageUrl) post.image_url = imageUrl;
+    if (title) post.title = title;
+    if (content) post.content = content;
+    if (postImage) post.postImage = postImage;
+    post.updatedAt = new Date().toISOString();
 
-    if (title || text || imageUrl) {
-      post.updated_at = new Date().toISOString();
-    }
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
-    console.log(`Post ID: ${postId}, Image: ${imageUrl}, Title: ${title}`);
-
-    await writePostsToFile(posts);
-
-    res.status(200).json({ message: 'post_updated', data: post });
+    res.status(200).json({ message: 'post update success', data: null });
   } catch (error) {
-    console.log('댓글 수정 실패', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.log('게시글 수정 실패', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
 // 모든 게시글 가져오기
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await readPostsFromFile();
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
 
-    const sanitizedPosts = posts.map((post) => ({
-      ...post,
-      commentIds: post.commentIds || [],
-    }));
-
-    console.log('Retrieved posts:', posts); // 디버그 로그
-    res.status(200).json({ message: 'posts_retrieved', data: posts });
+    res.status(200).json({ message: 'posts retrieve success', data: posts });
   } catch (error) {
-    console.error('게시글 목록 가져오기 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.error('게시글 목록 가져오기 실패: ', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
 // 게시글 삭제
 export const deletePost = async (req, res) => {
   const postId = parseInt(req.params.post_id);
-  const user = req.session?.user;
+  const userId = req.session?.user?.id;
 
-  console.log('삭제할 게시글 ID: ', postId);
-  console.log('게시글 삭제를 요청한 사용자: ', req.session?.user?.id);
-
-  if (!req.session.user) {
+  if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const posts = await readPostsFromFile();
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const index = posts.findIndex((p) => p.id == postId);
 
-    const postIndex = posts.findIndex((p) => p.post_id == postId);
-    console.log('post INDEX: ', postIndex);
-
-    if (postIndex === -1) {
-      return res.status(404).json({ message: 'post_not_found', data: null });
+    if (index == -1) {
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    const post = posts[postIndex];
-    if (post.author_id !== user.id) {
-      return res.status(403).json({ message: 'no_permission', data: null });
+    if (posts[index].author.id !== userId) {
+      return res.status(403).json({ message: 'no permission', data: null });
     }
 
-    posts.splice(postIndex, 1);
-    await writePostsToFile(posts);
+    posts.splice(index, 1);
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
     res.status(204).send();
   } catch (error) {
-    console.error('게시글 삭제 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
+    console.error('게시글 삭제 실패: ', error);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
-// 작성자 프로필 정보 가져오기
-export const getAuthorProfile = async (req, res) => {
-  const authorId = parseInt(req.params.author_id, 10);
+/*
+  -------- 좋아요  --------
+*/
 
-  if (!authorId) {
-    return res.status(400).json({ message: 'invalid_author_id', data: null });
-  }
-
-  try {
-    const users = await readUsersFromFile();
-    const author = users.find((user) => user.id === authorId);
-
-    if (!author) {
-      return res.status(404).json({ message: 'author_not_found', data: null });
-    }
-
-    // 작성자 프로필 정보 반환
-    res.status(200).json({
-      message: 'author_profile_retrieved',
-      data: {
-        nickname: author.nickname,
-        profile_url: author.profile_url || '/assets/default-profile.jpg',
-      },
-    });
-  } catch (error) {
-    console.error('작성자 프로필 정보 가져오기 실패:', error);
-    res.status(500).json({ message: 'internal_server_error', data: null });
-  }
-};
-
+// 좋아요 상태 확인
 export const getLikeStatus = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
-  try {
-    const posts = await readPostsFromFile();
-    const post = posts.find((p) => p.post_id === postId);
 
-    const isLiked = post.liked_users?.includes(userId) || false;
+  try {
+    const likes = JSON.parse(fs.readFileSync(LIKE_FILE, 'utf-8'));
+    const isLiked = likes.some((l) => l.postId == postId && l.userId == userId);
 
     res
       .status(200)
-      .json({ message: 'Like status retrieved', data: { isLiked } });
+      .json({ message: 'like status retrieve success', data: { isLiked } });
   } catch (error) {
-    console.log(`좋아요 상태 확인 실패: ${error}`);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    console.error(`좋아요 상태 확인 실패: ${error}`);
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
+// 좋아요 추가/삭제
 export const toggleLikePost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
 
   if (!postId) {
-    return res.status(400).json({ message: 'Invalid post ID', data: null });
+    return res.status(400).json({ message: 'invalid post', data: null });
   }
   if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized', data: null });
+    return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const posts = await readPostsFromFile();
-    const post = posts.find((p) => p.post_id === postId);
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
 
     if (!post) {
-      return res.status(404).json({ message: 'Post not found', data: null });
+      return res.status(404).json({ message: 'post not found', data: null });
     }
 
-    // 좋아요 상태 토글
-    if (!Array.isArray(post.liked_users)) {
-      post.liked_users = [];
-    }
+    const likes = JSON.parse(fs.readFileSync(LIKE_FILE, 'utf-8'));
+    const index = likes.findIndex(
+      (l) => l.postId == postId && l.userId == userId
+    );
 
-    const isLiked = post.liked_users.includes(userId);
-
-    if (isLiked) {
+    if (index !== -1) {
       // 좋아요 취소
-      post.liked_users = post.liked_users.filter((id) => id !== userId);
-      post.likes -= 1;
+      likes.splice(index, 1);
+      fs.writeFileSync(LIKE_FILE, JSON.stringify(likes, null, 2));
+
+      post.likeCount -= 1;
+      fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
+
+      return res.status(200).json({
+        message: 'like remove success',
+        data: { isLiked: false, likeCount: post.likeCount },
+      });
     } else {
       // 좋아요 추가
-      post.liked_users.push(userId);
-      post.likes += 1;
+      const newLike = {
+        id: likes.length + 1,
+        userId,
+        postId,
+        createdAt: new Date().toISOString(),
+      };
+
+      likes.push(newLike);
+      fs.writeFileSync(LIKE_FILE, JSON.stringify(likes, null, 2));
+
+      post.likeCount += 1;
+      fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
+      return res.status(200).json({
+        message: 'like add success',
+        data: { isLiked: true, likeCount: post.likeCount },
+      });
     }
-
-    await writePostsToFile(posts);
-
-    res.status(200).json({
-      message: 'like toggled',
-      data: {
-        likes: post.likes,
-        isLiked: !isLiked, // 현재 좋아요 상태 반환
-      },
-    });
   } catch (error) {
     console.error('좋아요 토글 실패:', error);
-    res.status(500).json({ message: 'Internal server error', data: null });
+    res.status(500).json({ message: 'internal server error', data: null });
   }
 };

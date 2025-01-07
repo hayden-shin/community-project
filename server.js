@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
@@ -10,17 +11,15 @@ import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = 3000;
 
-// DB
-//import conn from './database/connect/maria.js';
-
-const SERVER_URL = '3.38.209.206';
-
 // CORS 설정
 const corsOptions = {
-  origin: `http://${SERVER_URL}:2000`,
+  origin: `http://localhost:2000`,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-USER-ID'],
   credentials: true,
@@ -33,7 +32,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // HTTPS가 아닌 경우 false로 설정
+      secure: false,
       httpOnly: true, // 클라이언트에서 쿠키를 접근하지 못하도록 설정
       sameSite: 'lax', // 크로스-도메인 요청에서 쿠키 허용
       maxAge: 1000 * 60 * 60 * 24, // 1일후 쿠키 만료
@@ -41,14 +40,13 @@ app.use(
   })
 );
 
-// 정적 파일 제공 설정
-const __dirname = path.resolve();
+// 정적 파일 제공
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // 미들웨어 설정
 app.use(cors(corsOptions));
-app.use(express.json()); // JSON 요청 본문 파싱
-app.use(express.urlencoded({ extended: true })); // URL-encoded 파싱
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 
 // OPTIONS 요청 예외처리
@@ -78,37 +76,11 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/posts/:post_id/comments', commentRoutes);
 
-// JSON 요청 본문 크기 제한 늘리기
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
 // 404 에러 디버깅
 app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: 'Not Found' });
 });
-
-// JSON 파일 경로
-const POSTS_FILE = path.join(process.cwd(), 'data/posts.json');
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
-const COMMENTS_FILE = path.join(process.cwd(), 'data/comments.json');
-
-let posts = [];
-let users = [];
-let comments = [];
-
-// JSON 데이터 로드 함수
-const loadJSONData = () => {
-  try {
-    posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf-8'));
-    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    comments = JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8'));
-    console.log('JSON 데이터가 성공적으로 로드되었습니다.');
-  } catch (error) {
-    console.error('JSON 데이터 로드 중 에러 발생:', error);
-  }
-};
-loadJSONData();
 
 // 기본 라우트
 app.get('/', (req, res) => {

@@ -1,10 +1,13 @@
-import { readUsersFromFile, writeUsersToFile } from '../models/userModel.js';
+import fs from 'fs';
+import path from 'path';
 import { createRequire } from 'module';
+
+const USER_FILE = path.join(process.cwd(), 'data', 'user.json');
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
-const SERVER_URL = 'http://3.38.209.206:3000';
+const BASE_URL = 'http://localhost:3000';
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -14,37 +17,35 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  // 프로필 이미지 처리
-  let profileUrl = req.file
+  let profileImage = req.file
     ? `/assets/${req.file.filename}`
-    : `/assets/default-profile.jpg`;
+    : `/assets/default-profile-image.jpg`;
 
   try {
-    const users = await readUsersFromFile();
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
 
-    if (users.some((user) => user.email === email)) {
+    if (users.find((u) => u.email == email)) {
       return res
         .status(400)
-        .json({ message: 'email already exists', data: null });
+        .json({ message: 'email already exist', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10); // 비밀번호 암호화
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
       id: users.length + 1,
-      profile_url: profileUrl,
+      profileImage,
       email,
       password: hashedPassword,
       nickname,
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
-
     users.push(newUser);
 
-    await writeUsersToFile(users);
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
     res.status(201).json({
       message: 'register success',
-      data: newUser,
+      data: newUser.id,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
@@ -61,15 +62,18 @@ export const login = async (req, res) => {
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.email === email);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.email === email);
+
     if (!user) {
-      return res.status(400).json({ message: 'login fail', data: null });
+      return res.status(400).json({ message: 'invalid user', data: null });
     }
 
-    const isPasswordMatch = bcrypt.compare(password, user.password);
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ message: 'login fail', data: null });
+      return res
+        .status(400)
+        .json({ message: 'incorrect password', data: null });
     }
 
     // 세션에 사용자 정보 저장
@@ -77,13 +81,13 @@ export const login = async (req, res) => {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
-      profile_url: user.profile_url,
+      profileImage: user.profileImage,
     };
 
-    // HttpOnly 쿠키 발급
-    console.log('세션 저장된 사용자: ', req.session.user);
+    console.log('세션에 저장된 사용자: ', req.session?.user);
 
-    res.cookie('sessionId', req.sessionID, {
+    // HttpOnly 쿠키 발급
+    res.cookie('sessionId', req.sessionId, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
@@ -91,30 +95,25 @@ export const login = async (req, res) => {
     });
 
     res.status(200).json({
-      message: 'login_success',
-      data: {
-        id: user.id,
-        email: user.email,
-        nickname: user.nickname,
-        profile_url: user.profile_url,
-      },
+      message: 'login success',
+      data: { user },
     });
   } catch (error) {
-    console.error('로그인 실패:', error);
+    console.error('로그인 실패: ', error);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };
 
 // 로그아웃
-export const logout = async (req, res) => {
+export const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res
         .status(500)
-        .json({ message: 'internal_server_error', data: null });
+        .json({ message: 'internal server error', data: null });
     }
     res.clearCookie('sessionId');
-    res.status(204).send({ message: 'Logged out successfully' });
+    res.status(204);
   });
 };
 
@@ -127,15 +126,16 @@ export const getUserProfile = async (req, res) => {
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((u) => u.id === userId);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
 
     res.status(200).json({
-      message: 'user_profile_retrieved',
+      message: 'user profile retrieved',
       data: {
+        id: userId,
         email: user.email,
         nickname: user.nickname,
-        profileUrl: `${SERVER_URL}${user.profile_url || '/assets/default-profile.jpg'}`,
+        profileImage: `${BASE_URL}${user.profileImage}`,
       },
     });
   } catch (error) {
@@ -146,30 +146,51 @@ export const getUserProfile = async (req, res) => {
 // 사용자 정보 수정
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { newEmail, newNickname } = req.body;
-  const newProfileUrl = req.file
-    ? `/assets/${req.file.filename}`
-    : `/assets/default-profile.jpg`;
+  const { nickname } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.id === userId);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
+
     if (!user) {
-      return res.status(404).json({ message: 'not found', data: null });
+      return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (newEmail) user.email = newEmail;
-    if (newNickname) user.nickname = newNickname;
-    if (newProfileUrl) user.profile_url = newProfileUrl;
+    // validate new nickname if provided
+    if (users.some((u) => u.nickname == nickname && u.id !== userId)) {
+      return res
+        .status(400)
+        .json({ message: 'nickname already exists', data: null });
+    }
+    if (nickname) user.nickname = nickname;
 
-    await writeUsersToFile(users);
-    res.status(200).json({ message: 'profile updated', data: null });
+    const profileImage = req.file
+      ? `/assets/${req.file.filename}`
+      : user.profileImage || `/assets/default-profile-image.jpg`;
+    if (profileImage) user.profileImage = profileImage;
+
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+
+    // 세션에 저장된 사용자 정보 수정
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      profileImage: user.profileImage,
+    };
+
+    console.log('세션에 저장된 사용자: ', req.session?.user);
+
+    res.status(200).json({
+      message: 'profile update success',
+      data: { nickname, profileImage },
+    });
   } catch (error) {
-    console.error('사용자 정보 수정 실패:', error);
+    console.error('사용자 정보 수정 실패: ', error);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };
@@ -177,30 +198,28 @@ export const updateProfile = async (req, res) => {
 // 비밀번호 변경
 export const updatePassword = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { newPassword } = req.body;
+  const { password } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  if (!newPassword) {
-    return res
-      .status(400)
-      .json({ message: 'new_password_required', data: null });
-  }
-
   try {
-    const users = await readUsersFromFile();
-    const user = users.find((user) => user.id === userId);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const user = users.find((u) => u.id == userId);
+
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await writeUsersToFile(users);
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
 
-    res.status(200).json({ message: 'profile updated', data: null });
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+
+    res.status(200).json({ message: 'password update success', data: null });
   } catch (error) {
     console.error('비밀번호 변경 실패:', error);
     res.status(500).json({ message: 'internal server error', data: null });
@@ -209,28 +228,25 @@ export const updatePassword = async (req, res) => {
 
 // 회원 탈퇴
 export const deleteAccount = async (req, res) => {
-  const userId = req.session.user?.id;
+  const userId = req.session?.user?.id;
 
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const users = await readUsersFromFile();
-    const userIndex = users.findIndex((user) => user.id === userId);
+    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    const index = users.findIndex((u) => u.id == userId);
 
-    if (
-      userIndex === -1 ||
-      !bcrypt.compareSync(password, users[userIndex].password)
-    ) {
-      return res.status(401).json({ message: 'unauthorized', data: null });
+    if (index == -1) {
+      return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    users.splice(userIndex, 1);
-    await writeUsersToFile(users);
+    users.splice(index, 1);
+    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
 
     req.session.destroy();
-    res.clearCookie('user_session');
+    res.clearCookie('sessionId');
     res.status(204).send();
   } catch (error) {
     console.error('회원 탈퇴 실패:', error);

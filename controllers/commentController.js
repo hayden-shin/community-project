@@ -1,58 +1,58 @@
-import {
-  readCommentsFromFile,
-  writeCommentsToFile,
-} from '../models/commentModel.js';
+import fs from 'fs';
+import path from 'path';
 
-import { readPostsFromFile, writePostsToFile } from '../models/postModel.js';
+const POST_FILE = path.join(process.cwd(), 'data', 'post.json');
+const COMMENT_FILE = path.join(process.cwd(), 'data', 'comment.json');
 
 // 댓글 생성
 export const createComment = async (req, res) => {
-  const { text } = req.body;
-  const user = req.session?.user;
-  console.log('유저 세션 확인:', req.session.user);
+  const { content } = req.body;
+  const userId = req.session?.user?.id;
   const postId = parseInt(req.params.post_id, 10);
-  console.log('포스트 아이디: ', postId);
 
-  if (!user) {
+  if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   if (!postId || isNaN(postId)) {
-    res.status(400).json({ message: 'invalid post ID', data: null });
+    return res.status(400).json({ message: 'invalid post', data: null });
   }
 
-  if (!text) {
+  if (!content) {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
+  const { nickname, profileImage } = req.session?.user;
+
   try {
-    const comments = await readCommentsFromFile();
-    const posts = await readPostsFromFile();
-
-    const newCommentId = comments.length + 1;
-
+    // 댓글 작성
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
     const newComment = {
-      comment_id: newCommentId,
-      post_id: postId,
-      text,
-      created_at: new Date().toISOString(),
-      author_id: user.id,
-      author_profile_url: user.profile_url,
-      author_nickname: user.nickname,
+      id: comments.length + 1,
+      postId,
+      content,
+      createdAt: new Date().toISOString(),
+      author: {
+        id: userId,
+        nickname,
+        profileImage,
+      },
     };
-
     comments.push(newComment);
-    await writeCommentsToFile(comments);
+    fs.writeFileSync(COMMENT_FILE, JSON.stringify(comments, null, 2));
 
-    const post = posts.find((p) => p.post_id == postId);
-    if (post) {
-      post.comment_ids.push(newCommentId);
-      await writePostsToFile(posts);
-    }
+    // 댓글수 +1
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == postId);
+    post.commentCount += 1;
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
-    res.status(201).json({ message: 'comment created', data: newComment });
-  } catch (error) {
-    console.error('댓글 생성 실패:', error);
+    res.status(201).json({
+      message: 'comment create success',
+      data: { comment: newComment },
+    });
+  } catch (err) {
+    console.error('댓글 생성 실패:', err);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };
@@ -62,14 +62,15 @@ export const getCommentsByPostId = async (req, res) => {
   const postId = parseInt(req.params.post_id);
 
   try {
-    const comments = await readCommentsFromFile();
-    const postComments = comments.filter(
-      (comment) => comment.post_id === postId
-    );
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const postComments = comments.filter((c) => c.postId == postId);
 
-    res.status(200).json({ message: 'comments retrieved', data: postComments });
-  } catch (error) {
-    console.error('댓글 가져오기 실패:', error);
+    res.status(200).json({
+      message: 'comments retrieve success',
+      data: { comments: postComments },
+    });
+  } catch (err) {
+    console.error('댓글 가져오기 실패:', err);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };
@@ -77,36 +78,36 @@ export const getCommentsByPostId = async (req, res) => {
 // 댓글 수정
 export const updateComment = async (req, res) => {
   const commentId = parseInt(req.params.comment_id, 10);
-  const { text } = req.body;
-  const user = req.session?.user;
+  const { content } = req.body;
+  const userId = req.session?.user?.id;
 
-  if (!user) {
+  if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
-  if (!commentId || !text) {
+  if (!commentId || !content) {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
   try {
-    const comments = await readCommentsFromFile();
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const comment = comments.find((c) => c.id == commentId);
 
-    const comment = comments.find((c) => c.comment_id === commentId);
     if (!comment) {
       return res.status(404).json({ message: 'comment not found', data: null });
     }
 
-    if (comment.author_id !== user.id) {
+    if (comment.author.id !== userId) {
       return res.status(403).json({ message: 'no permission', data: null });
     }
 
-    comment.text = text;
-    comment.updated_at = new Date().toISOString();
-    await writeCommentsToFile(comments);
+    comment.content = content;
+    comment.updatedAt = new Date().toISOString();
+    fs.writeFileSync(COMMENT_FILE, JSON.stringify(comments, null, 2));
 
-    res.status(200).json({ message: 'comment updated', data: comment });
-  } catch (error) {
-    console.error('댓글 수정 실패:', error);
+    res.status(200).json({ message: 'comment update success', data: null });
+  } catch (err) {
+    console.error('댓글 수정 실패: ', err);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };
@@ -114,10 +115,9 @@ export const updateComment = async (req, res) => {
 // 댓글 삭제
 export const deleteComment = async (req, res) => {
   const commentId = parseInt(req.params.comment_id, 10);
-  // const { comment_id } = req.body;
-  const user = req.session?.user;
+  const userId = req.session?.user?.id;
 
-  if (!user) {
+  if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
@@ -126,31 +126,29 @@ export const deleteComment = async (req, res) => {
   }
 
   try {
-    const comments = await readCommentsFromFile();
-    const posts = await readPostsFromFile();
+    const comments = JSON.parse(fs.readFileSync(COMMENT_FILE, 'utf-8'));
+    const index = comments.findIndex((c) => c.id == commentId);
 
-    const commentIndex = comments.findIndex((c) => c.comment_id === commentId);
-    if (commentIndex === -1) {
+    if (index == -1) {
       return res.status(404).json({ message: 'comment not found', data: null });
     }
 
-    const comment = comments[commentIndex];
-    if (comment.author_id !== user.id) {
+    if (comments[index].author.id !== userId) {
       return res.status(403).json({ message: 'no permission', data: null });
     }
-    const postId = comments[commentIndex].post_id;
-    comments.splice(commentIndex, 1);
-    await writeCommentsToFile(comments);
 
-    const post = posts.find((p) => p.post_id === postId);
-    if (post) {
-      post.comment_ids = post.comment_ids.filter((id) => id !== commentId);
-      await writePostsToFile(posts);
-    }
+    comments.splice(index, 1);
+    fs.writeFileSync(COMMENT_FILE, JSON.stringify(comments, null, 2));
+
+    // 게시글 댓글수 -1
+    const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
+    const post = posts.find((p) => p.id == parseInt(req.params.post_id, 10));
+    post.commentCount -= 1;
+    fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
 
     res.status(204).send();
-  } catch (error) {
-    console.error('댓글 삭제 실패:', error);
+  } catch (err) {
+    console.error('댓글 삭제 실패: ', err);
     res.status(500).json({ message: 'internal server error', data: null });
   }
 };

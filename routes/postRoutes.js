@@ -30,6 +30,7 @@ router.patch('/:post_id', upload, editPost);
 // 게시글 삭제
 router.delete('/:post_id', deletePost);
 
+// 좋아요 상태 확인
 router.get('/:post_id/likes', getLikeStatus);
 
 // 좋아요 추가
