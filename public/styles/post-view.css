@@ -145,6 +145,10 @@
   z-index: 1; /* 텍스트를 이미지 위로 배치 */
 }
 
+.post-content, .comment-content {
+  white-space: pre-line;
+}
+
 /* .post-content p {
   line-height: 1.6;
   font-size: 12px;
