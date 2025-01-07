@@ -12,9 +12,9 @@ export const updateCommentCount = (postId) => {
 // 댓글 등록 요청
 const createComment = async (postId) => {
   const commentInput = document.getElementById('comment-input');
-  const commentText = commentInput.value.trim();
+  const content = commentInput.value.trim();
 
-  if (!commentText) {
+  if (!content) {
     alert('댓글 내용을 입력해주세요.');
     return;
   }
@@ -26,7 +26,7 @@ const createComment = async (postId) => {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify({ text: commentText }),
+      body: JSON.stringify({ content }),
     });
 
     if (response.status === 201) {
@@ -62,21 +62,21 @@ const renderComment = (commentData) => {
 
   const commentElement = document.createElement('div');
   commentElement.classList.add('comment');
-  commentElement.setAttribute('data-comment-id', commentData.comment_id);
+  commentElement.setAttribute('data-comment-id', commentData.id);
 
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-author">
-        <img src="${commentData.author_profile_url}" alt="User Icon" class="author-img">
-        <span class="comment-author">${commentData.author_nickname}</span>
-        <span class="comment-date">${formatDateTime(commentData.created_at)}</span>
+        <img src="${commentData.author.profileImage}" alt="User Icon" class="author-img">
+        <span class="comment-author">${commentData.author.nickname}</span>
+        <span class="comment-date">${formatDateTime(commentData.createdAt)}</span>
       </div>
       <div class="comment-buttons">
         <button class="edit-comment-button">수정</button>
         <button class="delete-comment-button">삭제</button>
       </div>
     </div>
-    <p class="comment-text">${commentData.text}</p>
+    <p class="comment-text">${commentData.content}</p>
   `;
 
   commentList.appendChild(commentElement);
@@ -84,7 +84,7 @@ const renderComment = (commentData) => {
 };
 
 // 댓글 수정
-const editComment = async (postId, commentId, newText) => {
+const editComment = async (postId, commentId, newContent) => {
   // 버튼 텍스트 변경
   // commentButton.textContent = '댓글 수정';
   // commentButton.style.backgroundColor = ''; // 기본 색상 복구
@@ -100,7 +100,7 @@ const editComment = async (postId, commentId, newText) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text: newText,
+          content: newContent,
         }),
         credentials: 'include',
       }
@@ -115,7 +115,7 @@ const editComment = async (postId, commentId, newText) => {
         `[data-comment-id="${commentId}"] .comment-text`
       );
       if (commentElement) {
-        commentElement.textContent = newText;
+        commentElement.textContent = newContent;
       }
     } else if (response.status === 400) {
       alert('잘못된 요청입니다. 입력값을 확인해주세요.');
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const commentElement = document.createElement('div');
       commentElement.className = 'comment';
       commentElement.innerHTML = `
-        <p>${comment.author_nickname}: ${comment.text}</p>
+        <p>${comment.author_nickname}: ${comment.content}</p>
         <small>${new Date(comment.created_at).toLocaleString()}</small>
       `;
       commentList.appendChild(commentElement);
@@ -231,16 +231,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 댓글 등록 및 수정 처리
   commentButton.addEventListener('click', async () => {
     const postId = new URLSearchParams(window.location.search).get('id');
-    const text = commentInput.value.trim();
+    const content = commentInput.value.trim();
 
-    if (!text) {
+    if (!content) {
       alert('댓글 내용을 입력해주세요.');
       return;
     }
 
     if (isEditMode) {
       const commentId = commentButton.dataset.commentId;
-      await editComment(postId, commentId, text);
+      await editComment(postId, commentId, content);
       isEditMode = false;
       commentButton.textContent = '댓글 작성';
       commentButton.removeAttribute('data-comment-id');
