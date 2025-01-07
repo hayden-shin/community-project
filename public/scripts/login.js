@@ -38,7 +38,7 @@ if (
   !emailHelper ||
   !passwordHelper
 ) {
-  console.error('One or more required input elements are missing.');
+  console.error('필수 요소를 입력해주세요.');
 }
 
 const checkLoginButtonState = () => {
