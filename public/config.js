@@ -1,1 +1,3 @@
-const BASE_URL = 'http://3.38.209.206:3000';
+const BASE_URL = 'http://localhost:3000';
+
+export default BASE_URL;
