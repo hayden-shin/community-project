@@ -87,7 +87,7 @@ export const login = async (req, res) => {
     console.log('세션에 저장된 사용자: ', req.session?.user);
 
     // HttpOnly 쿠키 발급
-    res.cookie('sessionId', req.sessionId, {
+    res.cookie('sessionId', req.sessionID, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
