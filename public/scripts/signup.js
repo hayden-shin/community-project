@@ -1,5 +1,5 @@
 import { isValidEmail, isValidPassword } from './common.js';
-import { BASE_URL } from '../config.js';
+import BASE_URL from '../config.js';
 
 const checkAllValid = () => {
   return (
