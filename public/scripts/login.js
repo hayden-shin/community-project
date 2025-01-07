@@ -1,12 +1,17 @@
 import BASE_URL from '../config.js';
 import { isValidEmail, isValidPassword } from './common.js';
 
-// 로티 애니메이션 표시
+// Lottie 애니메이션 표시
 function showSuccessAnimation() {
   const successContainer = document.getElementById('success-container');
+
+  if (!successContainer) {
+    console.error("'success-container' element not found.");
+    return;
+  }
+
   successContainer.style.display = 'flex';
 
-  // Lottie 애니메이션 로드
   lottie.loadAnimation({
     container: document.getElementById('lottie-success'), // 애니메이션 컨테이너
     renderer: 'svg', // 렌더링 방식
@@ -15,7 +20,6 @@ function showSuccessAnimation() {
     path: '/assets/Lottie.json',
   });
 
-  // 3초 후 메인 페이지로 이동
   setTimeout(() => {
     window.location.href = '/post-list';
   }, 3000);
@@ -27,13 +31,26 @@ const loginButton = document.getElementById('login-button');
 const emailHelper = document.getElementById('email-helper');
 const passwordHelper = document.getElementById('password-helper');
 
+if (
+  !emailInput ||
+  !passwordInput ||
+  !loginButton ||
+  !emailHelper ||
+  !passwordHelper
+) {
+  console.error('One or more required input elements are missing.');
+}
+
 const checkLoginButtonState = () => {
-  const emailValid = isValidEmail(emailInput.value.trim());
-  const passwordValid = isValidPassword(passwordInput.value.trim());
+  const emailValid = emailInput && isValidEmail(emailInput.value.trim());
+  const passwordValid =
+    passwordInput && isValidPassword(passwordInput.value.trim());
   const buttonActive = emailValid && passwordValid;
 
-  loginButton.disabled = !buttonActive;
-  loginButton.style.backgroundColor = buttonActive ? '#7F6AEE' : '#ACA0EB';
+  if (loginButton) {
+    loginButton.disabled = !buttonActive;
+    loginButton.style.backgroundColor = buttonActive ? '#7F6AEE' : '#ACA0EB';
+  }
 };
 
 // 로그인 요청
@@ -43,57 +60,41 @@ async function login(email, password) {
     return;
   }
 
-  if (!isValidPassword) {
-    alert(
-      '비밀번호는 8자 이상 20자 이하이며, 영문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.'
-    );
-    return;
-  }
-
-  if (!isValidEmail) {
-    alert('올바르지 않은 이메일 입니다.');
-  }
-
   const requestData = {
     email,
     password,
   };
 
-  if (isValidEmail(email) && isValidPassword(password)) {
-    try {
-      const response = await fetch(`${BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-        credentials: 'include',
-      });
+  try {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+      credentials: 'include',
+    });
 
-      if (response.ok) {
-        const result = await response.json();
-
-        console.log('로그인 응답:', result.data);
-        // alert(`로그인 성공! 환영합니다, ${result.data.nickname}님.`);
-        showSuccessAnimation(); // 로그인 성공 시 애니메이션 표시
-        // window.location.href = '/post-list';
-      } else if (response.status === 400) {
-        const result = await response.json();
-        alert('로그인 실패: ' + result.message);
-      } else if (response.status === 429) {
-        alert('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
-      } else {
-        alert('알 수 없는 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    if (response.ok) {
+      const result = await response.json();
+      console.log('로그인 응답:', result.data);
+      showSuccessAnimation();
+    } else if (response.status === 400) {
+      const result = await response.json();
+      alert('로그인 실패: ' + result.message);
+    } else if (response.status === 429) {
+      alert('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
+    } else {
+      alert('알 수 없는 오류가 발생했습니다.');
     }
+  } catch (error) {
+    console.error('로그인 실패:', error);
+    alert('서버와의 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 
 // 입력값 유효성 검사
-emailInput.addEventListener('input', () => {
+emailInput?.addEventListener('input', () => {
   const emailValue = emailInput.value.trim();
 
   if (!emailValue) {
@@ -102,12 +103,12 @@ emailInput.addEventListener('input', () => {
     emailHelper.textContent =
       '*올바른 이메일 형식을 입력해주세요. (예: example@example.com)';
   } else {
-    emailHelper.textContent = ''; // 유효성 통과 시 초기화
+    emailHelper.textContent = '';
   }
   checkLoginButtonState();
 });
 
-passwordInput.addEventListener('input', () => {
+passwordInput?.addEventListener('input', () => {
   const passwordValue = passwordInput.value.trim();
 
   if (!passwordValue) {
@@ -116,18 +117,20 @@ passwordInput.addEventListener('input', () => {
     passwordHelper.textContent =
       '*비밀번호는 8~20자이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.';
   } else {
-    passwordHelper.textContent = ''; // 유효성 통과 시 초기화
+    passwordHelper.textContent = '';
   }
   checkLoginButtonState();
 });
 
-loginButton.addEventListener('click', async (event) => {
+loginButton?.addEventListener('click', async (event) => {
   event.preventDefault();
 
-  const emailValue = emailInput.value.trim();
-  const passwordValue = passwordInput.value.trim();
+  const emailValue = emailInput?.value.trim();
+  const passwordValue = passwordInput?.value.trim();
 
-  await login(emailValue, passwordValue);
+  if (emailValue && passwordValue) {
+    await login(emailValue, passwordValue);
+  }
 });
 
 // 초기 버튼 상태 설정
