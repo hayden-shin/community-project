@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user.profileImage) {
           headerProfileImage.src = user.profileImage;
         } else {
-          // 기본 프로필 이미지 경로 사용
           headerProfileImage.src = `${BASE_URL}/assets/default-profile.jpg`;
         }
       }
