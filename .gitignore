@@ -1,9 +1,8 @@
-.gitignore
 .env
 views/
-server.js
 utils/
 middlewares/auth.js
 controllers/likeController.js
 models/likeModel.js
 data/likes.json
+node_modules/*
