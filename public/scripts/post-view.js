@@ -4,7 +4,6 @@ import { showToast, showModal } from './common.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
 import { fetchUserProfile } from '../../utils/fetchUserProfile.js';
 
-const backButton = document.getElementById('back-button');
 const editPostButton = document.getElementById('edit-post-button');
 const deletePostButton = document.getElementById('delete-post-button');
 const likeButton = document.getElementById('like-button');

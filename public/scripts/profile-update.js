@@ -148,11 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const deleteAccountButton = document.getElementById('delete-account-button');
   if (deleteAccountButton) {
     deleteAccountButton.addEventListener('click', () => {
-      if (!modal || !modalMessage) {
-        console.error('모달 요소를 찾을 수 없습니다.');
-        return;
-      }
-
       showModal('정말 계정을 삭제하시겠습니까?', async () => {
         try {
           const response = await fetch(`${BASE_URL}/auth/account`, {
