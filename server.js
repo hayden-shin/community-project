@@ -5,12 +5,14 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
+console.log(process.env);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,14 +30,14 @@ const corsOptions = {
 // 세션 설정
 app.use(
   session({
-    secret: 'MY_SWEET_HOME',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: false,
       httpOnly: true, // 클라이언트에서 쿠키를 접근하지 못하도록 설정
       sameSite: 'lax', // 크로스-도메인 요청에서 쿠키 허용
-      maxAge: 1000 * 60 * 60 * 24, // 1일후 쿠키 만료
+      maxAge: process.env.SESSION_EXPIRES_SEC, // 1일후 쿠키 만료
     },
   })
 );
