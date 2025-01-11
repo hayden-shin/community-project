@@ -1,11 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { createRequire } from 'module';
+import bcrypt from 'bcrypt';
 import { config } from '../config.js';
 import * as userRepository from '../model/user.js';
-
-const require = createRequire(import.meta.url);
-const bcrypt = require('bcrypt');
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -20,7 +15,7 @@ export const signup = async (req, res) => {
     : `/assets/default-profile-image.jpg`;
 
   try {
-    if (userRepository.findByEmail(email)) {
+    if (sitory.findByEmail(email)) {
       return res
         .status(400)
         .json({ message: 'Email already exists', data: null });
@@ -34,7 +29,7 @@ export const signup = async (req, res) => {
       url,
       createdAt: new Date().toISOString(),
     };
-    userRepository.createUser(user);
+    await userRepository.createUser(user);
 
     res.status(201).json({
       message: 'register success',
@@ -57,7 +52,7 @@ export const login = async (req, res) => {
   }
 
   try {
-    const user = userRepository.findByEmail(email);
+    const user = await userRepository.findByEmail(email);
     if (!user) {
       return res.status(400).json({ message: 'invalid user', data: null });
     }
@@ -118,7 +113,7 @@ export const getUserProfile = async (req, res) => {
   }
 
   try {
-    const user = userRepository.findById(userId);
+    const user = await userRepository.findById(userId);
 
     res.status(200).json({
       message: 'user profile retrieved',
@@ -143,19 +138,19 @@ export const updateProfile = async (req, res) => {
   }
 
   try {
-    const user = userRepository.findById(userId);
+    const user = await userRepository.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (userRepository.findByUsername(username)) {
+    if (await userRepository.findByUsername(username)) {
       return res
         .status(400)
         .json({ message: 'Username already exists', data: null });
     }
     if (username) {
       user.username = username;
-      userRepository.updateUsername(user);
+      await userRepository.updateUsername(user);
     }
 
     const url = req.file
@@ -163,10 +158,10 @@ export const updateProfile = async (req, res) => {
       : user.url || `/assets/default-profile-image.jpg`;
     if (url) {
       user.url = url;
-      userRepository.updateUrl(user);
+      await userRepository.updateUrl(user);
     }
 
-    const updated = userRepository.findById(userId);
+    const updated = await userRepository.findById(userId);
     req.session.user = {
       id: updated.id,
       email: updated.email,
@@ -194,18 +189,15 @@ export const updatePassword = async (req, res) => {
   }
 
   try {
-    const user = userRepository.findById(userId);
+    const user = await userRepository.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (password) {
-      const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
-      user.password = hashed;
-    }
-
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
+    user.password = hashed;
+    await userRepository.updatePassword(user.password, id);
 
     res.status(200).json({ message: 'password update success', data: null });
   } catch (error) {
@@ -223,15 +215,12 @@ export const deleteAccount = async (req, res) => {
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const index = users.findIndex((u) => u.id == userId);
-
-    if (index == -1) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    users.splice(index, 1);
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    await userRepository.deleteUser(userId);
 
     req.session.destroy();
     res.clearCookie('sessionId');

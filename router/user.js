@@ -5,7 +5,7 @@ import {
   updatePassword,
 } from '../controller/user.js';
 
-import { upload } from '../middlewares/upload.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router({ mergeParams: true });
 

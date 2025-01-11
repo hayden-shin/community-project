@@ -1,6 +1,6 @@
 import express from 'express';
 import * as authController from '../controller/user.js';
-import { upload } from '../middlewares/upload.js';
+import { upload } from '../middleware/upload.js';
 const router = express.Router({ mergeParams: true });
 
 // 회원가입
