@@ -4,7 +4,7 @@ import {
   getCommentsByPostId,
   updateComment,
   deleteComment,
-} from '../controllers/commentController.js';
+} from '../controller/commentController.js';
 
 const router = express.Router({ mergeParams: true });
 

@@ -8,7 +8,7 @@ import {
   deletePost,
   getLikeStatus,
   toggleLikePost,
-} from '../controllers/postController.js';
+} from '../controller/postController.js';
 
 // import { addLike, removeLike } from '../controllers/likeController.js';
 import { upload } from '../middlewares/upload.js';

@@ -3,7 +3,7 @@ import {
   getUserProfile,
   updateProfile,
   updatePassword,
-} from '../controllers/userController.js';
+} from '../controller/user.js';
 
 import { upload } from '../middlewares/upload.js';
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import * as authController from '../controllers/userController.js';
+import * as authController from '../controller/user.js';
 import { upload } from '../middlewares/upload.js';
 const router = express.Router({ mergeParams: true });
 
