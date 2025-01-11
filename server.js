@@ -9,6 +9,7 @@ import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import { config } from './config.js';
+import { db } from './db/database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +83,7 @@ app.get('/', (req, res) => {
   res.send('아무 말 대잔치 커뮤니티입니다.');
 });
 
+db.getConnection().then((connection) => console.log(`✅ mariadb is connected`));
 app.listen(config.host.port, () => {
   console.log(`🚀 backend is running on port ${config.host.port}`);
 });
