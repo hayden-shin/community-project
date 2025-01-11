@@ -8,6 +8,7 @@ import authRouter from './router/auth.js';
 import postRouter from './router/post.js';
 import userRouter from './router/user.js';
 import commentRouter from './router/comment.js';
+import likeRouter from './router/like.js';
 import { config } from './config.js';
 import { db } from './db/database.js';
 
@@ -73,6 +74,7 @@ app.use('/posts', postRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/posts/:post_id/comments', commentRouter);
+app.use('/posts/:post_id/likes', likeRouter);
 
 app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
