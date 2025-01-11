@@ -15,7 +15,7 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  const profileImage = req.file
+  const url = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile-image.jpg`;
 
@@ -31,7 +31,7 @@ export const signup = async (req, res) => {
       email,
       password: hashed,
       username,
-      profileImage,
+      url,
       createdAt: new Date().toISOString(),
     };
     userRepository.createUser(user);
@@ -73,7 +73,7 @@ export const login = async (req, res) => {
       id: user.id,
       email: user.email,
       username: user.username,
-      profileImage: user.profileImage,
+      url: user.url,
     };
 
     console.log('세션에 저장된 사용자: ', req.session?.user);
@@ -126,7 +126,7 @@ export const getUserProfile = async (req, res) => {
         id: userId,
         email: user.email,
         username: user.username,
-        profileImage: `${config.url.baseUrl}${user.profileImage}`,
+        url: `${config.url.baseUrl}${user.url}`,
       },
     });
   } catch (error) {
@@ -158,29 +158,29 @@ export const updateProfile = async (req, res) => {
       userRepository.updateUsername(user);
     }
 
-    const profileImage = req.file
+    const url = req.file
       ? `/assets/${req.file.filename}`
-      : user.profileImage || `/assets/default-profile-image.jpg`;
-    if (profileImage) {
-      user.profileImage = profileImage;
+      : user.url || `/assets/default-profile-image.jpg`;
+    if (url) {
+      user.url = url;
       userRepository.updateUrl(user);
     }
 
     const updated = userRepository.findById(userId);
-    const { id, email, username, profileImage } = updated;
+    const { id, email, username, url } = updated;
     // 세션에 저장된 사용자 정보 수정
     req.session.user = {
       id: user.id,
       email: user.email,
       username: user.username,
-      profileImage: user.profileImage,
+      url: user.url,
     };
 
     console.log('세션에 저장된 사용자: ', req.session?.user);
 
     res.status(200).json({
       message: 'profile update success',
-      data: { username, profileImage },
+      data: { username, url },
     });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);

@@ -6,7 +6,7 @@
     "postImage": null,
     "author": {
       "id": 1,
-      "profileImage": "/assets/default-profile-image.jpg",
+      "url": "/assets/default-profile-image.jpg",
       "username": "헤이든"
     },
     "createdAt": "2024-12-02T10:00:00Z",

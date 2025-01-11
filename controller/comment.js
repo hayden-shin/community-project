@@ -22,7 +22,7 @@ export const createComment = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  const { username, profileImage } = req.session?.user;
+  const { username, url } = req.session?.user;
 
   try {
     // 댓글 작성
@@ -35,7 +35,7 @@ export const createComment = async (req, res) => {
       author: {
         id: userId,
         username,
-        profileImage,
+        url,
       },
     };
     comments.push(newComment);
