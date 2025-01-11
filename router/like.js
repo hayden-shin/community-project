@@ -6,9 +6,9 @@ const router = express.Router({ mergeParams: true });
 router.get('/', likeController.getLikeStatus);
 
 // 좋아요 추가
-router.post('/', likeController.toggleLikePost);
+router.post('/', likeController.toggleLike);
 
 // 좋아요 취소
-router.delete('/', likeController.toggleLikePost);
+router.delete('/', likeController.toggleLike);
 
 export default router;
