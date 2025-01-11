@@ -20,13 +20,13 @@ export const createPost = async (req, res) => {
 
   try {
     const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
-    const postImage = req.file ? `/assets/${req.file.filename}` : null;
+    const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
 
     const newPost = {
       id: posts.length + 1,
       title,
       content,
-      postImage,
+      imageUrl,
       author: {
         id: userId,
         url: req.session.user.url,
@@ -88,7 +88,7 @@ export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
   const { title, content } = req.body;
-  const postImage = req.file ? `/assets/${req.file.filename}` : null;
+  const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
     const posts = JSON.parse(fs.readFileSync(POST_FILE, 'utf-8'));
@@ -104,7 +104,7 @@ export const editPost = async (req, res) => {
 
     if (title) post.title = title;
     if (content) post.content = content;
-    if (postImage) post.postImage = postImage;
+    if (imageUrl) post.imageUrl = imageUrl;
     post.updatedAt = new Date().toISOString();
 
     fs.writeFileSync(POST_FILE, JSON.stringify(posts, null, 2));
