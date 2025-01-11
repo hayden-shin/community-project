@@ -12,16 +12,16 @@ function required(key, defaultValue = undefined) {
 export const config = {
   session: {
     secretKey: required('SESSION_SECRET'),
-    expiresInSec: required('SESSION_EXPIRES_SEC', 86400),
+    expiresInSec: parseInt(required('SESSION_EXPIRES_SEC', 86400)),
   },
   bcrypt: {
-    saltRounds: required('BCRYPT_SALT_ROUNDS', 10),
+    saltRounds: parseInt(required('BCRYPT_SALT_ROUNDS', 10)),
   },
   url: {
     baseUrl: required('BASE_URL'),
     clientUrl: required('CLIENT_URL'),
   },
   host: {
-    port: required('HOST_PORT', 3000),
+    port: parseInt(required('HOST_PORT', 3000)),
   },
 };
