@@ -9,10 +9,8 @@ import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from './config.js';
 
-console.log(process.env);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -21,7 +19,7 @@ const PORT = 3000;
 
 // CORS 설정
 const corsOptions = {
-  origin: `http://localhost:2000`,
+  origin: config.url.clientUrl,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-USER-ID'],
   credentials: true,
@@ -30,14 +28,14 @@ const corsOptions = {
 // 세션 설정
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: config.session.secretKey,
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: false,
       httpOnly: true, // 클라이언트에서 쿠키를 접근하지 못하도록 설정
       sameSite: 'lax', // 크로스-도메인 요청에서 쿠키 허용
-      maxAge: process.env.SESSION_EXPIRES_SEC, // 1일후 쿠키 만료
+      maxAge: config.session.expiresInSec,
     },
   })
 );
@@ -53,7 +51,7 @@ app.use(cookieParser());
 
 // OPTIONS 요청 예외처리
 app.use('*', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', `http://localhost:2000`);
+  res.header('Access-Control-Allow-Origin', config.url.clientUrl);
   res.header(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, PATCH, OPTIONS'
