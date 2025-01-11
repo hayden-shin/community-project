@@ -167,16 +167,12 @@ export const updateProfile = async (req, res) => {
     }
 
     const updated = userRepository.findById(userId);
-    const { id, email, username, url } = updated;
-    // 세션에 저장된 사용자 정보 수정
     req.session.user = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      url: user.url,
+      id: updated.id,
+      email: updated.email,
+      username: updated.username,
+      url: updated.url,
     };
-
-    console.log('세션에 저장된 사용자: ', req.session?.user);
 
     res.status(200).json({
       message: 'profile update success',
@@ -198,19 +194,15 @@ export const updatePassword = async (req, res) => {
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
+    const user = userRepository.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
     if (password) {
-      const hashedPassword = await bcrypt.hash(
-        password,
-        config.bcrypt.saltRounds
-      );
-      user.password = hashedPassword;
+      const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
+      user.password = hashed;
     }
 
     fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
