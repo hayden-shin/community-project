@@ -1,8 +1,6 @@
 .env
-views/
-utils/
 middlewares/auth.js
 controllers/likeController.js
 models/likeModel.js
-data/likes.json
-node_modules/*
+node_modules/
+db/
