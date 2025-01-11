@@ -1,12 +1,44 @@
 import { db } from '../db/database.js';
 
-// JSON 파일에서 사용자 데이터를 읽어오는 함수
-export function readUsersFromFile() {
-  const data = fs.readFileSync(usersFilePath, 'utf-8');
-  return JSON.parse(data);
+export async function findById(id) {
+  return db
+    .execute('SELECT * FROM user WHERE id = ?', [id]) //
+    .then((result) => result[0][0]);
 }
 
-// JSON 파일에 사용자 데이터를 저장하는 함수
-export function writeUsersToFile(users) {
-  fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf-8');
+export async function findByEmail(email) {
+  return db
+    .execute('SELECT * FROM user WHERE email = ?', [email]) //
+    .then((result) => result[0][0]);
+}
+
+export async function findByUsername(username) {
+  return db
+    .execute('SELECT * FROM user WHERE nickname = ?', [username]) //
+    .then((result) => result[0][0]);
+}
+
+export async function createUser(user) {
+  const { email, password, nickname, profileImage } = user;
+  return db
+    .execute(
+      'INSERT INTO user (email, password, nickname, profileImage) VALUES (?,?,?,?)',
+      [email, password, nickname, profileImage]
+    ) //
+    .then((result) => result[0][0]);
+}
+
+export async function updateUsername(user) {
+  const { nickname, id } = user;
+  return db
+    .execute('UPDATE user SET nickname = ? WHERE id = ?', [nickname, id]) //
+    .then((result) => result[0][0]);
+}
+
+export async function updateUrl(user) {
+  const { profileImage, id } = user;
+  return db.execute('UPDATE user SET profileImage = ? WHERE id = ?', [
+    profileImage,
+    id,
+  ]);
 }

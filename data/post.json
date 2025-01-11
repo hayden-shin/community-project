@@ -7,7 +7,7 @@
     "author": {
       "id": 1,
       "profileImage": "/assets/default-profile-image.jpg",
-      "nickname": "헤이든"
+      "username": "헤이든"
     },
     "createdAt": "2024-12-02T10:00:00Z",
     "updatedAt": "2024-12-02T12:00:00Z",

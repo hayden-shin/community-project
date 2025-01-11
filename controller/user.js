@@ -2,51 +2,43 @@ import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
 import { config } from '../config.js';
+import * as userRepository from '../model/user.js';
 
-const USER_FILE = path.join(process.cwd(), 'data', 'user.json');
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
 // 회원가입
 export const signup = async (req, res) => {
-  const { email, password, nickname } = req.body;
+  const { email, password, username } = req.body;
 
-  if (!email || !password || !nickname) {
+  if (!email || !password || !username) {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  let profileImage = req.file
+  const profileImage = req.file
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile-image.jpg`;
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-
-    if (users.find((u) => u.email == email)) {
+    if (userRepository.findByEmail(email)) {
       return res
         .status(400)
-        .json({ message: 'email already exist', data: null });
+        .json({ message: 'Email already exists', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      config.bcrypt.saltRounds
-    );
-    const newUser = {
-      id: users.length + 1,
-      profileImage,
+    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
+    const user = {
       email,
-      password: hashedPassword,
-      nickname,
+      password: hashed,
+      username,
+      profileImage,
       createdAt: new Date().toISOString(),
     };
-    users.push(newUser);
-
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    userRepository.createUser(user);
 
     res.status(201).json({
       message: 'register success',
-      data: newUser.id,
+      data: user.insertId,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
@@ -59,13 +51,13 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'invalid request', data: null });
+    return res
+      .status(400)
+      .json({ message: 'Invalid email or password', data: null });
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.email === email);
-
+    const user = userRepository.findByEmail(email);
     if (!user) {
       return res.status(400).json({ message: 'invalid user', data: null });
     }
@@ -77,11 +69,10 @@ export const login = async (req, res) => {
         .json({ message: 'incorrect password', data: null });
     }
 
-    // 세션에 사용자 정보 저장
     req.session.user = {
       id: user.id,
       email: user.email,
-      nickname: user.nickname,
+      username: user.username,
       profileImage: user.profileImage,
     };
 
@@ -127,15 +118,14 @@ export const getUserProfile = async (req, res) => {
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
+    const user = userRepository.findById(userId);
 
     res.status(200).json({
       message: 'user profile retrieved',
       data: {
         id: userId,
         email: user.email,
-        nickname: user.nickname,
+        username: user.username,
         profileImage: `${config.url.baseUrl}${user.profileImage}`,
       },
     });
@@ -147,40 +137,42 @@ export const getUserProfile = async (req, res) => {
 // 사용자 정보 수정
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { nickname } = req.body;
-
+  const { username } = req.body;
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
-
+    const user = userRepository.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    // validate new nickname if provided
-    if (users.some((u) => u.nickname == nickname && u.id !== userId)) {
+    if (userRepository.findByUsername(username)) {
       return res
         .status(400)
-        .json({ message: 'nickname already exists', data: null });
+        .json({ message: 'Username already exists', data: null });
     }
-    if (nickname) user.nickname = nickname;
+    if (username) {
+      user.username = username;
+      userRepository.updateUsername(user);
+    }
 
     const profileImage = req.file
       ? `/assets/${req.file.filename}`
       : user.profileImage || `/assets/default-profile-image.jpg`;
-    if (profileImage) user.profileImage = profileImage;
+    if (profileImage) {
+      user.profileImage = profileImage;
+      userRepository.updateUrl(user);
+    }
 
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
-
+    const updated = userRepository.findById(userId);
+    const { id, email, username, profileImage } = updated;
     // 세션에 저장된 사용자 정보 수정
     req.session.user = {
       id: user.id,
       email: user.email,
-      nickname: user.nickname,
+      username: user.username,
       profileImage: user.profileImage,
     };
 
@@ -188,7 +180,7 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json({
       message: 'profile update success',
-      data: { nickname, profileImage },
+      data: { username, profileImage },
     });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);
