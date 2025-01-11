@@ -1,13 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
+import { config } from '../config.js';
 
 const USER_FILE = path.join(process.cwd(), 'data', 'user.json');
-
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
-
-const BASE_URL = 'http://localhost:3000';
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -30,7 +28,10 @@ export const signup = async (req, res) => {
         .json({ message: 'email already exist', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      config.bcrypt.saltRounds
+    );
     const newUser = {
       id: users.length + 1,
       profileImage,
@@ -91,7 +92,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24, // 24시간 유지
+      maxAge: config.session.expiresInSec,
     });
 
     res.status(200).json({
@@ -135,7 +136,7 @@ export const getUserProfile = async (req, res) => {
         id: userId,
         email: user.email,
         nickname: user.nickname,
-        profileImage: `${BASE_URL}${user.profileImage}`,
+        profileImage: `${config.url.baseUrl}${user.profileImage}`,
       },
     });
   } catch (error) {
@@ -213,7 +214,10 @@ export const updatePassword = async (req, res) => {
     }
 
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(
+        password,
+        config.bcrypt.saltRounds
+      );
       user.password = hashedPassword;
     }
 
