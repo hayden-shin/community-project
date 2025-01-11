@@ -1,5 +1,4 @@
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
@@ -15,7 +14,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
 
 // CORS 설정
 const corsOptions = {
@@ -70,24 +68,20 @@ app.use((req, res, next) => {
   next(); // 다음 미들웨어로 이동
 });
 
-// 라우트 설정
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/posts/:post_id/comments', commentRoutes);
 
-// 404 에러 디버깅
 app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: 'Not Found' });
 });
 
-// 기본 라우트
 app.get('/', (req, res) => {
   res.send('아무 말 대잔치 커뮤니티입니다.');
 });
 
-// 서버 실행
-app.listen(PORT, () => {
-  console.log(`BE 서버가 PORT ${PORT} 에서 실행 중입니다.`);
+app.listen(config.host.port, () => {
+  console.log(`🚀 backend is running on port ${config.host.port}`);
 });
