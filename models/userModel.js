@@ -1,7 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-const usersFilePath = path.join(process.cwd(), './data/users.json');
+import { db } from '../db/database.js';
 
 // JSON 파일에서 사용자 데이터를 읽어오는 함수
 export function readUsersFromFile() {
