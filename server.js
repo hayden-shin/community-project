@@ -5,9 +5,9 @@ import cors from 'cors';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import authRouter from './router/auth.js';
-import postRouter from './router/posts.js';
-import userRouter from './router/users.js';
-import commentRouter from './router/comments.js';
+import postRouter from './router/post.js';
+import userRouter from './router/user.js';
+import commentRouter from './router/comment.js';
 import { config } from './config.js';
 import { db } from './db/database.js';
 
