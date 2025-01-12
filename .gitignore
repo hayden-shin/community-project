@@ -3,3 +3,4 @@ middlewares/auth.js
 controllers/likeController.js
 models/likeModel.js
 node_modules/
+assets/
