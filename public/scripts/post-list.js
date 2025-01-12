@@ -24,7 +24,7 @@ const renderPosts = (postsData) => {
     ({
       id,
       title,
-      author = { profileImage, nickname },
+      author = { profileImage, username },
       createdAt,
       viewCount = 0,
       commentCount = 0,
@@ -45,7 +45,7 @@ const renderPosts = (postsData) => {
         <hr />
         <div class="post-author">
           <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-author-img">
-          <span>${author.nickname}</span>
+          <span>${username}</span>
         </div>
       `;
 

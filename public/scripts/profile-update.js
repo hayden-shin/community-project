@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (user) {
       const emailInput = document.getElementById('email');
-      const nicknameInput = document.getElementById('nickname');
+      const usernameInput = document.getElementById('username');
       const profileImagePreview = document.getElementById(
         'profile-image-preview'
       );
 
       if (emailInput) emailInput.value = user.email;
-      if (nicknameInput) nicknameInput.value = user.nickname;
+      if (usernameInput) usernameInput.value = user.username;
       if (profileImagePreview) profileImagePreview.src = user.profileImage;
     } else {
       console.warn('유저 프로필 정보를 가져올 수 없습니다.');
@@ -28,25 +28,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error(`프로필 초기화 중 오류 발생: ${error.message}`);
   }
 
-  const nicknameInput = document.getElementById('nickname');
-  const nicknameHelper = document.getElementById('nickname-helper');
+  const usernameInput = document.getElementById('username');
+  const usernameHelper = document.getElementById('username-helper');
 
-  if (!nicknameInput || !nicknameHelper) {
+  if (!usernameInput || !usernameHelper) {
     console.error('닉네임 입력 또는 도움말 요소를 찾을 수 없습니다.');
     return;
   }
 
-  nicknameInput.addEventListener('input', () => {
-    const nicknameValue = nicknameInput.value.trim();
+  usernameInput.addEventListener('input', () => {
+    const usernameValue = usernameInput.value.trim();
 
-    if (!nicknameValue) {
-      nicknameHelper.textContent = '*닉네임을 입력해주세요.';
+    if (!usernameValue) {
+      usernameHelper.textContent = '*닉네임을 입력해주세요.';
       toggleButtonState(updateProfileButton, false);
-    } else if (nicknameValue.length > 10) {
-      nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
+    } else if (usernameValue.length > 10) {
+      usernameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
       toggleButtonState(updateProfileButton, false);
     } else {
-      nicknameHelper.textContent = '';
+      usernameHelper.textContent = '';
       toggleButtonState(updateProfileButton, true);
     }
   });
@@ -83,23 +83,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateProfileButton.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const nickname = document.getElementById('nickname')?.value.trim();
+      const username = document.getElementById('username')?.value.trim();
       const profileImage = document.getElementById('profile-image-upload')
         ?.files[0];
 
-      if (!nickname) {
+      if (!username) {
         alert('닉네임을 입력해주세요.');
         return;
       }
 
-      await updateProfile(nickname, profileImage);
+      await updateProfile(username, profileImage);
     });
   }
 
-  const updateProfile = async (nickname, profileImage) => {
+  const updateProfile = async (username, profileImage) => {
     try {
       const formData = new FormData();
-      if (nickname) formData.append('nickname', nickname);
+      if (username) formData.append('username', username);
       if (profileImage) formData.append('image', profileImage);
 
       const response = await fetch(`${BASE_URL}/users/profile`, {
@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (response.ok) {
         const updatedProfile = await response.json();
         showToast('프로필 업데이트 성공!');
-        document.getElementById('nickname').value =
-          updatedProfile.data.nickname || nickname;
+        document.getElementById('username').value =
+          updatedProfile.data.username || username;
         document.getElementById('profile-image-preview').src =
           `${BASE_URL}${updatedProfile.data.profileImage || profileImage}`;
         document.getElementById('header-profile-image').src =
