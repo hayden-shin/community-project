@@ -1,12 +1,12 @@
 import { db } from '../db/database.js';
 
 const POSTS_SELECT_JOIN = `
-  SELECT p.id, p.title, p.content, COALESCE(p.updatedAt, p.createdAt) AS createdAt, p.userId, u.username, u.url 
+  SELECT p.id, p.title, p.likeCount, p.viewCount, p.commentCount, COALESCE(p.updatedAt, p.createdAt) AS createdAt, p.userId, u.username, u.url 
   FROM post as p 
   JOIN user as u ON p.userId = u.id
   `;
 const POST_SELECT_JOIN = `
-  SELECT p.id, p.title, p.content, p.image, p.likeCount, p.viewCount, p.commentCount, p.createdAt, p.updatedAt, p.userId, u.username, u.url
+  SELECT p.id, p.title, p.content, p.image, p.likeCount, p.viewCount, p.commentCount, COALESCE(p.updatedAt, p.createdAt) AS createdAt, p.userId, u.username, u.url
   FROM post AS p
   JOIN user AS u ON p.userId = u.id
 `;
