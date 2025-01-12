@@ -43,7 +43,7 @@ async function renderPost(postData) {
   const postContent = document.getElementById('post-content');
   const authorImage = document.getElementById('author-image');
   const postAuthor = document.getElementById('post-author');
-  const postImage = document.getElementById('post-image');
+  const image = document.getElementById('post-image');
 
   const currentUser = await fetchUserProfile();
   const isAuthor = postData.author.id == currentUser.id;
@@ -68,11 +68,11 @@ async function renderPost(postData) {
   authorImage.src = `${BASE_URL}${postData.url}`;
   postAuthor.textContent = postData.author.nickname;
 
-  if (postData.postImage) {
-    postImage.src = `${BASE_URL}${postData.postImage}`;
-    postImage.style.display = 'block';
+  if (postData.image) {
+    image.src = `${BASE_URL}${postData.image}`;
+    image.style.display = 'block';
   } else {
-    postImage.style.display = 'none';
+    image.style.display = 'none';
   }
 
   document.getElementById('like-button').innerHTML =
