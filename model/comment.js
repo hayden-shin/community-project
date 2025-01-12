@@ -1,23 +1,44 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { db } from '../db/database.js';
+import { countComment } from './post.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const SELECT_JOIN = `
+  SELECT c.id, c.content, COALESCE(c.updatedAt, c.createdAt) AS createdAt, c.userId, u.username, u.url 
+  FROM comment as c 
+  JOIN user as u ON c.userId = u.id
+  `;
+const ORDER_ASC = 'ORDER BY c.createdAt ASC';
 
-const commentsFilePath = path.join(__dirname, '../data/comments.json');
+export async function getById(id) {
+  return db
+    .execute(`${SELECT_JOIN} WHERE c.id = ?`, [id]) //
+    .then((result) => result[0][0]);
+}
 
-// JSON 파일에서 댓글 데이터를 읽어오는 함수
-export const readCommentsFromFile = async () => {
-  const data = await fs.readFileSync(commentsFilePath, 'utf-8');
-  return JSON.parse(data);
-};
+export async function getByPostId(id) {
+  return db
+    .execute(`${SELECT_JOIN} WHERE postId = ? ${ORDER_ASC}`, [id]) //
+    .then((result) => result[0]);
+}
 
-// JSON 파일에 댓글 데이터를 저장하는 함수
-export const writeCommentsToFile = async (comments) => {
-  await fs.writeFileSync(
-    commentsFilePath,
-    JSON.stringify(comments, null, 2),
-    'utf-8'
-  );
-};
+export async function create(comment) {
+  const { content, postId, userId } = comment;
+  return db
+    .execute('INSERT INTO comment (content, postId, userId) VALUES (?,?,?)', [
+      content,
+      postId,
+      userId,
+    ]) //
+    .then((result) => result[0].insertId);
+}
+
+export async function update(content, id) {
+  return db
+    .execute('UPDATE comment SET content = ? WHERE id = ?', [content, id]) //
+    .then(() => getById(id));
+}
+
+export async function remove(id, postId) {
+  return db
+    .execute('DELETE FROM comment WHERE id = ?', [id]) //
+    .then(() => countComment(postId, id));
+}
