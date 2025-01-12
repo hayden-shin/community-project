@@ -24,11 +24,13 @@ const renderPosts = (postsData) => {
     ({
       id,
       title,
-      user = { url, username },
       createdAt,
       viewCount = 0,
       commentCount = 0,
       likeCount = 0,
+      // userId,
+      username,
+      url,
     }) => {
       const postItem = document.createElement('div');
       postItem.classList.add('post-item');
