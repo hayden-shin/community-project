@@ -106,7 +106,7 @@ export const deletePost = async (req, res) => {
   }
 
   try {
-    const post = await getById(postId);
+    const post = await postRepository.getById(postId);
     if (!post) {
       return res.status(404).json({ message: 'post not found', data: null });
     }
