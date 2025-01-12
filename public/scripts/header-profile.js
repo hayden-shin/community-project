@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user.url) {
           headerImage.src = user.url;
         } else {
-          headerImage.src = `${BASE_URL}/assets/default-profile.jpg`;
+          headerImage.src = `${BASE_URL}/assets/default-profile-image.jpg`;
         }
       }
     }
