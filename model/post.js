@@ -1,37 +1,55 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { db } from '../db/database.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const POSTS_SELECT_JOIN = `
+  SELECT p.id, p.title, p.content, COALESCE(p.updatedAt, p.createdAt) AS createdAt, p.userId, u.username, u.url 
+  FROM post as p 
+  JOIN user as u ON p.userId = u.id
+  `;
 
-const postsFilePath = path.join(__dirname, '../data/posts.json');
-const commentsFilePath = path.join(__dirname, '../data/comments.json');
+const POST_SELECT_JOIN = `
+  SELECT p.id, p.title, p.content, p.imageUrl, p.likeCount, p.viewCount, p.commentCount, p.createdAt, p.updatedAt, p.userId, u.username, u.url
+  FROM post AS p
+  JOIN user AS u ON p.userId = u.id
+`;
+const ORDER_DESC = 'ORDER BY p.createdAt DESC';
 
-// JSON 파일에서 데이터를 읽어오는 함수
-export const readPostsFromFile = async () => {
-  const data = await fs.readFileSync(postsFilePath, 'utf-8');
-  return JSON.parse(data);
-};
+export async function getAll() {
+  return db
+    .execute(`${POSTS_SELECT_JOIN} ${ORDER_DESC}`) //
+    .then((result) => result[0]);
+}
 
-export const readCommentsFromFile = async () => {
-  const data = await fs.readFileSync(commentsFilePath, 'utf-8');
-  return JSON.parse(data);
-};
+export async function getById(id) {
+  return db
+    .execute(`${POST_SELECT_JOIN} WHERE p.id = ?`, [id]) //
+    .then((result) => result[0][0]);
+}
 
-// JSON 파일에 데이터를 쓰는 함수
-export const writePostsToFile = async (posts) => {
-  await fs.writeFileSync(
-    postsFilePath,
-    JSON.stringify(posts, null, 2),
-    'utf-8'
-  );
-};
+export async function view(id) {
+  return db
+    .execute('UPDATE post SET viewCount = viewCount + 1 WHERE id = ?', [id]) //
+    .then((result) => result[0][0]);
+}
 
-export const writeCommentsToFile = async (comments) => {
-  await fs.writeFileSync(
-    commentsFilePath,
-    JSON.stringify(comments, null, 2),
-    'utf-8'
-  );
-};
+export async function create(post) {
+  const { title, content, imageUrl = null, userId } = post;
+  return db
+    .execute(
+      'INSERT INTO post (title, content, imageUrl, userId) VALUES (?,?,?,?)',
+      [title, content, imageUrl, userId]
+    ) //
+    .then((result) => getById(result[0].insertId));
+}
+
+export async function update(title, content, imageUrl = null, id) {
+  return db
+    .execute(
+      'UPDATE post SET title = ?, content = ?, imageUrl = ? WHERE id = ?',
+      [title, content, imageUrl, id]
+    ) //
+    .then(() => getById(id));
+}
+
+export async function remove(id) {
+  return db.execute('DELETE FROM post WHERE id = ?', [id]);
+}
