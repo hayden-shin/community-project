@@ -1,3 +1,8 @@
+/*
+회원가입 성공 alert 삭제
+현재 focusout 시 helper text 작업중
+*/
+
 import { isValidEmail, isValidPassword } from './common.js';
 import BASE_URL from '../config.js';
 
@@ -6,16 +11,15 @@ const checkAllValid = () => {
     isValidEmail(email.value.trim()) &&
     isValidPassword(password.value.trim()) &&
     password.value === confirmPassword.value &&
-    nickname.value.trim().length > 0 &&
-    nickname.value.trim().length <= 10
+    username.value.trim().length > 0 &&
+    username.value.trim().length <= 10
   );
 };
 
-const email = document.getElementById('email');
-const emailHelper = document.getElementById('email-helper');
-email.addEventListener('input', async () => {
-  const emailValue = email.value.trim();
-
+/*
+              --- email ---
+*/
+const validateEmail = (emailValue = '') => {
   if (!emailValue) {
     emailHelper.textContent = '*이메일을 입력해주세요.';
   } else if (!isValidEmail(emailValue)) {
@@ -23,13 +27,18 @@ email.addEventListener('input', async () => {
   } else {
     emailHelper.textContent = '';
   }
+};
+
+const email = document.getElementById('email');
+const emailHelper = document.getElementById('email-helper');
+email.addEventListener('input', async () => {
+  validateEmail(email.value.trim());
 });
 
-const password = document.getElementById('password');
-const passwordHelper = document.getElementById('password-helper');
-password.addEventListener('input', () => {
-  const passwordValue = password.value.trim();
-
+/*
+              --- password ---
+*/
+const validatePassword = (passwordValue = null) => {
   if (!passwordValue) {
     passwordHelper.textContent = '*비밀번호를 입력해주세요.';
   } else if (!isValidPassword(passwordValue)) {
@@ -38,49 +47,64 @@ password.addEventListener('input', () => {
   } else {
     passwordHelper.textContent = '';
   }
+};
+
+const password = document.getElementById('password');
+const passwordHelper = document.getElementById('password-helper');
+password.addEventListener('input', () => {
+  validatePassword(password.value.trim());
 });
 
-const confirmPassword = document.getElementById('confirm-password');
-const confirmPasswordHelper = document.getElementById(
-  'confirm-password-helper'
-);
-confirmPassword.addEventListener('input', () => {
-  const confirmPasswordValue = confirmPassword.value.trim();
-
-  if (!confirmPasswordValue) {
+/*
+              --- confirm password ---
+*/
+const validateConfirmPassword = (confirmPassword = '') => {
+  if (!confirmPassword) {
     confirmPasswordHelper.textContent = '*비밀번호를 한번 더 입력해주세요.';
   } else if (password.value !== confirmPassword.value) {
     confirmPasswordHelper.textContent = '*비밀번호가 일치하지 않습니다.';
   } else {
     confirmPasswordHelper.textContent = '';
   }
+};
+const confirmPassword = document.getElementById('confirm-password');
+const confirmPasswordHelper = document.getElementById(
+  'confirm-password-helper'
+);
+confirmPassword.addEventListener('input', () => {
+  validateConfirmPassword(confirmPassword.value.trim());
 });
 
-const nickname = document.getElementById('nickname');
-const nicknameHelper = document.getElementById('nickname-helper');
-nickname.addEventListener('input', () => {
-  const nicknameValue = nickname.value.trim();
+/*
+              --- username ---
+*/
 
-  if (!nicknameValue) {
-    nicknameHelper.textContent = '*닉네임을 입력해주세요.';
-  } else if (nicknameValue.length > 10) {
-    nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
+const validateUsername = (username) => {
+  if (!username) {
+    usernameHelper.textContent = '*닉네임을 입력해주세요.';
+  } else if (username.length > 10) {
+    usernameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
   } else {
-    nicknameHelper.textContent = '';
+    usernameHelper.textContent = '';
   }
+};
+const username = document.getElementById('username');
+const usernameHelper = document.getElementById('username-helper');
+username.addEventListener('input', () => {
+  validateUsername(username.value.trim());
 });
 
-const profileImage = document.getElementById('profile-image');
-const profileImageHelper = document.getElementById('profile-image-helper');
-profileImage.addEventListener('change', (event) => {
+const url = document.getElementById('profile-image');
+const urlHelper = document.getElementById('profile-image-helper');
+url.addEventListener('change', (event) => {
   const file = event.target.files[0];
   if (!file) {
-    profileImageHelper.textContent = '*프로필 사진을 추가해주세요.';
+    urlHelper.textContent = '*프로필 사진을 추가해주세요.';
     return;
   }
 
   // image 미리보기
-  profileImageHelper.textContent = '';
+  urlHelper.textContent = '';
   const reader = new FileReader();
   reader.onload = () => {
     const img =
@@ -96,8 +120,8 @@ profileImage.addEventListener('change', (event) => {
 });
 
 // 회원가입 요청
-async function signup(profileImage, email, password, nickname) {
-  if (!email || !password || !nickname) {
+async function signup(url, email, password, username) {
+  if (!email || !password || !username) {
     alert('이메일, 비밀번호, 닉네임은 필수 입력값입니다.');
     return;
   }
@@ -105,10 +129,10 @@ async function signup(profileImage, email, password, nickname) {
   const formData = new FormData();
   formData.append('email', email);
   formData.append('password', password);
-  formData.append('nickname', nickname);
+  formData.append('username', username);
 
-  if (profileImage) {
-    formData.append('image', profileImage);
+  if (url) {
+    formData.append('image', url);
   }
 
   try {
@@ -120,7 +144,6 @@ async function signup(profileImage, email, password, nickname) {
 
     if (response.status === 201) {
       const result = await response.json();
-      alert(`회원가입 성공! 사용자 ID: ${result.data.id}`);
       console.log(`회원가입 데이터: ${result.data}`);
       window.location.href = '/login';
     } else if (response.status === 400) {
@@ -140,13 +163,38 @@ const signupForm = document.querySelector('.signup-form');
 signupForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  const emailValue = email.value;
-  const passwordValue = password.value;
-  const nicknameValue = nickname.value;
-  const profileImageValue = profileImage.files[0] || null;
+  const emailValue = email.value.trim();
+  const passwordValue = password.value.trim();
+  const usernameValue = username.value.trim();
+  const urlValue = url.files[0] || null;
 
-  await signup(profileImageValue, emailValue, passwordValue, nicknameValue);
+  await signup(urlValue, emailValue, passwordValue, usernameValue);
 });
+
+document.addEventListener('focusout', (event) => {
+  const target = event.target;
+
+  if (
+    target.id === 'email' ||
+    target.id === 'password' ||
+    target.id === 'confirm-password' ||
+    target.id === 'username'
+  ) {
+    if (target.id === 'email') {
+      validateEmail(target.value.trim());
+    } else if (target.id === 'password') {
+      validatePassword(target.value.trim());
+    } else if (target.id === 'confirm-password') {
+      validateConfirmPassword(target.value.trim());
+    } else if (target.id === 'username') {
+      validateUsername(target.value.trim());
+    }
+  }
+});
+
+/*
+              --- 버튼 활성화 ---
+*/
 
 signupForm.addEventListener('input', () => {
   signupButton.disabled = !checkAllValid();
