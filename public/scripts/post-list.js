@@ -55,7 +55,7 @@ const renderPosts = (postsData) => {
         window.location.href = `/post-view?id=${id}`;
       });
 
-      postListContainer.prepend(postItem);
+      postListContainer.append(postItem);
     }
   );
 };
