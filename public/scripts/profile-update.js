@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (username) formData.append('username', username);
       if (url) formData.append('image', url);
 
-      const response = await fetch(`${BASE_URL}/users/profile`, {
+      const response = await fetch(`${BASE_URL}/auth/profile`, {
         method: 'PATCH',
         credentials: 'include',
         body: formData,

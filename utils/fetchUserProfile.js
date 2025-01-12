@@ -2,7 +2,7 @@ import BASE_URL from '../config.js';
 
 export async function fetchUserProfile() {
   try {
-    const response = await fetch(`${BASE_URL}/users/profile`, {
+    const response = await fetch(`${BASE_URL}/auth/profile`, {
       method: 'GET',
       credentials: 'include',
     });
