@@ -121,7 +121,7 @@ export const getUserProfile = async (req, res) => {
         id: userId,
         email: user.email,
         username: user.username,
-        url: `${config.url.baseUrl}${user.url}`,
+        url: `${config.url.baseUrl}${user.url}` || null,
       },
     });
   } catch (error) {
@@ -143,12 +143,12 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (username && (await userRepository.findByUsername(username))) {
-      return res
-        .status(400)
-        .json({ message: 'Username already exists', data: null });
-    }
     if (username) {
+      if (userId !== user.id) {
+        return res
+          .status(400)
+          .json({ message: 'Username already exists', data: null });
+      }
       await userRepository.updateUsername(username, userId);
     }
 
@@ -160,6 +160,7 @@ export const updateProfile = async (req, res) => {
     }
 
     const updated = await userRepository.findById(userId);
+
     req.session.user = {
       id: updated.id,
       email: updated.email,
@@ -167,10 +168,7 @@ export const updateProfile = async (req, res) => {
       url: updated.url,
     };
 
-    res.status(200).json({
-      message: 'profile update success',
-      data: { username, url },
-    });
+    res.status(200).send({ username: updated.username, url: updated.url });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);
     res.status(500).json({ message: 'internal server error', data: null });

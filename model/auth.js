@@ -28,15 +28,13 @@ export async function createUser(user) {
     .then((result) => result[0].insertId);
 }
 
-export async function updateUsername(user) {
-  const { username, id } = user;
+export async function updateUsername(username, id) {
   return db
     .execute('UPDATE user SET username = ? WHERE id = ?', [username, id]) //
     .then((result) => result[0][0]);
 }
 
-export async function updateUrl(user) {
-  const { url, id } = user;
+export async function updateUrl(url, id) {
   return db
     .execute('UPDATE user SET url = ? WHERE id = ?', [url, id]) //
     .then((result) => result[0][0]);
