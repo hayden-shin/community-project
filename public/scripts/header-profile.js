@@ -23,14 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('user.url:', user.url);
 
     if (user) {
-      const headerProfileImage = document.getElementById(
-        'header-profile-image'
-      );
-      if (headerProfileImage) {
+      const headerImage = document.getElementById('header-profile-image');
+      if (headerImage) {
         if (user.url) {
-          headerProfileImage.src = user.url;
+          headerImage.src = user.url;
         } else {
-          headerProfileImage.src = `${BASE_URL}/assets/default-profile.jpg`;
+          headerImage.src = `${BASE_URL}/assets/default-profile.jpg`;
         }
       }
     }
