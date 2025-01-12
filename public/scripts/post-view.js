@@ -41,12 +41,12 @@ async function renderPost(postData) {
   const postTitle = document.getElementById('post-title');
   const postDate = document.getElementById('post-date');
   const postContent = document.getElementById('post-content');
-  const authorImage = document.getElementById('author-image');
-  const postAuthor = document.getElementById('post-author');
+  const userImage = document.getElementById('user-image');
+  const postAuthor = document.getElementById('post-user');
   const image = document.getElementById('post-image');
 
   const currentUser = await fetchUserProfile();
-  const isAuthor = postData.author.id == currentUser.id;
+  const isAuthor = postData.user.id == currentUser.id;
 
   const editPostButton = document.getElementById('edit-post-button');
   const deletePostButton = document.getElementById('delete-post-button');
@@ -65,7 +65,7 @@ async function renderPost(postData) {
     : formatDateTime(postData.createdAt);
   postContent.innerHTML = postData.content;
 
-  authorImage.src = `${BASE_URL}${postData.url}`;
+  userImage.src = `${BASE_URL}${postData.url}`;
   postAuthor.textContent = postData.username;
 
   if (postData.image) {
@@ -95,13 +95,13 @@ async function renderComments(comments) {
     commentElement.classList.add('comment');
     commentElement.setAttribute('data-comment-id', comment.id);
 
-    const isAuthor = comment.author.id == currentUser.id;
+    const isAuthor = comment.user.id == currentUser.id;
 
     commentElement.innerHTML = `
       <div class="comment-header">
-        <div class="comment-author">
-          <img src="${BASE_URL}${comment.url}" alt="User Icon" class="author-img">
-          <span class="comment-author">${comment.username}</span>
+        <div class="comment-user">
+          <img src="${BASE_URL}${comment.url}" alt="User Icon" class="user-img">
+          <span class="comment-user">${comment.username}</span>
           <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
         </div>
         <div class="comment-buttons" style="display: ${isAuthor ? 'flex' : 'none'};">

@@ -24,7 +24,7 @@ const renderPosts = (postsData) => {
     ({
       id,
       title,
-      author = { url, username },
+      user = { url, username },
       createdAt,
       viewCount = 0,
       commentCount = 0,
@@ -43,8 +43,8 @@ const renderPosts = (postsData) => {
           <p class="post-date">${formatDateTime(createdAt)}</p>
         </div>
         <hr />
-        <div class="post-author">
-          <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-author-img">
+        <div class="post-user">
+          <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-user-img">
           <span>${username}</span>
         </div>
       `;
