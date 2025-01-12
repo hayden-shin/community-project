@@ -10,12 +10,12 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  const url = req.file
+  const url = req.file?.filename
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile-image.jpg`;
 
   try {
-    if (sitory.findByEmail(email)) {
+    if (await userRepository.findByEmail(email)) {
       return res
         .status(400)
         .json({ message: 'Email already exists', data: null });
@@ -27,13 +27,13 @@ export const signup = async (req, res) => {
       password: hashed,
       username,
       url,
-      createdAt: new Date().toISOString(),
+      // createdAt: new Date().toISOString(),
     };
-    await userRepository.createUser(user);
+    const id = await userRepository.createUser(user);
 
     res.status(201).json({
       message: 'register success',
-      data: user.insertId,
+      data: id,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
@@ -57,8 +57,8 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'invalid user', data: null });
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return res
         .status(400)
         .json({ message: 'incorrect password', data: null });
@@ -70,8 +70,6 @@ export const login = async (req, res) => {
       username: user.username,
       url: user.url,
     };
-
-    console.log('세션에 저장된 사용자: ', req.session?.user);
 
     // HttpOnly 쿠키 발급
     res.cookie('sessionId', req.sessionID, {
@@ -100,20 +98,22 @@ export const logout = (req, res) => {
         .json({ message: 'internal server error', data: null });
     }
     res.clearCookie('sessionId');
-    res.status(204);
+    res.status(204).send();
   });
 };
 
 // 사용자 프로필 가져오기
 export const getUserProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
     const user = await userRepository.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found', data: null });
+    }
 
     res.status(200).json({
       message: 'user profile retrieved',
@@ -143,22 +143,20 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (await userRepository.findByUsername(username)) {
+    if (username && (await userRepository.findByUsername(username))) {
       return res
         .status(400)
         .json({ message: 'Username already exists', data: null });
     }
     if (username) {
-      user.username = username;
-      await userRepository.updateUsername(user);
+      await userRepository.updateUsername(username, userId);
     }
 
     const url = req.file
       ? `/assets/${req.file.filename}`
       : user.url || `/assets/default-profile-image.jpg`;
     if (url) {
-      user.url = url;
-      await userRepository.updateUrl(user);
+      await userRepository.updateUrl(url, userId);
     }
 
     const updated = await userRepository.findById(userId);
@@ -196,8 +194,7 @@ export const updatePassword = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
-    user.password = hashed;
-    await userRepository.updatePassword(user.password, id);
+    await userRepository.updatePassword(hashed, userId);
 
     res.status(200).json({ message: 'password update success', data: null });
   } catch (error) {

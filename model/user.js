@@ -14,31 +14,42 @@ export async function findByEmail(email) {
 
 export async function findByUsername(username) {
   return db
-    .execute('SELECT * FROM user WHERE nickname = ?', [username]) //
+    .execute('SELECT * FROM user WHERE username = ?', [username]) //
     .then((result) => result[0][0]);
 }
 
 export async function createUser(user) {
-  const { email, password, nickname, profileImage } = user;
+  const { email, password, username, url } = user;
   return db
     .execute(
-      'INSERT INTO user (email, password, nickname, profileImage) VALUES (?,?,?,?)',
-      [email, password, nickname, profileImage]
+      'INSERT INTO user (email, password, username, url) VALUES (?,?,?,?)',
+      [email, password, username, url]
     ) //
-    .then((result) => result[0][0]);
+    .then((result) => result[0].insertId);
 }
 
 export async function updateUsername(user) {
-  const { nickname, id } = user;
+  const { username, id } = user;
   return db
-    .execute('UPDATE user SET nickname = ? WHERE id = ?', [nickname, id]) //
+    .execute('UPDATE user SET username = ? WHERE id = ?', [username, id]) //
     .then((result) => result[0][0]);
 }
 
 export async function updateUrl(user) {
-  const { profileImage, id } = user;
-  return db.execute('UPDATE user SET profileImage = ? WHERE id = ?', [
-    profileImage,
-    id,
-  ]);
+  const { url, id } = user;
+  return db
+    .execute('UPDATE user SET url = ? WHERE id = ?', [url, id]) //
+    .then((result) => result[0][0]);
+}
+
+export async function updatePassword(password, id) {
+  return db
+    .execute('UPDATE user SET password = ? WHERE id = ?', [password, id]) //
+    .then((result) => result[0][0]);
+}
+
+export async function deleteUser(id) {
+  return db
+    .execute('DELETE FROM user WHERE id = ?', [id]) //
+    .then((result) => console.log(result[0][0]));
 }
