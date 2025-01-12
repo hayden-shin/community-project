@@ -31,8 +31,9 @@ const createComment = async (postId) => {
 
     if (response.ok) {
       const result = await response.json();
-
-      renderComment(result.data.comment);
+      console.log(result);
+      console.log(result.data.created);
+      renderComment(result.data.created);
       updateCommentCount(postId);
       commentInput.value = '';
       showToast('댓글이 성공적으로 등록되었습니다.');
@@ -86,7 +87,7 @@ const editComment = async (postId, commentId, newContent) => {
 
     if (response.ok) {
       const commentElement = document.querySelector(
-        `[data-comment-id="${commentId}"] .comment-text`
+        `[data-comment-id="${commentId}"] .comment-content`
       );
       if (commentElement) {
         commentElement.textContent = newContent;
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const commentElement = event.target.closest('.comment');
       const commentId = commentElement.dataset.commentId;
       const existingContent = commentElement
-        .querySelector('.comment-text')
+        .querySelector('.comment-content')
         .textContent.trim();
 
       commentInput.value = existingContent;

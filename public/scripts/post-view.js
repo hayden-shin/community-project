@@ -46,7 +46,7 @@ async function renderPost(postData) {
   const image = document.getElementById('post-image');
 
   const currentUser = await fetchUserProfile();
-  const isUser = postData.user.id == currentUser.id;
+  const isUser = postData.userId == currentUser.id;
 
   const editPostButton = document.getElementById('edit-post-button');
   const deletePostButton = document.getElementById('delete-post-button');
@@ -95,7 +95,7 @@ async function renderComments(comments) {
     commentElement.classList.add('comment');
     commentElement.setAttribute('data-comment-id', comment.id);
 
-    const isUser = comment.user.id == currentUser.id;
+    const isUser = comment.userId == currentUser.id;
 
     commentElement.innerHTML = `
       <div class="comment-header">
@@ -109,7 +109,7 @@ async function renderComments(comments) {
           <button class="delete-comment-button">삭제</button>
         </div>
       </div>
-      <p class="comment-text">${comment.content}</p>
+      <p class="comment-content">${comment.content}</p>
     `;
     commentList.appendChild(commentElement);
   });
