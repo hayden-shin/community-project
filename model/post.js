@@ -6,7 +6,7 @@ const POSTS_SELECT_JOIN = `
   JOIN user as u ON p.userId = u.id
   `;
 const POST_SELECT_JOIN = `
-  SELECT p.id, p.title, p.content, p.imageUrl, p.likeCount, p.viewCount, p.commentCount, p.createdAt, p.updatedAt, p.userId, u.username, u.url
+  SELECT p.id, p.title, p.content, p.image, p.likeCount, p.viewCount, p.commentCount, p.createdAt, p.updatedAt, p.userId, u.username, u.url
   FROM post AS p
   JOIN user AS u ON p.userId = u.id
 `;
@@ -25,21 +25,23 @@ export async function getById(id) {
 }
 
 export async function create(post) {
-  const { title, content, imageUrl = null, userId } = post;
+  const { title, content, image = null, userId } = post;
   return db
     .execute(
-      'INSERT INTO post (title, content, imageUrl, userId) VALUES (?,?,?,?)',
-      [title, content, imageUrl, userId]
+      'INSERT INTO post (title, content, image, userId) VALUES (?,?,?,?)',
+      [title, content, image, userId]
     ) //
     .then((result) => getById(result[0].insertId));
 }
 
-export async function update(title, content, imageUrl = null, id) {
+export async function update(title, content, image = null, id) {
   return db
-    .execute(
-      'UPDATE post SET title = ?, content = ?, imageUrl = ? WHERE id = ?',
-      [title, content, imageUrl, id]
-    ) //
+    .execute('UPDATE post SET title = ?, content = ?, image = ? WHERE id = ?', [
+      title,
+      content,
+      image,
+      id,
+    ]) //
     .then(() => getById(id));
 }
 

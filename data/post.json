@@ -3,7 +3,7 @@
     "id": 1,
     "title": "The First Post",
     "content": "This is the first post.",
-    "imageUrl": null,
+    "image": null,
     "author": {
       "id": 1,
       "url": "/assets/default-profile-image.jpg",

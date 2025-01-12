@@ -17,11 +17,11 @@ export const createPost = async (req, res) => {
   }
 
   try {
-    const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+    const image = req.file ? `/assets/${req.file.filename}` : null;
     const post = {
       title,
       content,
-      imageUrl,
+      image,
       userId: userId,
     };
 
@@ -64,7 +64,7 @@ export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
   const { title, content } = req.body;
-  const imageUrl = req.file ? `/assets/${req.file.filename}` : null;
+  const image = req.file ? `/assets/${req.file.filename}` : null;
 
   try {
     const post = await postRepository.getById(postId);
@@ -73,12 +73,7 @@ export const editPost = async (req, res) => {
       return res.status(401).json({ message: 'no permission', data: null });
     }
 
-    const updated = await postRepository.update(
-      title,
-      content,
-      imageUrl,
-      postId
-    );
+    const updated = await postRepository.update(title, content, image, postId);
     res.status(200).json({ message: 'post update success', data: updated });
   } catch (error) {
     console.log('게시글 수정 실패', error);
@@ -115,6 +110,7 @@ export const deletePost = async (req, res) => {
     }
 
     await postRepository.remove(postId);
+    console.log('게시글 삭제 성공!');
     res.sendStatus(204);
   } catch (error) {
     console.error('게시글 삭제 실패: ', error);
