@@ -48,7 +48,7 @@ export const getPost = async (req, res) => {
 
     // 댓글 가져오기
     const comments = await commentRepository.getByPostId(postId);
-
+    await postRepository.view(postId);
     res.status(200).json({
       message: 'post retrieve success',
       data: { post, comments },

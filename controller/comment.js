@@ -24,10 +24,11 @@ export const createComment = async (req, res) => {
     };
 
     const id = await commentRepository.create(comment);
+    const created = await commentRepository.getById(id);
     const commentCount = await postRepository.countComment(postId);
     res.status(201).json({
       message: 'comment create success',
-      data: { id, commentCount },
+      data: { created, commentCount },
     });
   } catch (err) {
     console.error('댓글 생성 실패:', err);
