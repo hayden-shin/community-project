@@ -6,7 +6,6 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import authRouter from './router/auth.js';
 import postRouter from './router/post.js';
-import userRouter from './router/user.js';
 import commentRouter from './router/comment.js';
 import likeRouter from './router/like.js';
 import { config } from './config.js';
@@ -72,7 +71,6 @@ app.use((req, res, next) => {
 
 app.use('/posts', postRouter);
 app.use('/auth', authRouter);
-app.use('/users', userRouter);
 app.use('/posts/:post_id/comments', commentRouter);
 app.use('/posts/:post_id/likes', likeRouter);
 

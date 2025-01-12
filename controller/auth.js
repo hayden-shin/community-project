@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { config } from '../config.js';
-import * as userRepository from '../model/user.js';
+import * as userRepository from '../model/auth.js';
 
 // 회원가입
 export const signup = async (req, res) => {
