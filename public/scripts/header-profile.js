@@ -7,10 +7,12 @@ async function fetchUserProfile() {
       credentials: 'include',
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      return result.data;
+    if (!response.ok) {
+      console.log('something went wrong!');
     }
+
+    const result = await response.json();
+    return result.data;
   } catch (error) {
     console.error('프로필 데이터를 가져오는 중 오류 발생:', error);
   }
@@ -20,16 +22,12 @@ async function fetchUserProfile() {
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const user = await fetchUserProfile();
-    console.log('user.url:', user.url);
-
     if (user) {
       const headerImage = document.getElementById('header-profile-image');
-      if (headerImage) {
-        if (user.url) {
-          headerImage.src = user.url;
-        } else {
-          headerImage.src = `${BASE_URL}/assets/default-profile-image.jpg`;
-        }
+      if (user.url) {
+        headerImage.src = user.url;
+      } else {
+        headerImage.src = `${BASE_URL}/assets/default-profile-image.jpg`;
       }
     }
   } catch (error) {
