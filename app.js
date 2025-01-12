@@ -51,5 +51,5 @@ app.get('/password-update', (req, res) => {
 // 서버 시작
 const PORT = 2000;
 app.listen(PORT, () => {
-  console.log(`FE 서버가 PORT ${PORT} 에서 실행 중입니다.`);
+  console.log(`✨ frontend is listening at port ${PORT}`);
 });
