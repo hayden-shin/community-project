@@ -5,7 +5,6 @@ const POSTS_SELECT_JOIN = `
   FROM post as p 
   JOIN user as u ON p.userId = u.id
   `;
-
 const POST_SELECT_JOIN = `
   SELECT p.id, p.title, p.content, p.imageUrl, p.likeCount, p.viewCount, p.commentCount, p.createdAt, p.updatedAt, p.userId, u.username, u.url
   FROM post AS p
@@ -22,12 +21,6 @@ export async function getAll() {
 export async function getById(id) {
   return db
     .execute(`${POST_SELECT_JOIN} WHERE p.id = ?`, [id]) //
-    .then((result) => result[0][0]);
-}
-
-export async function view(id) {
-  return db
-    .execute('UPDATE post SET viewCount = viewCount + 1 WHERE id = ?', [id]) //
     .then((result) => result[0][0]);
 }
 
@@ -52,4 +45,42 @@ export async function update(title, content, imageUrl = null, id) {
 
 export async function remove(id) {
   return db.execute('DELETE FROM post WHERE id = ?', [id]);
+}
+
+export async function view(id) {
+  return db
+    .execute('UPDATE post SET viewCount = viewCount + 1 WHERE id = ?', [id]) //
+    .then((result) => result[0][0]);
+}
+
+export async function countComment(id, commentId) {
+  if (commentId) {
+    await db.execute(
+      'UPDATE post SET commentCount = commentCount - 1 WHERE id = ?',
+      [id]
+    );
+  } else {
+    await db.execute(
+      'UPDATE post SET commentCount = commentCount + 1 WHERE id = ?',
+      [id]
+    );
+  }
+  return db
+    .execute('SELECT commentCount FROM post WHERE id = ?', [id]) //
+    .then((result) => result[0][0].commentCount);
+}
+
+export async function countLike(id, likeId) {
+  if (likeId) {
+    await db.execute('UPDATE post SET likeCount = likeCount - 1 WHERE id = ?', [
+      id,
+    ]);
+  } else {
+    await db.execute('UPDATE post SET likeCount = likeCount + 1 WHERE id = ?', [
+      id,
+    ]);
+  }
+  return db
+    .execute('SELECT likeCount FROM post WHERE id = ?', [id]) //
+    .then((result) => result[0][0].likeCount);
 }
