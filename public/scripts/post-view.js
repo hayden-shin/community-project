@@ -42,16 +42,16 @@ async function renderPost(postData) {
   const postDate = document.getElementById('post-date');
   const postContent = document.getElementById('post-content');
   const userImage = document.getElementById('user-image');
-  const postAuthor = document.getElementById('post-user');
+  const postUser = document.getElementById('post-user');
   const image = document.getElementById('post-image');
 
   const currentUser = await fetchUserProfile();
-  const isAuthor = postData.user.id == currentUser.id;
+  const isUser = postData.user.id == currentUser.id;
 
   const editPostButton = document.getElementById('edit-post-button');
   const deletePostButton = document.getElementById('delete-post-button');
 
-  if (isAuthor) {
+  if (isUser) {
     editPostButton.style.display = 'block';
     deletePostButton.style.display = 'block';
   } else {
@@ -66,7 +66,7 @@ async function renderPost(postData) {
   postContent.innerHTML = postData.content;
 
   userImage.src = `${BASE_URL}${postData.url}`;
-  postAuthor.textContent = postData.username;
+  postUser.textContent = postData.username;
 
   if (postData.image) {
     image.src = `${BASE_URL}${postData.image}`;
@@ -95,7 +95,7 @@ async function renderComments(comments) {
     commentElement.classList.add('comment');
     commentElement.setAttribute('data-comment-id', comment.id);
 
-    const isAuthor = comment.user.id == currentUser.id;
+    const isUser = comment.user.id == currentUser.id;
 
     commentElement.innerHTML = `
       <div class="comment-header">
@@ -104,7 +104,7 @@ async function renderComments(comments) {
           <span class="comment-user">${comment.username}</span>
           <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
         </div>
-        <div class="comment-buttons" style="display: ${isAuthor ? 'flex' : 'none'};">
+        <div class="comment-buttons" style="display: ${isUser ? 'flex' : 'none'};">
           <button class="edit-comment-button">수정</button>
           <button class="delete-comment-button">삭제</button>
         </div>
