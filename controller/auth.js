@@ -1,52 +1,39 @@
-import fs from 'fs';
-import path from 'path';
-import { createRequire } from 'module';
+import bcrypt from 'bcrypt';
 import { config } from '../config.js';
-
-const USER_FILE = path.join(process.cwd(), 'data', 'user.json');
-const require = createRequire(import.meta.url);
-const bcrypt = require('bcrypt');
+import * as userRepository from '../model/auth.js';
 
 // 회원가입
 export const signup = async (req, res) => {
-  const { email, password, nickname } = req.body;
+  const { email, password, username } = req.body;
 
-  if (!email || !password || !nickname) {
+  if (!email || !password || !username) {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  let profileImage = req.file
+  const url = req.file?.filename
     ? `/assets/${req.file.filename}`
     : `/assets/default-profile-image.jpg`;
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-
-    if (users.find((u) => u.email == email)) {
+    if (await userRepository.findByEmail(email)) {
       return res
         .status(400)
-        .json({ message: 'email already exist', data: null });
+        .json({ message: 'Email already exists', data: null });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      config.bcrypt.saltRounds
-    );
-    const newUser = {
-      id: users.length + 1,
-      profileImage,
+    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
+    const user = {
       email,
-      password: hashedPassword,
-      nickname,
-      createdAt: new Date().toISOString(),
+      password: hashed,
+      username,
+      url,
+      // createdAt: new Date().toISOString(),
     };
-    users.push(newUser);
-
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    const id = await userRepository.createUser(user);
 
     res.status(201).json({
       message: 'register success',
-      data: newUser.id,
+      data: id,
     });
   } catch (error) {
     console.error('회원가입 실패:', error);
@@ -59,33 +46,30 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'invalid request', data: null });
+    return res
+      .status(400)
+      .json({ message: 'Invalid email or password', data: null });
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.email === email);
-
+    const user = await userRepository.findByEmail(email);
     if (!user) {
       return res.status(400).json({ message: 'invalid user', data: null });
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return res
         .status(400)
         .json({ message: 'incorrect password', data: null });
     }
 
-    // 세션에 사용자 정보 저장
     req.session.user = {
       id: user.id,
       email: user.email,
-      nickname: user.nickname,
-      profileImage: user.profileImage,
+      username: user.username,
+      url: user.url,
     };
-
-    console.log('세션에 저장된 사용자: ', req.session?.user);
 
     // HttpOnly 쿠키 발급
     res.cookie('sessionId', req.sessionID, {
@@ -114,29 +98,30 @@ export const logout = (req, res) => {
         .json({ message: 'internal server error', data: null });
     }
     res.clearCookie('sessionId');
-    res.status(204);
+    res.status(204).send();
   });
 };
 
 // 사용자 프로필 가져오기
 export const getUserProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found', data: null });
+    }
 
     res.status(200).json({
       message: 'user profile retrieved',
       data: {
         id: userId,
         email: user.email,
-        nickname: user.nickname,
-        profileImage: `${config.url.baseUrl}${user.profileImage}`,
+        username: user.username,
+        url: `${config.url.baseUrl}${user.url}` || null,
       },
     });
   } catch (error) {
@@ -147,49 +132,43 @@ export const getUserProfile = async (req, res) => {
 // 사용자 정보 수정
 export const updateProfile = async (req, res) => {
   const userId = req.session?.user?.id;
-  const { nickname } = req.body;
-
+  const { username } = req.body;
   if (!userId) {
     return res.status(401).json({ message: 'unauthorized', data: null });
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
-
+    const user = await userRepository.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    // validate new nickname if provided
-    if (users.some((u) => u.nickname == nickname && u.id !== userId)) {
-      return res
-        .status(400)
-        .json({ message: 'nickname already exists', data: null });
+    if (username) {
+      if (userId !== user.id) {
+        return res
+          .status(400)
+          .json({ message: 'Username already exists', data: null });
+      }
+      await userRepository.updateUsername(username, userId);
     }
-    if (nickname) user.nickname = nickname;
 
-    const profileImage = req.file
+    const url = req.file
       ? `/assets/${req.file.filename}`
-      : user.profileImage || `/assets/default-profile-image.jpg`;
-    if (profileImage) user.profileImage = profileImage;
+      : user.url || `/assets/default-profile-image.jpg`;
+    if (url) {
+      await userRepository.updateUrl(url, userId);
+    }
 
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    const updated = await userRepository.findById(userId);
 
-    // 세션에 저장된 사용자 정보 수정
     req.session.user = {
-      id: user.id,
-      email: user.email,
-      nickname: user.nickname,
-      profileImage: user.profileImage,
+      id: updated.id,
+      email: updated.email,
+      username: updated.username,
+      url: updated.url,
     };
 
-    console.log('세션에 저장된 사용자: ', req.session?.user);
-
-    res.status(200).json({
-      message: 'profile update success',
-      data: { nickname, profileImage },
-    });
+    res.status(200).send({ username: updated.username, url: updated.url });
   } catch (error) {
     console.error('사용자 정보 수정 실패: ', error);
     res.status(500).json({ message: 'internal server error', data: null });
@@ -206,22 +185,14 @@ export const updatePassword = async (req, res) => {
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const user = users.find((u) => u.id == userId);
+    const user = await userRepository.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    if (password) {
-      const hashedPassword = await bcrypt.hash(
-        password,
-        config.bcrypt.saltRounds
-      );
-      user.password = hashedPassword;
-    }
-
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
+    await userRepository.updatePassword(hashed, userId);
 
     res.status(200).json({ message: 'password update success', data: null });
   } catch (error) {
@@ -239,15 +210,12 @@ export const deleteAccount = async (req, res) => {
   }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
-    const index = users.findIndex((u) => u.id == userId);
-
-    if (index == -1) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: 'user not found', data: null });
     }
 
-    users.splice(index, 1);
-    fs.writeFileSync(USER_FILE, JSON.stringify(users, null, 2));
+    await userRepository.deleteUser(userId);
 
     req.session.destroy();
     res.clearCookie('sessionId');

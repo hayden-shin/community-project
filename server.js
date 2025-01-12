@@ -4,11 +4,12 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-import authRoutes from './routes/authRoutes.js';
-import postRoutes from './routes/postRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import commentRoutes from './routes/commentRoutes.js';
+import authRouter from './router/auth.js';
+import postRouter from './router/post.js';
+import commentRouter from './router/comment.js';
+import likeRouter from './router/like.js';
 import { config } from './config.js';
+import { db } from './db/database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,10 +69,10 @@ app.use((req, res, next) => {
   next(); // 다음 미들웨어로 이동
 });
 
-app.use('/posts', postRoutes);
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
-app.use('/posts/:post_id/comments', commentRoutes);
+app.use('/posts', postRouter);
+app.use('/auth', authRouter);
+app.use('/posts/:post_id/comments', commentRouter);
+app.use('/posts/:post_id/likes', likeRouter);
 
 app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
@@ -82,6 +83,7 @@ app.get('/', (req, res) => {
   res.send('아무 말 대잔치 커뮤니티입니다.');
 });
 
+db.getConnection().then((connection) => console.log(`✅ mariadb is connected`));
 app.listen(config.host.port, () => {
   console.log(`🚀 backend is running on port ${config.host.port}`);
 });
