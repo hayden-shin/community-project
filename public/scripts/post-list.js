@@ -44,7 +44,7 @@ const renderPosts = (postsData) => {
         </div>
         <hr />
         <div class="post-author">
-          <img src="${BASE_URL}${author.profileImage}" alt="프로필 이미지" class="post-author-img">
+          <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-author-img">
           <span>${author.nickname}</span>
         </div>
       `;

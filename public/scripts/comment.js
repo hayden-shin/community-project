@@ -55,7 +55,7 @@ const renderComment = (commentData) => {
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-author">
-        <img src="${BASE_URL}${commentData.author.profileImage}" alt="User Icon" class="author-img">
+        <img src="${BASE_URL}${commentData.url}" alt="User Icon" class="author-img">
         <span class="comment-author">${commentData.author.nickname}</span>
         <span class="comment-date">${formatDateTime(commentData.createdAt)}</span>
       </div>

@@ -65,7 +65,7 @@ async function renderPost(postData) {
     : formatDateTime(postData.createdAt);
   postContent.innerHTML = postData.content;
 
-  authorImage.src = `${BASE_URL}${postData.author.profileImage}`;
+  authorImage.src = `${BASE_URL}${postData.url}`;
   postAuthor.textContent = postData.author.nickname;
 
   if (postData.postImage) {
@@ -100,7 +100,7 @@ async function renderComments(comments) {
     commentElement.innerHTML = `
       <div class="comment-header">
         <div class="comment-author">
-          <img src="${BASE_URL}${comment.author.profileImage}" alt="User Icon" class="author-img">
+          <img src="${BASE_URL}${comment.url}" alt="User Icon" class="author-img">
           <span class="comment-author">${comment.author.nickname}</span>
           <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
         </div>
