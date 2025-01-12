@@ -106,14 +106,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (response.ok) {
-        const updatedProfile = await response.json();
+        const result = await response.json();
+        console.log(result);
         showToast('프로필 업데이트 성공!');
-        document.getElementById('username').value =
-          updatedProfile.data.username || username;
+        document.getElementById('username').value = result.username || username;
         document.getElementById('profile-image-preview').src =
-          `${BASE_URL}${updatedProfile.data.url || url}`;
+          `${BASE_URL}${result.url || url}`;
         document.getElementById('header-profile-image').src =
-          `${BASE_URL}${updatedProfile.data.url || url}`;
+          `${BASE_URL}${result.url || url}`;
       } else {
         const result = await response.json();
         alert(`프로필 업데이트 실패: ${result.message}`);
