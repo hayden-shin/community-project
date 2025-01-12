@@ -24,7 +24,7 @@ const renderPosts = (postsData) => {
     ({
       id,
       title,
-      author = { profileImage, username },
+      author = { url, username },
       createdAt,
       viewCount = 0,
       commentCount = 0,

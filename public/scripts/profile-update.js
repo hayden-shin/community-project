@@ -14,13 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (user) {
       const emailInput = document.getElementById('email');
       const usernameInput = document.getElementById('username');
-      const profileImagePreview = document.getElementById(
-        'profile-image-preview'
-      );
+      const urlPreview = document.getElementById('profile-image-preview');
 
       if (emailInput) emailInput.value = user.email;
       if (usernameInput) usernameInput.value = user.username;
-      if (profileImagePreview) profileImagePreview.src = user.profileImage;
+      if (urlPreview) urlPreview.src = user.url;
     } else {
       console.warn('유저 프로필 정보를 가져올 수 없습니다.');
     }
@@ -84,23 +82,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
 
       const username = document.getElementById('username')?.value.trim();
-      const profileImage = document.getElementById('profile-image-upload')
-        ?.files[0];
+      const url = document.getElementById('profile-image-upload')?.files[0];
 
       if (!username) {
         alert('닉네임을 입력해주세요.');
         return;
       }
 
-      await updateProfile(username, profileImage);
+      await updateProfile(username, url);
     });
   }
 
-  const updateProfile = async (username, profileImage) => {
+  const updateProfile = async (username, url) => {
     try {
       const formData = new FormData();
       if (username) formData.append('username', username);
-      if (profileImage) formData.append('image', profileImage);
+      if (url) formData.append('image', url);
 
       const response = await fetch(`${BASE_URL}/users/profile`, {
         method: 'PATCH',
@@ -114,9 +111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('username').value =
           updatedProfile.data.username || username;
         document.getElementById('profile-image-preview').src =
-          `${BASE_URL}${updatedProfile.data.profileImage || profileImage}`;
+          `${BASE_URL}${updatedProfile.data.url || url}`;
         document.getElementById('header-profile-image').src =
-          `${BASE_URL}${updatedProfile.data.profileImage || profileImage}`;
+          `${BASE_URL}${updatedProfile.data.url || url}`;
       } else {
         const result = await response.json();
         alert(`프로필 업데이트 실패: ${result.message}`);
@@ -127,16 +124,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  const profileImageUpload = document.getElementById('profile-image-upload');
-  const profileImagePreview = document.getElementById('profile-image-preview');
+  const urlUpload = document.getElementById('profile-image-upload');
+  const urlPreview = document.getElementById('profile-image-preview');
 
-  if (profileImageUpload && profileImagePreview) {
-    profileImageUpload.addEventListener('change', (event) => {
+  if (urlUpload && urlPreview) {
+    urlUpload.addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          profileImagePreview.src = e.target.result;
+          urlPreview.src = e.target.result;
         };
         reader.readAsDataURL(file);
       }
