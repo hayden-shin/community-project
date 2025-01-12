@@ -301,7 +301,7 @@ textarea:focus + .helper-text {
   font-weight: 600;
 }
 
-.modal-message {
+#modal-sub-message {
   font-size: 10px;
   color: #888;
   margin-bottom: 20px;

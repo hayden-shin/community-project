@@ -41,17 +41,17 @@ async function renderPost(postData) {
   const postTitle = document.getElementById('post-title');
   const postDate = document.getElementById('post-date');
   const postContent = document.getElementById('post-content');
-  const authorImage = document.getElementById('author-image');
-  const postAuthor = document.getElementById('post-author');
-  const postImage = document.getElementById('post-image');
+  const userImage = document.getElementById('user-image');
+  const postUser = document.getElementById('post-user');
+  const image = document.getElementById('post-image');
 
   const currentUser = await fetchUserProfile();
-  const isAuthor = postData.author.id == currentUser.id;
+  const isUser = postData.userId == currentUser.id;
 
   const editPostButton = document.getElementById('edit-post-button');
   const deletePostButton = document.getElementById('delete-post-button');
 
-  if (isAuthor) {
+  if (isUser) {
     editPostButton.style.display = 'block';
     deletePostButton.style.display = 'block';
   } else {
@@ -65,14 +65,14 @@ async function renderPost(postData) {
     : formatDateTime(postData.createdAt);
   postContent.innerHTML = postData.content;
 
-  authorImage.src = `${BASE_URL}${postData.author.profileImage}`;
-  postAuthor.textContent = postData.author.nickname;
+  userImage.src = `${BASE_URL}${postData.url}`;
+  postUser.textContent = postData.username;
 
-  if (postData.postImage) {
-    postImage.src = `${BASE_URL}${postData.postImage}`;
-    postImage.style.display = 'block';
+  if (postData.image) {
+    image.src = `${BASE_URL}${postData.image}`;
+    image.style.display = 'block';
   } else {
-    postImage.style.display = 'none';
+    image.style.display = 'none';
   }
 
   document.getElementById('like-button').innerHTML =
@@ -95,21 +95,21 @@ async function renderComments(comments) {
     commentElement.classList.add('comment');
     commentElement.setAttribute('data-comment-id', comment.id);
 
-    const isAuthor = comment.author.id == currentUser.id;
+    const isUser = comment.userId == currentUser.id;
 
     commentElement.innerHTML = `
       <div class="comment-header">
-        <div class="comment-author">
-          <img src="${BASE_URL}${comment.author.profileImage}" alt="User Icon" class="author-img">
-          <span class="comment-author">${comment.author.nickname}</span>
+        <div class="comment-user">
+          <img src="${BASE_URL}${comment.url}" alt="User Icon" class="user-img">
+          <span class="comment-user">${comment.username}</span>
           <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
         </div>
-        <div class="comment-buttons" style="display: ${isAuthor ? 'flex' : 'none'};">
+        <div class="comment-buttons" style="display: ${isUser ? 'flex' : 'none'};">
           <button class="edit-comment-button">수정</button>
           <button class="delete-comment-button">삭제</button>
         </div>
       </div>
-      <p class="comment-text">${comment.content}</p>
+      <p class="comment-content">${comment.content}</p>
     `;
     commentList.appendChild(commentElement);
   });

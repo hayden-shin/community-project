@@ -13,14 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (user) {
       const emailInput = document.getElementById('email');
-      const nicknameInput = document.getElementById('nickname');
-      const profileImagePreview = document.getElementById(
-        'profile-image-preview'
-      );
+      const usernameInput = document.getElementById('username');
+      const urlPreview = document.getElementById('profile-image-preview');
 
       if (emailInput) emailInput.value = user.email;
-      if (nicknameInput) nicknameInput.value = user.nickname;
-      if (profileImagePreview) profileImagePreview.src = user.profileImage;
+      if (usernameInput) usernameInput.value = user.username;
+      if (urlPreview) urlPreview.src = user.url;
     } else {
       console.warn('유저 프로필 정보를 가져올 수 없습니다.');
     }
@@ -28,25 +26,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error(`프로필 초기화 중 오류 발생: ${error.message}`);
   }
 
-  const nicknameInput = document.getElementById('nickname');
-  const nicknameHelper = document.getElementById('nickname-helper');
+  const usernameInput = document.getElementById('username');
+  const usernameHelper = document.getElementById('username-helper');
 
-  if (!nicknameInput || !nicknameHelper) {
+  if (!usernameInput || !usernameHelper) {
     console.error('닉네임 입력 또는 도움말 요소를 찾을 수 없습니다.');
     return;
   }
 
-  nicknameInput.addEventListener('input', () => {
-    const nicknameValue = nicknameInput.value.trim();
+  usernameInput.addEventListener('input', () => {
+    const usernameValue = usernameInput.value.trim();
 
-    if (!nicknameValue) {
-      nicknameHelper.textContent = '*닉네임을 입력해주세요.';
+    if (!usernameValue) {
+      usernameHelper.textContent = '*닉네임을 입력해주세요.';
       toggleButtonState(updateProfileButton, false);
-    } else if (nicknameValue.length > 10) {
-      nicknameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
+    } else if (usernameValue.length > 10) {
+      usernameHelper.textContent = '*닉네임은 최대 10자까지 작성 가능합니다.';
       toggleButtonState(updateProfileButton, false);
     } else {
-      nicknameHelper.textContent = '';
+      usernameHelper.textContent = '';
       toggleButtonState(updateProfileButton, true);
     }
   });
@@ -83,40 +81,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateProfileButton.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const nickname = document.getElementById('nickname')?.value.trim();
-      const profileImage = document.getElementById('profile-image-upload')
-        ?.files[0];
+      const username = document.getElementById('username')?.value.trim();
+      const url = document.getElementById('profile-image-upload')?.files[0];
 
-      if (!nickname) {
+      if (!username) {
         alert('닉네임을 입력해주세요.');
         return;
       }
 
-      await updateProfile(nickname, profileImage);
+      await updateProfile(username, url);
     });
   }
 
-  const updateProfile = async (nickname, profileImage) => {
+  const updateProfile = async (username, url) => {
     try {
       const formData = new FormData();
-      if (nickname) formData.append('nickname', nickname);
-      if (profileImage) formData.append('image', profileImage);
+      if (username) formData.append('username', username);
+      if (url) formData.append('image', url);
 
-      const response = await fetch(`${BASE_URL}/users/profile`, {
+      const response = await fetch(`${BASE_URL}/auth/profile`, {
         method: 'PATCH',
         credentials: 'include',
         body: formData,
       });
 
       if (response.ok) {
-        const updatedProfile = await response.json();
+        const result = await response.json();
+        console.log(result);
         showToast('프로필 업데이트 성공!');
-        document.getElementById('nickname').value =
-          updatedProfile.data.nickname || nickname;
+        document.getElementById('username').value = result.username || username;
         document.getElementById('profile-image-preview').src =
-          `${BASE_URL}${updatedProfile.data.profileImage || profileImage}`;
+          `${BASE_URL}${result.url || url}`;
         document.getElementById('header-profile-image').src =
-          `${BASE_URL}${updatedProfile.data.profileImage || profileImage}`;
+          `${BASE_URL}${result.url || url}`;
       } else {
         const result = await response.json();
         alert(`프로필 업데이트 실패: ${result.message}`);
@@ -127,16 +124,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  const profileImageUpload = document.getElementById('profile-image-upload');
-  const profileImagePreview = document.getElementById('profile-image-preview');
+  const urlUpload = document.getElementById('profile-image-upload');
+  const urlPreview = document.getElementById('profile-image-preview');
 
-  if (profileImageUpload && profileImagePreview) {
-    profileImageUpload.addEventListener('change', (event) => {
+  if (urlUpload && urlPreview) {
+    urlUpload.addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          profileImagePreview.src = e.target.result;
+          urlPreview.src = e.target.result;
         };
         reader.readAsDataURL(file);
       }

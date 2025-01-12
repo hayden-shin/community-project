@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/users/password`, {
+      const response = await fetch(`${BASE_URL}/auth/password`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

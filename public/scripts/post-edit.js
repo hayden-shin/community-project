@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     title.value = post.title;
     content.value = post.content;
 
-    if (post.postImage) {
-      imagePreview.src = `${BASE_URL}${post.postImage}`;
+    if (post.image) {
+      imagePreview.src = `${BASE_URL}${post.image}`;
       imagePreview.style.display = 'block';
     } else {
       imagePreview.style.display = 'none';
@@ -82,14 +82,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const newTitle = title.value.trim();
     const newContent = content.value.trim();
-    const newPostImage = imageInput.files[0];
+    const newimage = imageInput.files[0];
 
     if (!newTitle || !newContent) {
       alert('제목과 내용을 입력해주세요.');
       return;
     }
 
-    await editPost(postId, newTitle, newContent, newPostImage);
+    await editPost(postId, newTitle, newContent, newimage);
   });
 
   // 초기 버튼 상태 설정
@@ -97,11 +97,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // 게시글 수정 요청 함수
-async function editPost(postId, newTitle, newText, newPostImage = null) {
+async function editPost(postId, newTitle, newText, newimage = null) {
   const formData = new FormData();
   formData.append('title', newTitle);
   formData.append('content', newText);
-  if (newPostImage) formData.append('image', newPostImage);
+  if (newimage) formData.append('image', newimage);
 
   try {
     const response = await fetch(`${BASE_URL}/posts/${postId}`, {

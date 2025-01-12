@@ -24,11 +24,13 @@ const renderPosts = (postsData) => {
     ({
       id,
       title,
-      author = { profileImage, nickname },
       createdAt,
       viewCount = 0,
       commentCount = 0,
       likeCount = 0,
+      // userId,
+      username,
+      url,
     }) => {
       const postItem = document.createElement('div');
       postItem.classList.add('post-item');
@@ -43,9 +45,9 @@ const renderPosts = (postsData) => {
           <p class="post-date">${formatDateTime(createdAt)}</p>
         </div>
         <hr />
-        <div class="post-author">
-          <img src="${BASE_URL}${author.profileImage}" alt="프로필 이미지" class="post-author-img">
-          <span>${author.nickname}</span>
+        <div class="post-user">
+          <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-user-img">
+          <span>${username}</span>
         </div>
       `;
 
@@ -53,7 +55,7 @@ const renderPosts = (postsData) => {
         window.location.href = `/post-view?id=${id}`;
       });
 
-      postListContainer.prepend(postItem);
+      postListContainer.append(postItem);
     }
   );
 };

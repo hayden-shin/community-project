@@ -14,7 +14,7 @@
         <header>
             <button class="back-button" id="back-button" onclick="window.history.back()">&lt;</button>
             <h1 id="header">아무 말 대잔치</h1>
-            <img src="../assets/headerpic.png" alt="User Icon" id="header-profile-image" class="header-profile-image">
+            <img src="" alt="User Icon" id="header-profile-image" class="header-profile-image">
             <div class="dropdown" id="dropdown-menu">
                 <li id="profile-update">회원정보수정</li>
                 <li id="password-update">비밀번호수정</li>
@@ -27,9 +27,9 @@
             <header class="post-header">
                 <h2 class="post-title" id="post-title"></h2>
                 <div class="post-meta">
-                    <div class="post-author">
-                        <img src="../assets/default-profile.jpg" alt="User Icon" class="author-img" id="author-image">
-                        <span class="post-author" id="post-author"></span>
+                    <div class="post-user">
+                        <img src="../assets/default-profile.jpg" alt="User Icon" class="user-img" id="user-image">
+                        <span class="post-user" id="post-user"></span>
                         <span class="post-date" id="post-date"></span>
                     </div>
                     <div class="post-buttons">
@@ -70,7 +70,7 @@
     <div class="modal-overlay" id="modal" aria-hidden="true" tabindex="-1" role="dialog">
         <div class="modal">
             <p id="modal-message"></p>
-            <p class="modal-note">삭제한 내용은 복구할 수 없습니다.</p>
+            <p id="modal-sub-message">삭제한 내용은 복구할 수 없습니다.</p>
             <div class="modal-buttons">
                 <button class="modal-cancel-button" id="modal-cancel-button">취소</button>
                 <button class="modal-confirm-button" id="modal-confirm-button">확인</button>
@@ -79,7 +79,7 @@
     </div>
 
     <script type="module" src="../config.js"></script>
-    <script type="module" src="../scripts/headerProfile.js"></script>
+    <script type="module" src="../scripts/header-profile.js"></script>
     <script type="module" src="../scripts/dropdown.js"></script>
     <script type="module" src="../scripts/comment.js"></script>
     <script type="module" src="../scripts/common.js"></script>
