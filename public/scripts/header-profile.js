@@ -20,15 +20,15 @@ async function fetchUserProfile() {
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const user = await fetchUserProfile();
-    console.log('user.profileImage:', user.profileImage);
+    console.log('user.url:', user.url);
 
     if (user) {
       const headerProfileImage = document.getElementById(
         'header-profile-image'
       );
       if (headerProfileImage) {
-        if (user.profileImage) {
-          headerProfileImage.src = user.profileImage;
+        if (user.url) {
+          headerProfileImage.src = user.url;
         } else {
           headerProfileImage.src = `${BASE_URL}/assets/default-profile.jpg`;
         }
