@@ -20,6 +20,8 @@ async function fetchUserProfile() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('header').textContent = '모두의 이야기';
+
   try {
     const user = await fetchUserProfile();
     if (user) {
