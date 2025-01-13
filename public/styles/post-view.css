@@ -75,6 +75,7 @@
   height: 36px;
   border-radius: 50%;
   margin-right: 8px;
+  object-fit: cover
 }
 
 .user-img {
@@ -82,6 +83,7 @@
   height: 30px;
   border-radius: 50%;
   background-color: #ddd;
+  object-fit: cover
 }
 
 /* 게시글/댓글 작성 시간 */
