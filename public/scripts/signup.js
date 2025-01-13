@@ -94,27 +94,27 @@ username.addEventListener('input', () => {
   validateUsername(username.value.trim());
 });
 
-const url = document.getElementById('profile-image');
+/*
+              --- profile-image ---
+*/
+const url = document.querySelector('.image-placeholder');
+const fileInput = document.getElementById('profile-image');
+url.addEventListener('click', () => {
+  fileInput.click();
+});
 const urlHelper = document.getElementById('profile-image-helper');
-url.addEventListener('change', (event) => {
+fileInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
   if (!file) {
     urlHelper.textContent = '*프로필 사진을 추가해주세요.';
     return;
   }
 
-  // image 미리보기
+  // 이미지 미리보기
   urlHelper.textContent = '';
   const reader = new FileReader();
   reader.onload = () => {
-    const img =
-      document.querySelector('.profile-img-placeholder img') ||
-      document.createElement('img');
-    img.src = reader.result;
-    img.alt = 'Uploaded Profile Image';
-    img.style.cssText = 'border-radius: 50%; width: 100px; height: 100px;';
-    if (!img.parentNode)
-      document.querySelector('.profile-img-placeholder').appendChild(img);
+    url.src = reader.result;
   };
   reader.readAsDataURL(file);
 });

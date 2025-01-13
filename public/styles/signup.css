@@ -4,7 +4,7 @@
   text-align: left;
 }
 
-.profile-img-placeholder {
+.profile-img-placeholder-wrapper {
   width: 120px;
   height: 120px;
   margin: 0 auto;
@@ -17,12 +17,13 @@
   overflow: hidden;
 }
 
-.profile-img-placeholder img {
+.profile-img-placeholder-wrapper img {
   border-radius: 50%;
   width: 120px;
   height: 120px;
   object-fit: cover;
   position: absolute;
+  cursor: pointer;
 }
 
 .profile-img-add-button {
@@ -37,3 +38,5 @@
 .profile-img-add-button:hover {
   color: #333;
 }
+
+.
