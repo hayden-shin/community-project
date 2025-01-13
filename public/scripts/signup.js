@@ -120,7 +120,7 @@ fileInput.addEventListener('change', (event) => {
 });
 
 // 회원가입 요청
-async function signup(url, email, password, username) {
+async function signup(email, password, username, url = null) {
   if (!email || !password || !username) {
     alert('이메일, 비밀번호, 닉네임은 필수 입력값입니다.');
     return;
@@ -166,9 +166,9 @@ signupForm.addEventListener('submit', async (event) => {
   const emailValue = email.value.trim();
   const passwordValue = password.value.trim();
   const usernameValue = username.value.trim();
-  const urlValue = url.files[0] || null;
+  const urlValue = fileInput.files[0];
 
-  await signup(urlValue, emailValue, passwordValue, usernameValue);
+  await signup(emailValue, passwordValue, usernameValue, urlValue);
 });
 
 document.addEventListener('focusout', (event) => {
