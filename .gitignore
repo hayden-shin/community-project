@@ -5,3 +5,4 @@ public/scripts/script.js
 api/
 components/
 public/scripts/likes.js
+node_modules/
