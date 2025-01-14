@@ -29,7 +29,7 @@
 1. 저장소를 클론합니다:
 
    ```bash
-   git clone https://github.com/yourusername/backend.git
+   git clone https://github.com/100-hours-a-week/2-hayden-shin-community-be.git
    cd backend
    ```
 
