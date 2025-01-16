@@ -30,4 +30,11 @@ export const config = {
     database: required('DB_DATABASE'),
     password: required('DB_PASSWORD'),
   },
+  s3: {
+    cdnUrl: required('CDN_URL'),
+    bucketName: required('S3_BUCKET_NAME'),
+    accessKeyId: required('S3_ACCESS_KEY_ID'),
+    secretAccessKey: required('S3_SECRET_ACCESS_KEY'),
+    region: required('S3_BUCKET_REGION'),
+  },
 };

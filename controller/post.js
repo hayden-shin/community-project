@@ -1,9 +1,6 @@
 import * as postRepository from '../model/post.js';
 import * as commentRepository from '../model/comment.js';
-
-/*
-TODO: rename variable userId -> userId for consistency
-*/
+import { uploadS3 } from '../middleware/upload.js';
 
 // 새 게시글 생성
 export const createPost = async (req, res) => {
@@ -17,12 +14,13 @@ export const createPost = async (req, res) => {
   }
 
   try {
-    const image = req.file ? `/assets/${req.file.filename}` : null;
+    const image = req.file ? await uploadS3(req.file) : null;
+
     const post = {
       title,
       content,
       image,
-      userId: userId,
+      userId,
     };
 
     const id = await postRepository.create(post);
@@ -66,7 +64,7 @@ export const editPost = async (req, res) => {
   const postId = parseInt(req.params.post_id, 10);
   const userId = req.session?.user?.id;
   const { title, content } = req.body;
-  const image = req.file ? `/assets/${req.file.filename}` : null;
+  const image = req.file ? await uploadS3(req.file) : null;
 
   try {
     const post = await postRepository.getById(postId);

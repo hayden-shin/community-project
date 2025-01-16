@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { config } from '../config.js';
 import * as userRepository from '../model/auth.js';
+import { uploadS3 } from '../middleware/upload.js';
 
 // 회원가입
 export const signup = async (req, res) => {
@@ -10,9 +11,7 @@ export const signup = async (req, res) => {
     return res.status(400).json({ message: 'invalid request', data: null });
   }
 
-  const url = req.file?.filename
-    ? `/assets/${req.file.filename}`
-    : `/assets/default-profile-image.jpg`;
+  const url = req.file ? await uploadS3(req.file) : null;
 
   try {
     if (await userRepository.findByEmail(email)) {
@@ -27,7 +26,6 @@ export const signup = async (req, res) => {
       password: hashed,
       username,
       url,
-      // createdAt: new Date().toISOString(),
     };
     const id = await userRepository.createUser(user);
 
@@ -152,9 +150,7 @@ export const updateProfile = async (req, res) => {
       await userRepository.updateUsername(username, userId);
     }
 
-    const url = req.file
-      ? `/assets/${req.file.filename}`
-      : user.url || `/assets/default-profile-image.jpg`;
+    const url = req.file ? await uploadS3(req.file) : null;
     if (url) {
       await userRepository.updateUrl(url, userId);
     }
