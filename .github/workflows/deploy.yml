@@ -39,14 +39,9 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "
             # 1. Git Repository에서 최신 코드 가져오기
-            if [ ! -d /home/${USER}/frontend ]; then
-              echo 'Cloning repository for the first time...';
-              git clone https://github.com/${{ github.repository }} frontend;
-            else
-              echo 'Pulling latest changes from repository...';
-              cd frontend;
-              git pull origin main;
-            fi;
+            cd /home/ubuntu/backend || git clone git@github.com:100-hours-a-week/2-hayden-shin-community-be.git /home/ubuntu/backend;
+            cd /home/ubuntu/backend;
+            git pull origin main;
 
             # 2. Docker 이미지 Pull
             echo 'Pulling the latest Docker image from ECR...';
