@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 import {
   showModal,
   closeModal,
@@ -111,9 +111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast('프로필 업데이트 성공!');
         document.getElementById('username').value = result.username || username;
         document.getElementById('profile-image-preview').src =
-          `${BASE_URL}${result.url || url}`;
+          `${CDN_URL}${result.url || url}`;
         document.getElementById('header-profile-image').src =
-          `${BASE_URL}${result.url || url}`;
+          `${CDN_URL}${result.url || url}`;
       } else {
         const result = await response.json();
         alert(`프로필 업데이트 실패: ${result.message}`);

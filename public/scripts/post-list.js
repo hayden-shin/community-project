@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
 import { showToastAndRedirect } from './common.js';
 
@@ -46,7 +46,7 @@ const renderPosts = (postsData) => {
         </div>
         <hr />
         <div class="post-user">
-          <img src="${BASE_URL}${url}" alt="프로필 이미지" class="post-user-img">
+          <img src="${CDN_URL}${url}" alt="프로필 이미지" class="post-user-img">
           <span>${username}</span>
         </div>
       `;

@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 import { showToast } from './common.js';
 
 const title = document.getElementById('post-title');
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     content.value = post.content;
 
     if (post.image) {
-      imagePreview.src = `${BASE_URL}${post.image}`;
+      imagePreview.src = `${CDN_URL}${post.image}`;
       imagePreview.style.display = 'block';
     } else {
       imagePreview.style.display = 'none';

@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 import { updateCommentCount } from './comment.js';
 import { showToast, showModal } from './common.js';
 import { formatDateTime, formatNumber } from '../../utils/format.js';
@@ -65,11 +65,11 @@ async function renderPost(postData) {
     : formatDateTime(postData.createdAt);
   postContent.innerHTML = postData.content;
 
-  userImage.src = `${BASE_URL}${postData.url}`;
+  userImage.src = `${CDN_URL}${postData.url}`;
   postUser.textContent = postData.username;
 
   if (postData.image) {
-    image.src = `${BASE_URL}${postData.image}`;
+    image.src = `${CDN_URL}${postData.image}`;
     image.style.display = 'block';
   } else {
     image.style.display = 'none';
@@ -100,7 +100,7 @@ async function renderComments(comments) {
     commentElement.innerHTML = `
       <div class="comment-header">
         <div class="comment-user">
-          <img src="${BASE_URL}${comment.url}" alt="User Icon" class="user-img">
+          <img src="${CDN_URL}${comment.url}" alt="User Icon" class="user-img">
           <span class="comment-user">${comment.username}</span>
           <span class="comment-date">${formatDateTime(comment.createdAt)}</span>
         </div>

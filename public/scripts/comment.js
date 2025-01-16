@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 import { showModal, showToast } from './common.js';
 import { formatDateTime } from '../../utils/format.js';
 
@@ -56,7 +56,7 @@ const renderComment = (commentData) => {
   commentElement.innerHTML = `
     <div class="comment-header">
       <div class="comment-user">
-        <img src="${BASE_URL}${commentData.url}" alt="User Icon" class="user-img">
+        <img src="${CDN_URL}${commentData.url}" alt="User Icon" class="user-img">
         <span class="comment-user">${commentData.username}</span>
         <span class="comment-date">${formatDateTime(commentData.createdAt)}</span>
       </div>
