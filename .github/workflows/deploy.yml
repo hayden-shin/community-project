@@ -34,16 +34,28 @@ jobs:
         HOST=${{ secrets.EC2_HOST }}
         USER=${{ secrets.EC2_USER }}
 
-        # Pull the latest Docker image from ECR
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com"
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/frontend:latest"
+        # Log into EC2
+        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "
+          # Log into AWS ECR
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com;
 
-        # Stop and remove the existing container
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "docker stop frontend || true"
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "docker rm frontend || true"
+          # Pull the latest Docker image
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/frontend:latest;
 
-        # Run the new container
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "docker run -d -p 2000:2000 --name frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/frontend:latest"
+          # Check if port 2000 is in use and stop the process if necessary
+          if lsof -i:2000; then
+            echo 'Port 2000 is in use. Stopping the process...';
+            PID=\$(lsof -t -i:2000);
+            kill -9 \$PID;
+          fi;
 
-        # Reload Nginx to apply changes
-        ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "sudo systemctl reload nginx"
+          # Stop and remove the existing container if it exists
+          docker stop frontend || true;
+          docker rm frontend || true;
+
+          # Run the new container
+          docker run -d -p 2000:2000 --name frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/frontend:latest;
+
+          # Reload Nginx to apply changes
+          sudo systemctl reload nginx;
+        "
