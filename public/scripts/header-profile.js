@@ -1,4 +1,4 @@
-import { CDN_URL } from '../config.js';
+import { BASE_URL, CDN_URL } from '../config.js';
 
 async function fetchUserProfile() {
   try {
