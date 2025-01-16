@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL } from '../config.js';
 
 export async function fetchUserProfile() {
   try {
