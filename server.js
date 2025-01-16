@@ -18,7 +18,7 @@ const app = express();
 
 // CORS 설정
 const corsOptions = {
-  origin: config.url.clientUrl,
+  origin: ['http://3.35.218.197', config.url.clientUrl],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-USER-ID'],
   credentials: true,
@@ -39,26 +39,11 @@ app.use(
   })
 );
 
-// 정적 파일 제공
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-
 // 미들웨어 설정
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
-
-// OPTIONS 요청 예외처리
-app.use('*', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', config.url.clientUrl);
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-  );
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 // 디버깅 미들웨어
 app.use((req, res, next) => {
