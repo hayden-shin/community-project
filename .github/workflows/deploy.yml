@@ -39,8 +39,8 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST "
             # 1. Git Repository에서 최신 코드 가져오기
-            cd /home/ubuntu/backend || git clone git@github.com:100-hours-a-week/2-hayden-shin-community-be.git /home/ubuntu/backend;
-            cd /home/ubuntu/backend;
+            cd /home/ubuntu/frontend || git clone git@github.com:100-hours-a-week/2-hayden-shin-community-fe.git /home/ubuntu/frontend;
+            cd /home/ubuntu/frontend;
             git pull origin main;
 
             # 2. Docker 이미지 Pull
