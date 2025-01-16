@@ -1,4 +1,4 @@
-import { BASE_URL } from '../config.js';
+import { CDN_URL } from '../config.js';
 
 async function fetchUserProfile() {
   try {
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (user.url) {
         headerImage.src = user.url;
       } else {
-        headerImage.src = `${BASE_URL}/assets/default-profile-image.jpg`;
+        headerImage.src = `${CDN_URL}/default-profile-image.jpg`;
       }
     }
   } catch (error) {
