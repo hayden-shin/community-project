@@ -119,7 +119,7 @@ export const getUserProfile = async (req, res) => {
         id: userId,
         email: user.email,
         username: user.username,
-        url: `${config.url.baseUrl}${user.url}` || null,
+        url: `${config.s3.cdnUrl}${user.url}` || null,
       },
     });
   } catch (error) {
