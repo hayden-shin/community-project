@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL } from '../config.js';
 import { isValidEmail, isValidPassword } from './common.js';
 
 // Lottie 애니메이션 표시

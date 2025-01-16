@@ -1,4 +1,4 @@
-import BASE_URL from '../config.js';
+import { BASE_URL } from '../config.js';
 
 const titleInput = document.getElementById('post-title');
 const contentInput = document.getElementById('post-content');
