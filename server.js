@@ -54,18 +54,18 @@ app.use((req, res, next) => {
   next(); // 다음 미들웨어로 이동
 });
 
-app.use('/posts', postRouter);
-app.use('/auth', authRouter);
-app.use('/posts/:post_id/comments', commentRouter);
-app.use('/posts/:post_id/likes', likeRouter);
+app.use('/api/posts', postRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/posts/:post_id/comments', commentRouter);
+app.use('/api/posts/:post_id/likes', likeRouter);
 
 app.use((req, res, next) => {
   console.error(`404 Not Found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: 'Not Found' });
 });
 
-app.get('/', (req, res) => {
-  res.send('아무 말 대잔치 커뮤니티입니다.');
+app.get('/api', (req, res) => {
+  res.send('backend is running with /api prefix 🐖');
 });
 
 db.getConnection().then((connection) => console.log(`✅ mariadb is connected`));
