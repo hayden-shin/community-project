@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/login.css">
+    <!-- Lottie CDN 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    <style>
+        /* 성공 화면 스타일 */
+        #success-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        #lottie-success {
+            width: 50%;
+            height: 50%;
+            transform: scale(0.5); /* Lottie 애니메이션의 크기 비율 조정 */
+        }
+
+        #success-text {
+            font-size: 2rem;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.history.back()">&lt;</button>
+        <header><h1 id="header" class="title">모두의 이야기</h1></header>
+        <hr class="header-line" />
+
+        <section class="form-container">
+            <h2 class="form-title">로그인</h2>
+            
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" placeholder="이메일을 입력하세요" />
+                    <span class="helper-text" id="email-helper"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" />
+                    <span class="helper-text" id="password-helper"></span>
+                </div>
+                
+                <button type="submit" class="submit-button" id="login-button" disabled>로그인</button>
+            </form>
+            <a href="/signup" class="link">회원가입</a>
+        </section>
+    </div>
+
+    <!-- 로그인 성공 애니메이션 -->
+    <div id="success-container" style="display: none;">
+        <div id="lottie-success"></div>
+        <div id="success-text">로그인 성공!</div>
+    </div>
+
+    <script type="module" src="../config.js"></script>
+    <script type="module" src="../scripts/common.js"></script>
+    <script type="module" src="../scripts/login.js"></script>
+</body>
+</html>

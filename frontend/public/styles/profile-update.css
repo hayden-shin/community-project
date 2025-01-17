@@ -1,0 +1,114 @@
+/* 프로필 사진 변경*/
+.profile-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 350;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.profile-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.profile-image-container {
+  position: relative; /* 부모 요소를 기준으로 변경 버튼 위치 설정 */
+  width: 100px;
+  height: 100px;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.change-photo-label {
+  position: absolute; /* 부모 요소인 .profile-image-container 기준으로 배치 */
+  top: 50%; /* 부모 요소의 세로 중앙 */
+  left: 50%; /* 부모 요소의 가로 중앙 */
+  transform: translate(-50%, -50%); /* 중앙 정렬 */
+
+  background-color: rgba(0, 0, 0, 0.6); /* 반투명 배경 */
+  color: white !important;
+  padding: 5px 10px;
+  border-radius: 2em;
+  border: 1px solid white;
+
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.profile-picture-wrapper .change-photo-label {
+  color: white !important; /* 강제 적용 */
+}
+
+.change-photo-label:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.upload-photo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+
+  padding: 5px 10px;
+  font-size: 12px;
+
+  border-radius: 2em;
+  border-color: white;
+  border-width: 2px;
+  cursor: pointer;
+}
+
+.profile-picture {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: left;
+
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background-color: #ddd;
+
+  font-size: 30px;
+  color: #fff;
+}
+
+.upload-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #8888ff;
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+  /* display: block; */
+
+  /* width: 500px;
+  height: 1px;
+  border: none;
+  background-color: #ddd; */
+
+  align-self: center;
+  /* 중앙 정렬 (부모 너비 기준) */
+}

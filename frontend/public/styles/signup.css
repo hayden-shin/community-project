@@ -1,0 +1,42 @@
+/* 프로필 사진 업로드 */
+.profile-image {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.profile-img-placeholder-wrapper {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  background-color: #ddd;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.profile-img-placeholder-wrapper img {
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  position: absolute;
+  cursor: pointer;
+}
+
+.profile-img-add-button {
+  font-size: 40px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.profile-img-add-button:hover {
+  color: #333;
+}
+
+.
