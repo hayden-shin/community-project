@@ -1,0 +1,30 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "frontend",
+      "image": "940482415398.dkr.ecr.ap-northeast-2.amazonaws.com/frontend:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 2000
+        }
+      ]
+    },
+    {
+      "name": "backend",
+      "image": "940482415398.dkr.ecr.ap-northeast-2.amazonaws.com/backend:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 8080,
+          "containerPort": 3000
+        }
+      ]
+    }
+  ]
+}
+
