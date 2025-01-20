@@ -54,7 +54,7 @@ jobs:
 
           # EB 초기 설정
           #  - app name, platform, region은 상황에 맞게 수정
-          eb init ${{ secrets.EB_APP_NAME }} --platform "Docker" --region ${{ secrets.AWS_REGION }}
+          eb init ${{ secrets.EB_APP_NAME }} --platform "64bit Amazon Linux 2 v4.0.6 running Docker" --region ${{ secrets.AWS_REGION }}
 
           # 배포 환경 지정
           eb use ${{ secrets.EB_ENV_NAME }}
