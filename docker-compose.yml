@@ -1,0 +1,19 @@
+on: '3'
+services:
+  frontend:
+    image: 940482415398.dkr.ecr.ap-northeast-2.amazonaws.com/frontend:latest
+    ports:
+      - "2000:2000"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  backend:
+    image: 940482415398.dkr.ecr.ap-northeast-2.amazonaws.com/backend:latest
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
