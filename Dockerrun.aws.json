@@ -23,7 +23,14 @@
           "containerPort": 2000,
           "hostPort": 2000
         }
+      ],
+      "environment": [
+        {
+          "name": "BASE_URL",
+          "value": "http://127.0.0.1:2000"
+        }
       ]
     }
   ]
 }
+
